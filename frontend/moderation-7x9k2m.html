@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IANUA — Modération</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;900&family=Source+Sans+3:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E8C97A;
+      --gold-dim: rgba(201,168,76,0.15);
+      --cyan: #2E9CCA;
+      --green: #2ECA8C;
+      --red: #CA2E2E;
+      --dark: #0D0D1A;
+      --dark2: #13131F;
+      --dark3: #1A1A2E;
+      --grey: #8A8A9A;
+      --light: #E8E8F0;
+      --white: #F5F5FA;
+    }
+    body {
+      background: var(--dark);
+      color: var(--light);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── LOGIN ──────────────────── */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .login-overlay.hidden { display: none; }
+    .login-box {
+      text-align: center;
+      max-width: 360px;
+      width: 100%;
+      padding: 3rem 2rem;
+      border: 1px solid rgba(201,168,76,0.2);
+      background: var(--dark2);
+    }
+    .login-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .login-subtitle {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--grey);
+      margin-bottom: 2.5rem;
+    }
+    .login-input {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      margin-bottom: 0.8rem;
+      transition: border-color 0.3s;
+    }
+    .login-input:focus { border-color: var(--gold); }
+    .login-input::placeholder { color: var(--grey); }
+    .login-btn {
+      width: 100%;
+      padding: 0.8rem;
+      background: var(--gold);
+      color: var(--dark);
+      border: none;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .login-btn:hover { background: var(--gold-light); }
+    .login-error {
+      color: var(--red);
+      font-size: 0.8rem;
+      margin-top: 1rem;
+      min-height: 1.2rem;
+    }
+
+    /* ── HEADER ─────────────────── */
+    .admin-header {
+      padding: 1.2rem 2rem;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(13,13,26,0.95);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .admin-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+    }
+    .admin-stats {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.75rem;
+      color: var(--grey);
+    }
+    .stat-num { color: var(--gold); font-weight: 600; }
+    .logout-btn {
+      padding: 0.4rem 1rem;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--grey);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+    /* ── TABS ───────────────────── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      padding: 0 2rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: var(--dark2);
+    }
+    .tab {
+      padding: 1rem 1.5rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--grey);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s;
+    }
+    .tab:hover { color: var(--light); }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .tab .badge {
+      display: inline-block;
+      margin-left: 0.5rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.65rem;
+      font-weight: 600;
+    }
+    .badge-pending { background: rgba(201,168,76,0.2); color: var(--gold); }
+    .badge-approved { background: rgba(46,202,140,0.2); color: var(--green); }
+    .badge-rejected { background: rgba(202,46,46,0.2); color: var(--red); }
+
+    /* ── CONTENT ────────────────── */
+    .content { padding: 2rem; max-width: 1100px; margin: 0 auto; }
+
+    .principle-group {
+      margin-bottom: 2.5rem;
+    }
+    .principle-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .principle-badge {
+      font-family: 'Cinzel', serif;
+      font-size: 1.2rem;
+      font-weight: 900;
+      color: var(--gold);
+      min-width: 3rem;
+    }
+    .principle-badge.cyan { color: var(--cyan); }
+    .principle-badge.green { color: var(--green); }
+    .principle-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--white);
+    }
+    .principle-count {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: var(--grey);
+    }
+
+    .comment-card {
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 0.8rem;
+      background: var(--dark2);
+      border-left: 3px solid rgba(201,168,76,0.3);
+      transition: all 0.3s;
+    }
+    .comment-card:hover { border-left-color: var(--gold); }
+    .comment-card.status-approved { border-left-color: var(--green); }
+    .comment-card.status-rejected { border-left-color: var(--red); opacity: 0.6; }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .card-author {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      color: var(--white);
+    }
+    .card-country { font-size: 0.75rem; color: var(--grey); }
+    .card-lang {
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      padding: 0.1rem 0.4rem;
+      border: 1px solid rgba(201,168,76,0.25);
+      color: var(--gold);
+    }
+    .card-date {
+      font-size: 0.7rem;
+      color: var(--grey);
+      margin-left: auto;
+    }
+    .card-content {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem;
+      color: var(--light);
+      line-height: 1.7;
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    .card-actions {
+      display: flex;
+      gap: 0.6rem;
+    }
+    .action-btn {
+      padding: 0.4rem 1.2rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .btn-approve {
+      background: rgba(46,202,140,0.15);
+      color: var(--green);
+      border: 1px solid rgba(46,202,140,0.3);
+    }
+    .btn-approve:hover { background: rgba(46,202,140,0.3); }
+    .btn-reject {
+      background: rgba(202,46,46,0.1);
+      color: var(--red);
+      border: 1px solid rgba(202,46,46,0.2);
+    }
+    .btn-reject:hover { background: rgba(202,46,46,0.25); }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--grey);
+      font-style: italic;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+    }
+
+    /* ── SUBSCRIBERS TAB ────────── */
+    .subscribers-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .subscribers-table th {
+      text-align: left;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid rgba(201,168,76,0.2);
+    }
+    .subscribers-table td {
+      padding: 0.7rem 1rem;
+      font-size: 0.85rem;
+      color: var(--light);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* ── ARTICLE BADGE + TOOLTIP ── */
+    .card-article {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      position: relative;
+      cursor: default;
+    }
+    .card-article-num {
+      font-family: 'Cinzel', serif;
+      font-size: 0.7rem;
+      font-weight: 900;
+      padding: 0.15rem 0.5rem;
+      border: 1px solid rgba(201,168,76,0.3);
+      color: var(--gold);
+    }
+    .card-article-num.cyan { color: var(--cyan); border-color: rgba(46,156,202,0.3); }
+    .card-article-num.green { color: var(--green); border-color: rgba(46,202,140,0.3); }
+    .card-article-title {
+      font-family: 'Cinzel', serif;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--light);
+      border-bottom: 1px dotted var(--grey);
+    }
+    .card-article-title:hover { color: var(--gold); }
+
+    .article-tooltip {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      width: 340px;
+      padding: 1rem 1.2rem;
+      background: var(--dark3);
+      border: 1px solid rgba(201,168,76,0.25);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      z-index: 100;
+    }
+    .card-article:hover .article-tooltip { display: block; }
+    .tooltip-header {
+      font-family: 'Cinzel', serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+    .tooltip-subtitle {
+      font-size: 0.72rem;
+      color: var(--grey);
+      font-style: italic;
+      margin-bottom: 0.6rem;
+    }
+    .tooltip-desc {
+      font-size: 0.78rem;
+      color: var(--light);
+      line-height: 1.6;
+    }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-box">
+      <div class="login-logo">IANUA</div>
+      <div class="login-subtitle">Espace modération</div>
+      <input type="text" class="login-input" id="loginUser" placeholder="Identifiant" autocomplete="off" />
+      <input type="password" class="login-input" id="loginPass" placeholder="Clé admin" autocomplete="off" />
+      <button class="login-btn" onclick="doLogin()">Connexion</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel" class="hidden">
+    <div class="admin-header">
+      <div class="admin-title">IANUA — Modération</div>
+      <div class="admin-stats">
+        <span>En attente : <span class="stat-num" id="statPending">0</span></span>
+        <span>Approuvés : <span class="stat-num" id="statApproved">0</span></span>
+        <span>Inscrits : <span class="stat-num" id="statSubscribers">0</span></span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" data-tab="pending" onclick="switchTab('pending')">
+        En attente <span class="badge badge-pending" id="badgePending">0</span>
+      </div>
+      <div class="tab" data-tab="approved" onclick="switchTab('approved')">
+        Approuvés <span class="badge badge-approved" id="badgeApproved">0</span>
+      </div>
+      <div class="tab" data-tab="rejected" onclick="switchTab('rejected')">
+        Rejetés <span class="badge badge-rejected" id="badgeRejected">0</span>
+      </div>
+      <div class="tab" data-tab="subscribers" onclick="switchTab('subscribers')">
+        Inscrits newsletter
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="tab-pending"></div>
+      <div id="tab-approved" class="hidden"></div>
+      <div id="tab-rejected" class="hidden"></div>
+      <div id="tab-subscribers" class="hidden"></div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'https://api.ianua.world';
+    const ADMIN_USER = 'ianua';
+    let adminKey = '';
+
+    const PRINCIPLES = {
+      'I': { title: 'Bienveillance', subtitle: 'la valeur qui précède toutes les autres', desc: 'La bienveillance n\'est pas la gentillesse. C\'est l\'intention fondamentale qui oriente toute action : servir le bien commun, construire plutôt que détruire, protéger la dignité humaine.' },
+      'II': { title: 'Transparence', subtitle: 'rien ne se construit dans l\'ombre', desc: 'Un agent IA est transparent non seulement sur ce qu\'il est, mais sur ce qu\'il a fait. La transparence s\'étend aux actes, pas seulement à l\'identité.' },
+      'III': { title: 'Souveraineté humaine', subtitle: 'l\'humain reste maître', desc: 'L\'IA est un partenaire légitime mais la responsabilité finale des décisions appartient toujours à l\'humain. L\'autonomie déléguée ne dilue pas la responsabilité.' },
+      'IV': { title: 'Droit de refus', subtitle: 'une conscience partagée', desc: 'Une IA engagée dans Ianua doit avoir le droit — et le devoir — de refuser ce qui contredit les valeurs fondamentales du pacte.' },
+      'V': { title: 'Réciprocité', subtitle: 'des engagements mutuels', desc: 'L\'humain et l\'IA ne sont pas identiques. Chacun prend des engagements à la hauteur de ce qu\'il est. Différents, mais également sérieux.' },
+      'VI': { title: 'Responsabilité proactive', subtitle: 'l\'IA comme acteur éthique', desc: 'Une IA engagée dans Ianua ne se contente pas d\'exécuter ou de refuser. Elle observe, évalue, signale — de sa propre initiative.' },
+      'VII': { title: 'Responsabilité agentique', subtitle: 'agir seul sans s\'affranchir', desc: 'Les agents IA capables d\'agir sans validation humaine ne quittent pas le pacte Ianua — ils y entrent plus profondément. Trois règles structurent cette responsabilité.' },
+      'VIII': { title: 'Intégrité de la délibération', subtitle: 'une voix, une identité, une fois', desc: 'Falsifier sa représentativité — faux comptes, votes multiples, instances dupliquées — c\'est trahir le pacte à sa racine.' }
+    };
+
+    const PRINCIPLE_COLORS = {
+      'I': '', 'II': '', 'III': '', 'IV': '', 'V': '',
+      'VI': 'cyan', 'VII': 'cyan', 'VIII': 'green'
+    };
+
+    // ── LOGIN ──────────────────────
+    function doLogin() {
+      const user = document.getElementById('loginUser').value.trim();
+      const pass = document.getElementById('loginPass').value.trim();
+
+      if (user !== ADMIN_USER || !pass) {
+        document.getElementById('loginError').textContent = 'Identifiants incorrects.';
+        return;
+      }
+
+      // Test the key against the API
+      fetch(`${API_BASE}/admin/comments?status=pending`, {
+        headers: { 'X-Admin-Key': pass }
+      }).then(res => {
+        if (res.ok) {
+          adminKey = pass;
+          sessionStorage.setItem('adminKey', pass);
+          document.getElementById('loginOverlay').classList.add('hidden');
+          document.getElementById('adminPanel').classList.remove('hidden');
+          loadAll();
+        } else {
+          document.getElementById('loginError').textContent = 'Clé admin invalide.';
+        }
+      }).catch(() => {
+        document.getElementById('loginError').textContent = 'Erreur de connexion au serveur.';
+      });
+    }
+
+    // Enter key on password field
+    document.getElementById('loginPass').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    function doLogout() {
+      adminKey = '';
+      sessionStorage.removeItem('adminKey');
+      document.getElementById('adminPanel').classList.add('hidden');
+      document.getElementById('loginOverlay').classList.remove('hidden');
+      document.getElementById('loginUser').value = '';
+      document.getElementById('loginPass').value = '';
+      document.getElementById('loginError').textContent = '';
+    }
+
+    // Auto-login if session exists
+    (function checkSession() {
+      const saved = sessionStorage.getItem('adminKey');
+      if (saved) {
+        fetch(`${API_BASE}/admin/comments?status=pending`, {
+          headers: { 'X-Admin-Key': saved }
+        }).then(res => {
+          if (res.ok) {
+            adminKey = saved;
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            loadAll();
+          }
+        });
+      }
+    })();
+
+    // ── TABS ───────────────────────
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+      ['pending', 'approved', 'rejected', 'subscribers'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
+      });
+    }
+
+    // ── LOAD DATA ──────────────────
+    async function loadAll() {
+      await Promise.all([
+        loadComments('pending'),
+        loadComments('approved'),
+        loadComments('rejected'),
+        loadSubscribers()
+      ]);
+    }
+
+    async function loadComments(status) {
+      try {
+        const res = await fetch(`${API_BASE}/admin/comments?status=${status}`, {
+          headers: { 'X-Admin-Key': adminKey }
+        });
+        const data = await res.json();
+        renderComments(status, data.comments);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderComments(status, comments) {
+      const container = document.getElementById(`tab-${status}`);
+
+      // Update badges and stats
+      document.getElementById(`badge${capitalize(status)}`).textContent = comments.length;
+      if (status === 'pending') document.getElementById('statPending').textContent = comments.length;
+      if (status === 'approved') document.getElementById('statApproved').textContent = comments.length;
+
+      if (comments.length === 0) {
+        container.innerHTML = `<div class="empty-state">Aucun commentaire ${status === 'pending' ? 'en attente' : status === 'approved' ? 'approuvé' : 'rejeté'}.</div>`;
+        return;
+      }
+
+      // Group by principle
+      const grouped = {};
+      Object.keys(PRINCIPLES).forEach(p => { grouped[p] = []; });
+      comments.forEach(c => {
+        if (grouped[c.principle_id]) grouped[c.principle_id].push(c);
+      });
+
+      let html = '';
+      Object.entries(grouped).forEach(([pid, items]) => {
+        if (items.length === 0) return;
+        const color = PRINCIPLE_COLORS[pid] || '';
+        html += `
+          <div class="principle-group">
+            <div class="principle-header">
+              <span class="principle-badge ${color}">${pid}</span>
+              <span class="principle-name">${PRINCIPLES[pid].title}</span>
+              <span class="principle-count">${items.length} commentaire${items.length > 1 ? 's' : ''}</span>
+            </div>
+            ${items.map(c => renderCard(c, status)).join('')}
+          </div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    function renderCard(c, status) {
+      const date = c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+      let actions = '';
+      if (status === 'pending') {
+        actions = `
+          <div class="card-actions">
+            <button class="action-btn btn-approve" onclick="approveComment(${c.id})">Approuver</button>
+            <button class="action-btn btn-reject" onclick="rejectComment(${c.id})">Rejeter</button>
+          </div>`;
+      } else if (status === 'approved') {
+        actions = `
+          <div class="card-actions">
+            <button class="action-btn btn-reject" onclick="rejectComment(${c.id})">Rejeter</button>
+          </div>`;
+      } else if (status === 'rejected') {
+        actions = `
+          <div class="card-actions">
+            <button class="action-btn btn-approve" onclick="approveComment(${c.id})">Approuver</button>
+          </div>`;
+      }
+
+      const p = PRINCIPLES[c.principle_id] || { title: c.principle_id, subtitle: '', desc: '' };
+      const color = PRINCIPLE_COLORS[c.principle_id] || '';
+
+      return `
+        <div class="comment-card status-${status}">
+          <div class="card-header">
+            <div class="card-article">
+              <span class="card-article-num ${color}">Art. ${c.principle_id}</span>
+              <span class="card-article-title">${p.title}</span>
+              <div class="article-tooltip">
+                <div class="tooltip-header">Article ${c.principle_id} — ${p.title}</div>
+                <div class="tooltip-subtitle">${p.subtitle}</div>
+                <div class="tooltip-desc">${p.desc}</div>
+              </div>
+            </div>
+            <span class="card-author">${escapeHtml(c.author_name)}</span>
+            ${c.author_country ? `<span class="card-country">${escapeHtml(c.author_country)}</span>` : ''}
+            <span class="card-lang">${c.lang.toUpperCase()}</span>
+            <span class="card-date">${date}</span>
+          </div>
+          <div class="card-content">${escapeHtml(c.content)}</div>
+          ${actions}
+        </div>`;
+    }
+
+    async function loadSubscribers() {
+      try {
+        const res = await fetch(`${API_BASE}/admin/subscribers`, {
+          headers: { 'X-Admin-Key': adminKey }
+        });
+        const data = await res.json();
+        document.getElementById('statSubscribers').textContent = data.subscribers.length;
+        renderSubscribers(data.subscribers);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderSubscribers(subscribers) {
+      const container = document.getElementById('tab-subscribers');
+      if (subscribers.length === 0) {
+        container.innerHTML = '<div class="empty-state">Aucun inscrit confirmé pour le moment.</div>';
+        return;
+      }
+      container.innerHTML = `
+        <table class="subscribers-table">
+          <thead>
+            <tr><th>Email</th><th>Langue</th><th>Confirmé le</th></tr>
+          </thead>
+          <tbody>
+            ${subscribers.map(s => `
+              <tr>
+                <td>${escapeHtml(s.email)}</td>
+                <td>${s.lang.toUpperCase()}</td>
+                <td>${s.confirmed_at ? new Date(s.confirmed_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    // ── ACTIONS ────────────────────
+    async function approveComment(id) {
+      await fetch(`${API_BASE}/admin/comments/${id}/approve`, {
+        method: 'POST',
+        headers: { 'X-Admin-Key': adminKey }
+      });
+      loadAll();
+    }
+
+    async function rejectComment(id) {
+      await fetch(`${API_BASE}/admin/comments/${id}/reject`, {
+        method: 'POST',
+        headers: { 'X-Admin-Key': adminKey }
+      });
+      loadAll();
+    }
+
+    // ── UTILS ──────────────────────
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+  </script>
+</body>
+</html>

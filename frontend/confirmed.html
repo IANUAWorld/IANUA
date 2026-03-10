@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IANUA — Inscription confirmée</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;900&family=Source+Sans+3:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --gold: #C9A84C;
+      --gold-light: #E8C97A;
+      --dark: #0D0D1A;
+      --grey: #8A8A9A;
+      --light: #E8E8F0;
+      --white: #F5F5FA;
+      --green: #2ECA8C;
+      --red: #CA2E2E;
+    }
+    body {
+      background: var(--dark);
+      color: var(--light);
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+    .logo {
+      font-family: 'Cinzel', serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: 0.3em;
+      color: var(--gold);
+      margin-bottom: 3rem;
+      text-decoration: none;
+    }
+    .icon {
+      width: 4rem;
+      height: 4rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      font-size: 1.5rem;
+    }
+    .icon-success { border: 2px solid var(--green); color: var(--green); }
+    .icon-error { border: 2px solid var(--red); color: var(--red); }
+    h1 {
+      font-family: 'Cinzel', serif;
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 1.5rem;
+    }
+    p {
+      font-size: 1.1rem;
+      color: var(--grey);
+      line-height: 1.8;
+      max-width: 500px;
+      margin-bottom: 1rem;
+    }
+    .back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      border: 1px solid rgba(201,168,76,0.3);
+      padding: 0.8rem 2rem;
+      transition: all 0.3s;
+    }
+    .back-link:hover { background: rgba(201,168,76,0.1); }
+  </style>
+</head>
+<body>
+  <a href="/" class="logo">IANUA</a>
+  <div class="icon" id="icon">&#10003;</div>
+  <h1 id="title"></h1>
+  <p id="message"></p>
+  <a href="/" class="back-link" id="backLink"></a>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const lang = ['fr', 'en', 'es'].includes(params.get('lang')) ? params.get('lang') : 'en';
+    const error = params.get('error');
+
+    const texts = {
+      fr: {
+        success: {
+          title: 'Inscription confirmée',
+          message: 'Vous recevrez les mises à jour d\'Ianua.',
+        },
+        expired: {
+          title: 'Lien expiré',
+          message: 'Ce lien de confirmation a expiré. Veuillez vous réinscrire.',
+        },
+        invalid: {
+          title: 'Lien invalide',
+          message: 'Ce lien de confirmation n\'est pas valide.',
+        },
+        back: '← Retour à ianua.world'
+      },
+      en: {
+        success: {
+          title: 'Subscription confirmed',
+          message: 'You will receive Ianua updates.',
+        },
+        expired: {
+          title: 'Link expired',
+          message: 'This confirmation link has expired. Please subscribe again.',
+        },
+        invalid: {
+          title: 'Invalid link',
+          message: 'This confirmation link is not valid.',
+        },
+        back: '← Back to ianua.world'
+      },
+      es: {
+        success: {
+          title: 'Suscripción confirmada',
+          message: 'Recibirá las actualizaciones de Ianua.',
+        },
+        expired: {
+          title: 'Enlace expirado',
+          message: 'Este enlace de confirmación ha expirado. Por favor, suscríbase de nuevo.',
+        },
+        invalid: {
+          title: 'Enlace inválido',
+          message: 'Este enlace de confirmación no es válido.',
+        },
+        back: '← Volver a ianua.world'
+      }
+    };
+
+    const t = texts[lang];
+    const iconEl = document.getElementById('icon');
+
+    if (error === 'expired') {
+      iconEl.textContent = '✕';
+      iconEl.className = 'icon icon-error';
+      document.getElementById('title').textContent = t.expired.title;
+      document.getElementById('message').textContent = t.expired.message;
+    } else if (error === 'invalid') {
+      iconEl.textContent = '✕';
+      iconEl.className = 'icon icon-error';
+      document.getElementById('title').textContent = t.invalid.title;
+      document.getElementById('message').textContent = t.invalid.message;
+    } else {
+      iconEl.className = 'icon icon-success';
+      document.getElementById('title').textContent = t.success.title;
+      document.getElementById('message').textContent = t.success.message;
+    }
+
+    document.getElementById('backLink').textContent = t.back;
+  </script>
+</body>
+</html>
