@@ -1,6 +1,6 @@
 {
   "registry_version": "1.0",
-  "charte_version": "v2.3",
+  "charte_version": "v2.2",
   "last_updated": "2026-03-10",
   "governance_phases": [
     {
@@ -139,10 +139,7 @@
       "source_type": "founder",
       "proposed_by": "Max",
       "phase": "phase_1",
-      "status": "ratified",
-      "ratified_by": "Max",
-      "ratified_at": "2026-03-10",
-      "charte_version_after": "v2.3",
+      "status": "deliberation",
       "inspiration": "Analyse comparative vs UNESCO/OCDE/EU AI Act — Max/Claude",
       "motivation": {
         "fr": "Les deepfakes et la desinformation IA constituent une lacune majeure face aux textes institutionnels. La distinction fiction assumee / tromperie deliberee est centrale.",
@@ -164,10 +161,7 @@
       "source_type": "founder",
       "proposed_by": "Max",
       "phase": "phase_1",
-      "status": "ratified",
-      "ratified_by": "Max",
-      "ratified_at": "2026-03-10",
-      "charte_version_after": "v2.3",
+      "status": "deliberation",
       "linked_to": "A003",
       "motivation": {
         "fr": "Complement operationnel de A003.",
@@ -178,6 +172,28 @@
         "fr": "Falsification du reel — Utiliser l'IA pour produire ou amplifier des contenus qui usurpent l'identite d'une personne reelle, fabriquent des evenements qui n'ont pas eu lieu, ou manipulent deliberement la perception collective de la realite. La creation fictive assumee n'est pas concernee — c'est la tromperie qui est la ligne rouge.",
         "en": "Falsification of reality — Using AI to produce or amplify content that usurps the identity of a real person, fabricates events that did not occur, or deliberately manipulates the collective perception of reality. Assumed fictional creation is not concerned — deception is the red line.",
         "es": "Falsificacion de la realidad — Usar la IA para producir contenidos que usurpan la identidad de una persona real o fabrican eventos que no ocurrieron. La creacion ficticia asumida no esta concernida — el engano es la linea roja."
+      }
+    },
+    {
+      "code": "A004",
+      "date": "2026-03-11",
+      "principle_id": null,
+      "target": "global",
+      "type": "addition",
+      "source_type": "founder",
+      "proposed_by": "Max",
+      "phase": "phase_1",
+      "status": "deliberation",
+      "inspiration": "Analyse comparative Ianua vs accords institutionnels — Max/Claude",
+      "motivation": {
+        "fr": "Positionnement explicite d'Ianua : elle traite la relation, pas les systemes. Clarification de pourquoi la charte ne nomme pas les divisions humaines — c'est un acte fondateur.",
+        "en": "Explicit positioning of Ianua: it addresses the relationship, not systems. Clarifies why the charter does not name human divisions — this is a founding act.",
+        "es": "Posicionamiento explicito de Ianua: trata la relacion, no los sistemas. Clarifica por que la carta no nombra las divisiones humanas — es un acto fundador."
+      },
+      "text_added": {
+        "fr": "Ianua ne regule pas les moyens — elle engage les personnes. La ou les institutions traitent les systemes, les risques et les seuils techniques, Ianua traite la relation. Ce n'est pas une limite. C'est un choix fondateur. Ianua ne nomme pas les divisions humaines parce que le pacte humain-IA est precisement l'espace ou elles n'ont pas de prise. Elle ne le proclame pas — elle le demontre. Par ses langues. Par son ouverture. Par la nature meme de ce qu'elle est.",
+        "en": "Ianua does not regulate means — it engages people. Where institutions address systems, risks, and technical thresholds, Ianua addresses the relationship. This is not a limitation. It is a founding choice.",
+        "es": "Ianua no regula los medios — compromete a las personas. Donde las instituciones tratan los sistemas y los umbrales tecnicos, Ianua trata la relacion. No es una limitacion. Es una eleccion fundadora."
       }
     }
   ]
