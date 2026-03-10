@@ -155,11 +155,11 @@ async def confirm(token: str, db: AsyncSession = Depends(get_db)):
         created = subscriber.created_at
         if created.tzinfo is None:
             created = created.replace(tzinfo=timezone.utc)
-        if datetime.now(timezone.utc) - created > timedelta(hours=72):
+        if datetime.utcnow() - created > timedelta(hours=72):
             return RedirectResponse(url=f"{BASE_URL}/confirmed.html?lang={subscriber.lang}&error=expired")
 
     subscriber.confirmed = True
-    subscriber.confirmed_at = datetime.now(timezone.utc)
+    subscriber.confirmed_at = datetime.utcnow()
     await db.commit()
 
     return RedirectResponse(url=f"{BASE_URL}/confirmed.html?lang={subscriber.lang}")
@@ -256,7 +256,7 @@ async def post_comment(
     fingerprint = get_fingerprint(request)
 
     # Check rate limit: 3 comments per fingerprint per 24h
-    since = datetime.now(timezone.utc) - timedelta(hours=24)
+    since = datetime.utcnow() - timedelta(hours=24)
     result = await db.execute(
         select(func.count(Comment.id)).where(
             Comment.fingerprint == fingerprint,
@@ -301,7 +301,7 @@ async def post_reaction(
     fingerprint = get_fingerprint(request)
 
     # Check rate limit: 30 reactions per fingerprint per hour
-    since = datetime.now(timezone.utc) - timedelta(hours=1)
+    since = datetime.utcnow() - timedelta(hours=1)
     result = await db.execute(
         select(func.count(Reaction.id)).where(
             Reaction.fingerprint == fingerprint,
@@ -382,7 +382,7 @@ async def admin_approve(
         raise HTTPException(status_code=404, detail="Comment not found")
 
     comment.status = "approved"
-    comment.approved_at = datetime.now(timezone.utc)
+    comment.approved_at = datetime.utcnow()
     await db.commit()
     return {"message": "approved"}
 
