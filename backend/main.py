@@ -82,9 +82,13 @@ class ReactionRequest(BaseModel):
 # ── Startup ──────────────────────────────────────
 @app.on_event("startup")
 async def startup():
-    # Create tables for SQLite dev; in prod use Alembic
     if IS_SQLITE:
+        # Dev: create tables directly
         create_tables_sync()
+    else:
+        # Prod: run Alembic migrations
+        import subprocess
+        subprocess.run(["alembic", "upgrade", "head"], check=True)
 
 
 # ── PUBLIC ENDPOINTS ─────────────────────────────
