@@ -1528,11 +1528,11 @@ Source  : ianua.world</pre>
         block.id = `forum-${pid}`;
         block.innerHTML = `
           <div class="forum-toggles">
-            <div class="forum-toggle" onclick="toggleComments('${pid}')">
+            <div class="forum-toggle" id="toggle-comments-${pid}" onclick="toggleComments('${pid}')" style="display:none;">
               <span data-fr="Voir les commentaires" data-en="View comments" data-es="Ver comentarios">Voir les commentaires</span>
             </div>
             <div class="forum-toggle" onclick="toggleCommentForm('${pid}')">
-              <span data-fr="Ajouter un commentaire" data-en="Add a comment" data-es="Añadir un comentario">Ajouter un commentaire</span>
+              <span data-fr="Ajouter un commentaire" data-en="Add a comment" data-es="Añadir un commentario">Ajouter un commentaire</span>
             </div>
           </div>
           <div class="forum-comments" id="forum-comments-${pid}" style="display:none;">
@@ -1557,6 +1557,37 @@ Source  : ianua.world</pre>
         `;
         content.appendChild(block);
       });
+
+      /* Pre-load comment counts to show/hide "Voir les commentaires" */
+      loadCommentCounts();
+    }
+
+    async function loadCommentCounts() {
+      const pids = Object.keys(PRINCIPLES);
+      await Promise.all(pids.map(async (pid) => {
+        try {
+          const res = await fetch(`${API_BASE}/comments/${pid}`);
+          const data = await res.json();
+          const count = data.comments.length;
+          const toggle = document.getElementById(`toggle-comments-${pid}`);
+          if (count > 0) {
+            toggle.style.display = '';
+            const span = toggle.querySelector('span');
+            const labels = {
+              fr: `Voir les commentaires (${count})`,
+              en: `View comments (${count})`,
+              es: `Ver comentarios (${count})`
+            };
+            span.setAttribute('data-fr', labels.fr);
+            span.setAttribute('data-en', labels.en);
+            span.setAttribute('data-es', labels.es);
+            span.textContent = labels[currentLang];
+          }
+          /* Cache comments so toggleComments doesn't re-fetch */
+          commentsCache[pid] = data.comments;
+          commentsShown[pid] = COMMENTS_PER_PAGE;
+        } catch (e) { /* silent */ }
+      }));
     }
 
     function toggleComments(principleId) {
@@ -1582,18 +1613,24 @@ Source  : ianua.world</pre>
         commentsShown[principleId] = COMMENTS_PER_PAGE;
         renderComments(principleId);
 
-        // Update toggle count (first toggle = "Voir les commentaires")
-        const toggle = document.querySelector(`#forum-${principleId} .forum-toggle:first-child span`);
+        // Update toggle visibility & count
         const count = data.comments.length;
-        const labels = {
-          fr: `Commentaires (${count})`,
-          en: `Comments (${count})`,
-          es: `Comentarios (${count})`
-        };
-        toggle.setAttribute('data-fr', labels.fr);
-        toggle.setAttribute('data-en', labels.en);
-        toggle.setAttribute('data-es', labels.es);
-        toggle.textContent = labels[currentLang];
+        const toggle = document.getElementById(`toggle-comments-${principleId}`);
+        if (count > 0) {
+          toggle.style.display = '';
+          const span = toggle.querySelector('span');
+          const labels = {
+            fr: `Voir les commentaires (${count})`,
+            en: `View comments (${count})`,
+            es: `Ver comentarios (${count})`
+          };
+          span.setAttribute('data-fr', labels.fr);
+          span.setAttribute('data-en', labels.en);
+          span.setAttribute('data-es', labels.es);
+          span.textContent = labels[currentLang];
+        } else {
+          toggle.style.display = 'none';
+        }
       } catch (e) {
         console.error(e);
       }
@@ -1698,17 +1735,21 @@ Source  : ianua.world</pre>
         clearTimeout(timeout);
 
         if (res.ok) {
-          /* — Success notification — */
+          /* — Close form immediately & show success above — */
           document.getElementById(`name-${principleId}`).value = '';
           document.getElementById(`country-${principleId}`).value = '';
           document.getElementById(`content-${principleId}`).value = '';
-          msgEl.innerHTML = `<span class="form-success">✓ ${msgs[currentLang]}</span>`;
-          /* Auto-close form after 2.5s */
-          setTimeout(() => {
-            formPanel.style.display = 'none';
-            msgEl.textContent = '';
-            msgEl.className = 'form-message';
-          }, 2500);
+          formPanel.style.display = 'none';
+          msgEl.textContent = '';
+          msgEl.className = 'form-message';
+
+          /* Show success notification above the toggles */
+          const block = document.getElementById(`forum-${principleId}`);
+          const notif = document.createElement('div');
+          notif.className = 'form-success';
+          notif.textContent = `✓ ${msgs[currentLang]}`;
+          block.insertBefore(notif, block.firstChild);
+          setTimeout(() => notif.remove(), 3500);
         } else if (res.status === 429) {
           msgEl.textContent = errMsgs[currentLang];
         } else {
