@@ -1,6 +1,6 @@
 {
   "registry_version": "1.0",
-  "charte_version": "v2.1",
+  "charte_version": "v2.2",
   "last_updated": "2026-03-10",
   "governance_phases": [
     {
@@ -49,7 +49,7 @@
     {
       "code": "A001",
       "date": "2026-03-10",
-      "principle_id": "II",
+      "principle_id": "transparence",
       "target": "principle_body",
       "type": "addition",
       "source_type": "founder",
@@ -94,6 +94,40 @@
         "fr": "Instructions cachees — Programmer une IA avec des instructions dissimulees qui contredisent les valeurs declarees. Ce que l'on demande a l'IA d'etre doit pouvoir etre assume publiquement.",
         "en": "Hidden instructions — Programming an AI with concealed instructions that contradict declared values. What we ask the AI to be must be publicly assumed.",
         "es": "Instrucciones ocultas — Programar una IA con instrucciones disimuladas que contradigan los valores declarados. Lo que pedimos que sea la IA debe poder asumirse publicamente."
+      }
+    },
+    {
+      "code": "A002",
+      "date": "2026-03-10",
+      "principle_id": null,
+      "target": "global",
+      "type": "modification",
+      "source_type": "founder",
+      "proposed_by": "Max",
+      "phase": "phase_1",
+      "status": "ratified",
+      "ratified_by": "Max",
+      "ratified_at": "2026-03-10",
+      "charte_version_after": "v2.2",
+      "inspiration": "Analyse structurelle Max/Claude — 10 mars 2026",
+      "motivation": {
+        "fr": "L'ordre original manquait de progression narrative. La Reciprocite monte en III pour conclure les fondations. Trois paliers visuels ajoutes : Fondations / Mecanismes / Agents.",
+        "en": "The original order lacked narrative progression. Reciprocity moves to III to close the foundations. Three visual tiers added: Foundations / Mechanisms / Agents.",
+        "es": "El orden original carecia de progresion narrativa. La Reciprocidad sube a III. Tres niveles visuales agregados: Fundamentos / Mecanismos / Agentes."
+      },
+      "structural_change": {
+        "before": ["I Bienveillance", "II Transparence", "III Souverainete", "IV Refus", "V Reciprocite", "VI Proactive", "VII Agentique", "VIII Deliberation"],
+        "after": ["I Bienveillance", "II Transparence", "III Reciprocite", "IV Souverainete", "V Refus", "VI Proactive", "VII Agentique", "VIII Deliberation"],
+        "paliers": {
+          "1": ["I", "II", "III"],
+          "2": ["IV", "V", "VI"],
+          "3": ["VII", "VIII"]
+        },
+        "id_migration": {
+          "I": "bienveillance", "II": "transparence", "III": "reciprocite",
+          "IV": "souverainete", "V": "refus", "VI": "proactive",
+          "VII": "agentique", "VIII": "deliberation"
+        }
       }
     }
   ]

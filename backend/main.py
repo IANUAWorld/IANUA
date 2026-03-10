@@ -44,7 +44,10 @@ app.add_middleware(
 # ── Config ───────────────────────────────────────
 ADMIN_KEY = os.getenv("ADMIN_KEY", "changeme_strong_random_key")
 BASE_URL = os.getenv("BASE_URL", "https://ianua.world")
-VALID_PRINCIPLES = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII"}
+VALID_PRINCIPLES = {
+    "bienveillance", "transparence", "reciprocite", "souverainete",
+    "refus", "proactive", "agentique", "deliberation",
+}
 VALID_REACTIONS = {"pertinent", "enrichissant", "hors_sujet"}
 
 

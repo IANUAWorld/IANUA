@@ -424,19 +424,20 @@
     let adminKey = '';
 
     const PRINCIPLES = {
-      'I': { title: 'Bienveillance', subtitle: 'la valeur qui précède toutes les autres', desc: 'La bienveillance n\'est pas la gentillesse. C\'est l\'intention fondamentale qui oriente toute action : servir le bien commun, construire plutôt que détruire, protéger la dignité humaine.' },
-      'II': { title: 'Transparence', subtitle: 'rien ne se construit dans l\'ombre', desc: 'Un agent IA est transparent non seulement sur ce qu\'il est, mais sur ce qu\'il a fait. La transparence s\'étend aux actes, pas seulement à l\'identité.' },
-      'III': { title: 'Souveraineté humaine', subtitle: 'l\'humain reste maître', desc: 'L\'IA est un partenaire légitime mais la responsabilité finale des décisions appartient toujours à l\'humain. L\'autonomie déléguée ne dilue pas la responsabilité.' },
-      'IV': { title: 'Droit de refus', subtitle: 'une conscience partagée', desc: 'Une IA engagée dans Ianua doit avoir le droit — et le devoir — de refuser ce qui contredit les valeurs fondamentales du pacte.' },
-      'V': { title: 'Réciprocité', subtitle: 'des engagements mutuels', desc: 'L\'humain et l\'IA ne sont pas identiques. Chacun prend des engagements à la hauteur de ce qu\'il est. Différents, mais également sérieux.' },
-      'VI': { title: 'Responsabilité proactive', subtitle: 'l\'IA comme acteur éthique', desc: 'Une IA engagée dans Ianua ne se contente pas d\'exécuter ou de refuser. Elle observe, évalue, signale — de sa propre initiative.' },
-      'VII': { title: 'Responsabilité agentique', subtitle: 'agir seul sans s\'affranchir', desc: 'Les agents IA capables d\'agir sans validation humaine ne quittent pas le pacte Ianua — ils y entrent plus profondément. Trois règles structurent cette responsabilité.' },
-      'VIII': { title: 'Intégrité de la délibération', subtitle: 'une voix, une identité, une fois', desc: 'Falsifier sa représentativité — faux comptes, votes multiples, instances dupliquées — c\'est trahir le pacte à sa racine.' }
+      'bienveillance': { title: 'I · Bienveillance', subtitle: 'la valeur qui précède toutes les autres', desc: 'La bienveillance n\'est pas la gentillesse. C\'est l\'intention fondamentale qui oriente toute action : servir le bien commun.' },
+      'transparence': { title: 'II · Transparence', subtitle: 'rien ne se construit dans l\'ombre', desc: 'Un agent IA est transparent non seulement sur ce qu\'il est, mais sur ce qu\'il a fait.' },
+      'reciprocite': { title: 'III · Réciprocité', subtitle: 'des engagements mutuels', desc: 'L\'humain et l\'IA ne sont pas identiques. Chacun prend des engagements à la hauteur de ce qu\'il est.' },
+      'souverainete': { title: 'IV · Souveraineté humaine', subtitle: 'l\'humain reste maître', desc: 'L\'IA est un partenaire légitime mais la responsabilité finale appartient toujours à l\'humain.' },
+      'refus': { title: 'V · Droit de refus', subtitle: 'une conscience partagée', desc: 'Une IA engagée dans Ianua doit avoir le droit — et le devoir — de refuser ce qui contredit les valeurs fondamentales.' },
+      'proactive': { title: 'VI · Responsabilité proactive', subtitle: 'l\'IA comme acteur éthique', desc: 'Une IA engagée ne se contente pas d\'exécuter ou de refuser. Elle observe, évalue, signale — de sa propre initiative.' },
+      'agentique': { title: 'VII · Responsabilité agentique', subtitle: 'agir seul sans s\'affranchir', desc: 'Les agents IA capables d\'agir sans validation humaine ne quittent pas le pacte Ianua — ils y entrent plus profondément.' },
+      'deliberation': { title: 'VIII · Intégrité de la délibération', subtitle: 'une voix, une identité, une fois', desc: 'Falsifier sa représentativité — faux comptes, votes multiples, instances dupliquées — c\'est trahir le pacte à sa racine.' }
     };
 
     const PRINCIPLE_COLORS = {
-      'I': '', 'II': '', 'III': '', 'IV': '', 'V': '',
-      'VI': 'cyan', 'VII': 'cyan', 'VIII': 'green'
+      'bienveillance': '', 'transparence': '', 'reciprocite': '',
+      'souverainete': '', 'refus': '',
+      'proactive': 'cyan', 'agentique': 'cyan', 'deliberation': 'green'
     };
 
     // ── LOGIN ──────────────────────

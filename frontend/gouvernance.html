@@ -559,9 +559,15 @@
     let currentFilter = 'all';
 
     const PRINCIPLES = {
-      'I': 'Bienveillance', 'II': 'Transparence', 'III': 'Souverainete humaine',
-      'IV': 'Droit de refus', 'V': 'Reciprocite', 'VI': 'Responsabilite proactive',
-      'VII': 'Responsabilite agentique', 'VIII': 'Integrite de la deliberation'
+      'bienveillance': 'Bienveillance', 'transparence': 'Transparence',
+      'reciprocite': 'Reciprocite', 'souverainete': 'Souverainete humaine',
+      'refus': 'Droit de refus', 'proactive': 'Responsabilite proactive',
+      'agentique': 'Responsabilite agentique', 'deliberation': 'Integrite de la deliberation'
+    };
+    const PRINCIPLE_NUM = {
+      'bienveillance': 'I', 'transparence': 'II', 'reciprocite': 'III',
+      'souverainete': 'IV', 'refus': 'V', 'proactive': 'VI',
+      'agentique': 'VII', 'deliberation': 'VIII'
     };
 
     /* ── Language ─────────────────────────── */
@@ -675,7 +681,7 @@
       }
 
       timeline.innerHTML = amendments.map(a => {
-        const principle = a.principle_id ? `Principe ${a.principle_id} · ${PRINCIPLES[a.principle_id] || ''}` : 'Global';
+        const principle = a.principle_id ? `Principe ${PRINCIPLE_NUM[a.principle_id] || a.principle_id} · ${PRINCIPLES[a.principle_id] || a.principle_id}` : 'Global';
         const type = typeLabels[a.type] ? typeLabels[a.type][currentLang] : a.type;
         const source = sourceLabels[a.source_type] ? sourceLabels[a.source_type][currentLang] : a.source_type;
         const status = statusLabels[a.status] ? statusLabels[a.status][currentLang] : a.status;
