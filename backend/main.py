@@ -98,6 +98,16 @@ async def health():
     return {"status": "ok"}
 
 
+@app.get("/stats")
+async def stats(db: AsyncSession = Depends(get_db)):
+    subscribers = await db.execute(select(func.count()).where(Subscriber.confirmed == True))
+    comments = await db.execute(select(func.count()).where(Comment.status == "approved"))
+    return {
+        "subscribers": subscribers.scalar() or 0,
+        "comments": comments.scalar() or 0
+    }
+
+
 @app.post("/subscribe")
 async def subscribe(body: SubscribeRequest, db: AsyncSession = Depends(get_db)):
     lang = body.lang if body.lang in ("fr", "en", "es") else "en"

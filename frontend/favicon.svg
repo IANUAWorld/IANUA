@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- IANUA Favicon — Le I-Porte (compact) -->
+
+  <!-- Background -->
+  <rect width="64" height="64" rx="8" fill="#0D0D1A"/>
+
+  <!-- Left pillar -->
+  <rect x="14" y="10" width="7" height="44" rx="1" fill="#C9A84C"/>
+
+  <!-- Right pillar -->
+  <rect x="43" y="10" width="7" height="44" rx="1" fill="#C9A84C"/>
+
+  <!-- Top arch -->
+  <path d="M14 10 L14 6 Q32 -4 50 6 L50 10 L43 10 Q32 3 21 10 Z" fill="#C9A84C"/>
+
+  <!-- Threshold line -->
+  <rect x="21" y="38" width="22" height="1.5" rx="0.5" fill="#C9A84C" opacity="0.5"/>
+</svg>

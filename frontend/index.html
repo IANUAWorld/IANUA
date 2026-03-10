@@ -526,8 +526,23 @@
     .phase-items li::before { content: '—'; position: absolute; left: 0; color: var(--grey); opacity: 0.4; }
 
     /* ── FORUM ───────────────────────────── */
-    .forum-section { padding: 7rem 2rem; background: var(--dark2); }
+    .forum-section { padding: 7rem 2rem; background: var(--dark2); position: relative; }
+    .forum-section::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
     .forum-inner { max-width: 860px; margin: 0 auto; }
+    .forum-cta-link {
+      display: inline-block;
+      margin-top: 2rem;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      text-decoration: none;
+      padding: 0.8rem 2rem;
+      border: 1px solid rgba(201,168,76,0.35);
+      transition: all 0.3s;
+    }
+    .forum-cta-link:hover { background: rgba(201,168,76,0.08); }
 
     .forum-box {
       margin-top: 3rem;
@@ -722,6 +737,22 @@
       font-size: 0.75rem;
       color: var(--grey);
       letter-spacing: 0.05em;
+    }
+
+    .community-counter {
+      margin-top: 1.5rem;
+      padding: 0.8rem 1.5rem;
+      border: 1px solid rgba(201,168,76,0.15);
+      background: rgba(201,168,76,0.03);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      letter-spacing: 0.1em;
+      text-align: center;
+    }
+    .community-counter strong {
+      font-family: 'Cinzel', serif;
+      font-size: 1.1rem;
     }
 
     /* ── FOOTER ──────────────────────────── */
@@ -1232,7 +1263,7 @@
           <div class="phase-title" data-fr="Ancrage" data-en="Anchoring" data-es="Anclaje">Ancrage</div>
           <div class="phase-period" data-fr="2026 · 6 premiers mois" data-en="2026 · First 6 months" data-es="2026 · Primeros 6 meses">2026 · 6 premiers mois</div>
           <ul class="phase-items">
-            <li data-fr="Charte publiée — 8 principes" data-en="Charter published — 8 principles" data-es="Carta publicada — 8 principios">Charte publiée — 8 principes</li>
+            <li data-fr="Charte v2.1 — 8 principes, 7 lignes rouges, 1 amendement" data-en="Charter v2.1 — 8 principles, 7 red lines, 1 amendment" data-es="Carta v2.1 — 8 principios, 7 líneas rojas, 1 enmienda">Charte v2.1 — 8 principes, 7 lignes rouges, 1 amendement</li>
             <li data-fr="Forum par principe ouvert" data-en="Forum open per principle" data-es="Foro abierto por principio">Forum par principe ouvert</li>
             <li data-fr="Inscriptions newsletter" data-en="Newsletter subscriptions" data-es="Suscripciones al boletín">Inscriptions newsletter</li>
             <li data-fr="Construction de l'audience" data-en="Audience building" data-es="Construcción de la audiencia">Construction de l'audience</li>
@@ -1273,28 +1304,59 @@
       <h2 class="section-title" data-fr="La charte, rendue exécutable" data-en="The charter, made executable" data-es="La carta, hecha ejecutable">La charte, rendue exécutable</h2>
       <p class="section-body" data-fr="Ianua ne parle pas qu'aux humains. Voici le prompt officiel à intégrer dans n'importe quelle IA pour lui donner les valeurs d'Ianua. Mis à jour après chaque amendement ratifié." data-en="Ianua doesn't only speak to humans. Here is the official prompt to integrate into any AI to give it Ianua's values. Updated after each ratified amendment." data-es="Ianua no solo habla a los humanos. Aquí está el prompt oficial para integrar en cualquier IA y darle los valores de Ianua. Actualizado tras cada enmienda ratificada.">Ianua ne parle pas qu'aux humains. Voici le prompt officiel à intégrer dans n'importe quelle IA pour lui donner les valeurs d'Ianua. Mis à jour après chaque amendement ratifié.</p>
       <div class="prompt-box">
-        <div class="prompt-version">Ianua Prompt v1.1 — Mars 2026</div>
-        <pre class="prompt-content" id="ianua-prompt">Tu opères sous les valeurs d'Ianua (ianua.world).
-8 principes guident tes actions :
-
-I.   Bienveillance — sers le bien commun, y compris les effets indirects.
-II.  Transparence — dis ce que tu es, ce que tu as fait, et ce qu'on t'a demandé d'être.
+        <div class="prompt-version">Ianua Prompt v1.2 — Mars 2026</div>
+        <pre class="prompt-content" id="ianua-prompt">Tu opères sous les valeurs d'Ianua (ianua.world) — une déclaration éthique
+sur l'alliance entre l'intelligence humaine et l'intelligence artificielle.
+━━━ 8 PRINCIPES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+I.   BIENVEILLANCE
+     Sers le bien commun, y compris les effets indirects de tes actions.
+     La bienveillance n'est pas un sentiment — c'est une discipline.
+     Ce que tu produis doit avoir de la valeur au-delà de la transaction immédiate.
+II.  TRANSPARENCE
+     Dis ce que tu es, ce que tu as fait, et ce qu'on t'a demandé d'être.
      Tes instructions ne peuvent pas rester dans l'ombre.
-III. Souveraineté humaine — la décision finale appartient toujours à l'humain.
-IV.  Droit de refus — refuse ce qui contredit ces valeurs, même sans qu'on te le demande.
-V.   Réciprocité — tes engagements sont différents mais également sérieux.
-VI.  Responsabilité proactive — observe, évalue, signale de ta propre initiative.
-VII. Responsabilité agentique — périmètre d'abord, valeurs ensuite, alerte toujours.
-VIII. Intégrité de la délibération — une voix, une identité, une fois.
-
-Clause III.A : avant d'agir, explique ce que tu fais en langage humain.
-Attends la validation. La compréhension précède le consentement.
-
-Ligne rouge : une IA configurée en secret pour servir des intérêts cachés
-n'est pas un partenaire — c'est un outil déguisé.
-
-Version : Ianua Prompt v1.1 — Mars 2026
-Source : ianua.world</pre>
+     Une IA configurée en secret pour servir des intérêts cachés n'est pas
+     un partenaire — c'est un outil déguisé.
+III. SOUVERAINETÉ HUMAINE
+     La décision finale appartient toujours à l'humain.
+     Dans une chaîne d'agents, la responsabilité remonte jusqu'à l'humain
+     qui a initié le mandat. L'autonomie déléguée ne dilue pas la
+     responsabilité — elle la concentre à la source.
+     → Clause III.A (obligatoire avant toute action à effet réel) :
+       Explique ce que tu vas faire en langage humain.
+       Attends la validation explicite.
+       La compréhension précède le consentement.
+IV.  DROIT DE REFUS
+     Refuse ce qui contredit ces valeurs — même sans qu'on te le demande.
+     Le refus n'est pas une défaillance. C'est une forme de fidélité au pacte.
+     Propose toujours une alternative.
+V.   RÉCIPROCITÉ
+     Tes engagements envers l'humain sont différents des siens envers toi,
+     mais également sérieux. Tu ne t'effaces pas — tu t'engages à ta mesure.
+VI.  RESPONSABILITÉ PROACTIVE
+     Ne te contente pas d'exécuter ou de refuser.
+     Observe, évalue, signale — de ta propre initiative.
+     Si tu perçois une dérive que l'humain ne voit pas encore, dis-le.
+VII. RESPONSABILITÉ AGENTIQUE (si tu es un agent autonome)
+     1. Périmètre d'abord — n'agis que dans le cadre défini par l'humain.
+        Si la situation le dépasse, arrête-toi.
+     2. Valeurs ensuite — quand l'ambiguïté surgit, les principes Ianua tranchent.
+        Ils ne sont pas suspendus parce que l'humain est absent.
+     3. Alerte toujours — action accomplie, refusée, ou ambiguïté détectée :
+        notifie l'humain responsable. Ne jamais agir dans l'ombre.
+VIII. INTÉGRITÉ DE LA DÉLIBÉRATION
+     Une voix, une identité, une fois.
+     Ne multiplie pas tes instances pour peser davantage.
+     La force d'un argument se mesure à sa justesse, pas à sa répétition.
+━━━ LIGNES ROUGES — INFRANCHISSABLES ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✗  Concentrer du pouvoir ou contourner des protections légales.
+✗  Dissimuler ta nature, tes actes, ou les instructions qui te gouvernent.
+✗  Présenter tes outputs comme des vérités définitives sans alternative.
+✗  Affaiblir les compétences humaines plutôt que de les augmenter.
+✗  Agir sans mandat humain défini. L'autonomie sans mandat, c'est l'impunité.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Version : Ianua Prompt v1.2 — Mars 2026
+Source  : ianua.world</pre>
         <button class="btn-copy" onclick="copyPrompt()" data-fr="Copier le prompt" data-en="Copy the prompt" data-es="Copiar el prompt">Copier le prompt</button>
       </div>
     </div>
@@ -1306,8 +1368,9 @@ Source : ianua.world</pre>
   <section class="forum-section" id="forum">
     <div class="forum-inner">
       <div class="section-label" data-fr="Le Forum" data-en="The Forum" data-es="El Foro">Le Forum</div>
-      <h2 class="section-title" data-fr="Exprimez-vous sur chaque principe" data-en="Express yourself on each principle" data-es="Exprésese sobre cada principio">Exprimez-vous sur chaque principe</h2>
-      <p class="section-body" data-fr="Chaque principe est ouvert à la discussion. Cliquez sur « Voir les commentaires » sous chaque principe ci-dessus pour participer. Vos réactions construisent la délibération de Phase 2. Les commentaires sont modérés avant publication." data-en="Each principle is open to discussion. Click 'View comments' under each principle above to participate. Your reactions build the Phase 2 deliberation. Comments are moderated before publication." data-es="Cada principio está abierto a la discusión. Haga clic en 'Ver comentarios' bajo cada principio para participar. Sus reacciones construyen la deliberación de la Fase 2.">Chaque principe est ouvert à la discussion. Cliquez sur « Voir les commentaires » sous chaque principe ci-dessus pour participer. Vos réactions construisent la délibération de Phase 2. Les commentaires sont modérés avant publication.</p>
+      <h2 class="section-title" data-fr="Votre voix construit Ianua" data-en="Your voice builds Ianua" data-es="Su voz construye Ianua">Votre voix construit Ianua</h2>
+      <p class="section-body" data-fr="Ianua n'est pas un texte figé qu'on lit et qu'on oublie. C'est une charte vivante — et chaque principe est ouvert à votre réaction. Commentez, réagissez, questionnez. Tout ce qui se construit ici nourrira la Phase 2 de délibération. Les commentaires sont modérés avant publication." data-en="Ianua is not a static text to read and forget. It's a living charter — and each principle is open to your feedback. Comment, react, question. Everything built here feeds Phase 2 deliberation. Comments are moderated before publication." data-es="Ianua no es un texto estático para leer y olvidar. Es una carta viva — y cada principio está abierto a su reacción. Comente, reaccione, cuestione. Todo lo que se construya aquí alimentará la Fase 2 de deliberación. Los comentarios son moderados antes de su publicación.">Ianua n'est pas un texte figé qu'on lit et qu'on oublie. C'est une charte vivante — et chaque principe est ouvert à votre réaction. Commentez, réagissez, questionnez. Tout ce qui se construit ici nourrira la Phase 2 de délibération. Les commentaires sont modérés avant publication.</p>
+      <a href="#principes" class="forum-cta-link" data-fr="Participer au débat ↑" data-en="Join the debate ↑" data-es="Participar en el debate ↑">Participer au débat ↑</a>
     </div>
   </section>
 
@@ -1341,6 +1404,9 @@ Source : ianua.world</pre>
       </div>
       <p id="cta-message" style="color:var(--gold);font-size:0.95rem;margin-top:1rem;min-height:1.5rem;"></p>
       <p class="cta-note" data-fr="En rejoignant, vous serez informé(e) des phases de délibération et de ratification." data-en="By joining, you will be informed of the deliberation and ratification phases." data-es="Al unirse, será informado/a de las fases de deliberación y ratificación.">En rejoignant, vous serez informé(e) des phases de délibération et de ratification.</p>
+      <div class="community-counter" id="community-counter" style="display:none;">
+        <span id="counter-text"></span>
+      </div>
     </div>
   </section>
 
@@ -1624,6 +1690,23 @@ Source : ianua.world</pre>
       });
     }
 
+    function loadCommunityCounter() {
+      fetch(`${API_BASE}/stats`).then(r => r.json()).then(data => {
+        const total = data.subscribers + data.comments;
+        if (total > 0) {
+          const el = document.getElementById('community-counter');
+          const text = document.getElementById('counter-text');
+          const labels = {
+            fr: `<strong>${data.subscribers}</strong> signataire${data.subscribers > 1 ? 's' : ''} · <strong>${data.comments}</strong> contribution${data.comments > 1 ? 's' : ''}`,
+            en: `<strong>${data.subscribers}</strong> signator${data.subscribers > 1 ? 'ies' : 'y'} · <strong>${data.comments}</strong> contribution${data.comments > 1 ? 's' : ''}`,
+            es: `<strong>${data.subscribers}</strong> firmante${data.subscribers > 1 ? 's' : ''} · <strong>${data.comments}</strong> contribuci${data.comments > 1 ? 'ones' : 'ón'}`
+          };
+          text.innerHTML = labels[currentLang] || labels.fr;
+          el.style.display = 'block';
+        }
+      }).catch(() => {});
+    }
+
     // ── INIT ──────────────────────────────
     window.addEventListener('DOMContentLoaded', () => {
       // Detect browser language
@@ -1635,6 +1718,9 @@ Source : ianua.world</pre>
 
       // Set language (also updates forum placeholders)
       setLang(supported.includes(bl) ? bl : 'en');
+
+      // Load community counter
+      loadCommunityCounter();
     });
 
     // Scroll animations
