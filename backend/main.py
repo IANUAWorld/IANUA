@@ -34,11 +34,15 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 
 # ── CORS ─────────────────────────────────────────
+_raw_origins = os.getenv("CORS_ORIGINS", os.getenv("ALLOWED_ORIGINS", ""))
+CORS_ORIGINS = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+print(f"[CORS] origins = {CORS_ORIGINS}")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("CORS_ORIGINS", os.getenv("ALLOWED_ORIGINS", "")).split(","),
-    allow_methods=["GET", "POST"],
+    allow_origins=CORS_ORIGINS if CORS_ORIGINS else ["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["Content-Type", "X-Admin-Key"],
+    allow_credentials=False,
 )
 
 # ── Config ───────────────────────────────────────
