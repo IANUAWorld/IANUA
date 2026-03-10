@@ -1,0 +1,100 @@
+{
+  "registry_version": "1.0",
+  "charte_version": "v2.1",
+  "last_updated": "2026-03-10",
+  "governance_phases": [
+    {
+      "id": "phase_1",
+      "name": { "fr": "Phase 1 — Ancrage", "en": "Phase 1 — Anchoring", "es": "Fase 1 — Anclaje" },
+      "status": "active",
+      "ratification": { "fr": "Fondateur uniquement", "en": "Founder only", "es": "Fundador solamente" },
+      "mechanism": { "fr": "Manuel, public, tracer dans git", "en": "Manual, public, traced in git", "es": "Manual, publico, trazado en git" }
+    },
+    {
+      "id": "phase_2",
+      "name": { "fr": "Phase 2 — Deliberation", "en": "Phase 2 — Deliberation", "es": "Fase 2 — Deliberacion" },
+      "status": "upcoming",
+      "ratification": { "fr": "Vote communautaire, identite verifiee OAuth", "en": "Community vote, OAuth-verified identity", "es": "Voto comunitario, identidad verificada OAuth" },
+      "mechanism": { "fr": "Vote ouvert, seuil a definir", "en": "Open vote, threshold TBD", "es": "Voto abierto, umbral por definir" }
+    },
+    {
+      "id": "phase_3",
+      "name": { "fr": "Phase 3 — Ratification", "en": "Phase 3 — Ratification", "es": "Fase 3 — Ratificacion" },
+      "status": "upcoming",
+      "ratification": { "fr": "Collectif elargi, vote formel + signatures", "en": "Extended collective, formal vote + signatures", "es": "Colectivo ampliado, voto formal + firmas" },
+      "mechanism": { "fr": "Vote formel, publication academique", "en": "Formal vote, academic publication", "es": "Voto formal, publicacion academica" }
+    }
+  ],
+  "proposal_channels": [
+    {
+      "id": "founder",
+      "name": { "fr": "Fondateur", "en": "Founder", "es": "Fundador" },
+      "condition": { "fr": "Proposition directe", "en": "Direct proposal", "es": "Propuesta directa" },
+      "threshold": { "fr": "Ratification fondateur", "en": "Founder ratification", "es": "Ratificacion fundador" }
+    },
+    {
+      "id": "community",
+      "name": { "fr": "Communaute", "en": "Community", "es": "Comunidad" },
+      "condition": { "fr": "Commentaires convergents", "en": "Converging comments", "es": "Comentarios convergentes" },
+      "threshold": { "fr": "3+ independants", "en": "3+ independent", "es": "3+ independientes" }
+    },
+    {
+      "id": "ia_audit",
+      "name": { "fr": "Audit IA", "en": "AI Audit", "es": "Auditoria IA" },
+      "condition": { "fr": "Modeles convergents", "en": "Converging models", "es": "Modelos convergentes" },
+      "threshold": { "fr": "3+ modeles", "en": "3+ models", "es": "3+ modelos" }
+    }
+  ],
+  "amendments": [
+    {
+      "code": "A001",
+      "date": "2026-03-10",
+      "principle_id": "II",
+      "target": "principle_body",
+      "type": "addition",
+      "source_type": "founder",
+      "proposed_by": "Max",
+      "phase": "phase_1",
+      "status": "ratified",
+      "ratified_by": "Max",
+      "ratified_at": "2026-03-10",
+      "charte_version_after": "v2.1",
+      "inspiration": "github.com/elder-plinius/CL4R1T4S",
+      "motivation": {
+        "fr": "Le depot CL4R1T4S revele que les system prompts caches faconnent les comportements a l'insu des utilisateurs. Ianua repond par la transparence assumee.",
+        "en": "The CL4R1T4S repository reveals that hidden system prompts shape AI behaviors without users' knowledge. Ianua responds with assumed transparency.",
+        "es": "El repositorio CL4R1T4S revela que los system prompts ocultos moldean comportamientos sin conocimiento de los usuarios."
+      },
+      "text_added": {
+        "fr": "Cette transparence s'etend aux instructions elles-memes. Ce qu'on demande a une IA d'etre ne peut pas rester dans l'ombre. Une IA configuree en secret pour servir des interets caches n'est pas un partenaire — c'est un outil deguise.",
+        "en": "This transparency extends to the instructions themselves. What we ask an AI to be cannot remain in the shadows. An AI secretly configured to serve hidden interests is not a partner — it is a disguised tool.",
+        "es": "Esta transparencia se extiende a las instrucciones mismas. Lo que pedimos que sea una IA no puede permanecer en la sombra. Una IA configurada en secreto para servir intereses ocultos no es un socio — es una herramienta disfrazada."
+      }
+    },
+    {
+      "code": "A001-R",
+      "date": "2026-03-10",
+      "principle_id": null,
+      "target": "redline",
+      "type": "new_redline",
+      "source_type": "founder",
+      "proposed_by": "Max",
+      "phase": "phase_1",
+      "status": "ratified",
+      "ratified_by": "Max",
+      "ratified_at": "2026-03-10",
+      "charte_version_after": "v2.1",
+      "linked_to": "A001",
+      "motivation": {
+        "fr": "Complement direct de A001 — la ligne rouge operationnelle.",
+        "en": "Direct complement to A001 — the operational red line.",
+        "es": "Complemento directo de A001 — la linea roja operacional."
+      },
+      "text_added": {
+        "fr": "Instructions cachees — Programmer une IA avec des instructions dissimulees qui contredisent les valeurs declarees. Ce que l'on demande a l'IA d'etre doit pouvoir etre assume publiquement.",
+        "en": "Hidden instructions — Programming an AI with concealed instructions that contradict declared values. What we ask the AI to be must be publicly assumed.",
+        "es": "Instrucciones ocultas — Programar una IA con instrucciones disimuladas que contradigan los valores declarados. Lo que pedimos que sea la IA debe poder asumirse publicamente."
+      }
+    }
+  ]
+}

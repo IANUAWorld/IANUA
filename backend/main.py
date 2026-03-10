@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from database import get_db, engine, Base, IS_SQLITE, create_tables_sync
-from models import Subscriber, Comment, Reaction
+from models import Subscriber, Comment, Reaction, Amendment, AmendmentVote
 from email_service import send_confirmation_email
 
 # ── App ──────────────────────────────────────────
@@ -336,6 +336,124 @@ async def post_reaction(
     await db.commit()
 
     return {"message": "added"}
+
+
+# ── GOVERNANCE ENDPOINTS ─────────────────────────
+
+@app.get("/amendments")
+async def list_amendments(
+    status: str | None = None,
+    principle_id: str | None = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """List all public amendments, optionally filtered by status or principle."""
+    stmt = select(Amendment).where(
+        Amendment.status.in_(["deliberation", "accepted", "ratified", "rejected"])
+    )
+    if status:
+        stmt = select(Amendment).where(Amendment.status == status)
+    if principle_id:
+        stmt = stmt.where(Amendment.principle_id == principle_id)
+    stmt = stmt.order_by(Amendment.proposed_at.desc())
+
+    result = await db.execute(stmt)
+    amendments = result.scalars().all()
+
+    return {
+        "amendments": [
+            {
+                "code": a.code,
+                "principle_id": a.principle_id,
+                "target": a.target,
+                "amendment_type": a.amendment_type,
+                "text_before": a.text_before,
+                "text_after": a.text_after,
+                "motivation": a.motivation,
+                "motivation_en": a.motivation_en,
+                "motivation_es": a.motivation_es,
+                "text_after_en": a.text_after_en,
+                "text_after_es": a.text_after_es,
+                "inspiration": a.inspiration,
+                "source_type": a.source_type,
+                "proposed_by": a.proposed_by,
+                "phase": a.phase,
+                "status": a.status,
+                "ratified_by": a.ratified_by,
+                "ratified_at": a.ratified_at.isoformat() if a.ratified_at else None,
+                "proposed_at": a.proposed_at.isoformat() if a.proposed_at else None,
+                "published_at": a.published_at.isoformat() if a.published_at else None,
+                "charte_version": a.charte_version,
+                "github_commit": a.github_commit,
+                "votes_for": a.votes_for,
+                "votes_against": a.votes_against,
+                "votes_abstain": a.votes_abstain,
+            }
+            for a in amendments
+        ]
+    }
+
+
+@app.get("/amendments/{code}")
+async def get_amendment(code: str, db: AsyncSession = Depends(get_db)):
+    """Get a single amendment by code."""
+    result = await db.execute(select(Amendment).where(Amendment.code == code))
+    a = result.scalar_one_or_none()
+    if not a:
+        raise HTTPException(status_code=404, detail="Amendment not found")
+
+    return {
+        "code": a.code,
+        "principle_id": a.principle_id,
+        "target": a.target,
+        "amendment_type": a.amendment_type,
+        "text_before": a.text_before,
+        "text_after": a.text_after,
+        "motivation": a.motivation,
+        "motivation_en": a.motivation_en,
+        "motivation_es": a.motivation_es,
+        "text_after_en": a.text_after_en,
+        "text_after_es": a.text_after_es,
+        "inspiration": a.inspiration,
+        "source_type": a.source_type,
+        "proposed_by": a.proposed_by,
+        "phase": a.phase,
+        "status": a.status,
+        "ratified_by": a.ratified_by,
+        "ratified_at": a.ratified_at.isoformat() if a.ratified_at else None,
+        "proposed_at": a.proposed_at.isoformat() if a.proposed_at else None,
+        "published_at": a.published_at.isoformat() if a.published_at else None,
+        "charte_version": a.charte_version,
+        "github_commit": a.github_commit,
+        "votes_for": a.votes_for,
+        "votes_against": a.votes_against,
+        "votes_abstain": a.votes_abstain,
+    }
+
+
+@app.get("/governance/stats")
+async def governance_stats(db: AsyncSession = Depends(get_db)):
+    """Global governance statistics."""
+    ratified = await db.execute(
+        select(func.count()).select_from(Amendment).where(Amendment.status == "ratified")
+    )
+    deliberation = await db.execute(
+        select(func.count()).select_from(Amendment).where(Amendment.status == "deliberation")
+    )
+    # Get latest charte version
+    latest = await db.execute(
+        select(Amendment.charte_version)
+        .where(Amendment.status == "ratified", Amendment.charte_version.isnot(None))
+        .order_by(Amendment.ratified_at.desc())
+        .limit(1)
+    )
+    version = latest.scalar_one_or_none() or "v1.0"
+
+    return {
+        "charte_version": version,
+        "amendments_ratified": ratified.scalar() or 0,
+        "amendments_deliberation": deliberation.scalar() or 0,
+        "last_updated": "2026-03-10",
+    }
 
 
 # ── ADMIN ENDPOINTS ──────────────────────────────

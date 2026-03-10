@@ -1,5 +1,6 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, Boolean, DateTime, ForeignKey, UniqueConstraint
+    Column, Integer, String, Text, Boolean, DateTime, ForeignKey, UniqueConstraint,
+    ARRAY
 )
 from sqlalchemy.sql import func
 from database import Base
@@ -46,33 +47,71 @@ class Reaction(Base):
     )
 
 
-# ── Phase 2 — Gouvernance (structure seulement, pas d'endpoint en v1) ──
+# ── Gouvernance — Registre des amendements (pérenne) ─────────────────
 
 class Amendment(Base):
     __tablename__ = "amendments"
 
     id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    type = Column(String(20), nullable=False)        # 'clause' | 'principle' | 'redline'
-    principle_id = Column(String(5), nullable=True)   # 'I'...'VIII' ou NULL si clause globale
-    content = Column(Text, nullable=False)
-    status = Column(String(20), default="open")       # 'open' | 'adopted' | 'rejected'
-    threshold = Column(Integer, nullable=False)        # 66 ou 80
-    opens_at = Column(DateTime, nullable=False)
-    closes_at = Column(DateTime, nullable=False)       # durée : 60 jours
-    created_at = Column(DateTime, server_default=func.now())
+    code = Column(String(10), unique=True, nullable=False, index=True)  # "A001", "A001-R"
+
+    # Cible
+    principle_id = Column(String(10), nullable=True)                     # "I"..."VIII", NULL si global
+    target = Column(String(20), nullable=False)                          # principle_body / redline / global
+    amendment_type = Column(String(20), nullable=False)                  # addition / modification / suppression / new_redline
+
+    # Contenu
+    text_before = Column(Text, nullable=True)
+    text_after = Column(Text, nullable=True)
+    motivation = Column(Text, nullable=False)
+    inspiration = Column(Text, nullable=True)
+
+    # Voie de proposition
+    source_type = Column(String(20), nullable=False)                     # founder / community / ia_audit
+    proposed_by = Column(String(100), nullable=True)
+    supporting_comments = Column(ARRAY(Integer), nullable=True)
+    supporting_models = Column(ARRAY(Text), nullable=True)
+
+    # Gouvernance
+    phase = Column(String(10), nullable=False)                           # phase_1 / phase_2 / phase_3
+    status = Column(String(20), nullable=False, default="draft")         # draft / deliberation / accepted / ratified / rejected
+    ratified_by = Column(String(100), nullable=True)
+    ratified_at = Column(DateTime, nullable=True)
+    rejected_reason = Column(Text, nullable=True)
+
+    # Votes (Phase 2+)
+    votes_for = Column(Integer, default=0)
+    votes_against = Column(Integer, default=0)
+    votes_abstain = Column(Integer, default=0)
+    vote_threshold = Column(Integer, nullable=True)
+    vote_opened_at = Column(DateTime, nullable=True)
+    vote_closed_at = Column(DateTime, nullable=True)
+
+    # Traçabilité
+    proposed_at = Column(DateTime, server_default=func.now())
+    published_at = Column(DateTime, nullable=True)
+    github_commit = Column(String(100), nullable=True)
+    charte_version = Column(String(10), nullable=True)
+
+    # Internationalisation
+    motivation_en = Column(Text, nullable=True)
+    motivation_es = Column(Text, nullable=True)
+    text_after_en = Column(Text, nullable=True)
+    text_after_es = Column(Text, nullable=True)
 
 
-class Vote(Base):
-    __tablename__ = "votes"
+class AmendmentVote(Base):
+    __tablename__ = "amendment_votes"
 
     id = Column(Integer, primary_key=True, index=True)
     amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False)
-    vote_type = Column(String(20), nullable=False)    # 'adopt' | 'amend' | 'reject' | 'abstain'
-    fingerprint = Column(String(64), nullable=False)
-    lang = Column(String(5), default="fr")
-    created_at = Column(DateTime, server_default=func.now())
+    voter_type = Column(String(10), nullable=False)      # human / ia
+    voter_identity = Column(String(100), nullable=True)   # OAuth id ou ia_audit_id
+    voter_model = Column(String(100), nullable=True)      # si ia : nom du modèle
+    vote = Column(String(10), nullable=False)             # for / against / abstain
+    comment = Column(Text, nullable=True)
+    voted_at = Column(DateTime, server_default=func.now())
 
     __table_args__ = (
-        UniqueConstraint("amendment_id", "fingerprint", name="uq_vote_per_fingerprint"),
+        UniqueConstraint("amendment_id", "voter_identity", name="uq_amendment_vote_per_voter"),
     )

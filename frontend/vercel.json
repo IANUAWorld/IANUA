@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/gouvernance", "destination": "/gouvernance.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
