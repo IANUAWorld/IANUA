@@ -84,3 +84,72 @@ async def send_confirmation_email(email: str, token: str, lang: str = "fr") -> b
     except Exception as e:
         print(f"[EMAIL ERROR] {e}")
         return False
+
+
+# ── Signature confirmation ────────────────────────
+
+SIGNATURE_TEMPLATES = {
+    "fr": {
+        "subject": "Ianua — Confirmez votre soutien",
+        "body": """Merci {pseudo} de soutenir la démarche Ianua.
+
+Pour confirmer votre signature, cliquez ici :
+{confirm_url}
+
+Ce lien est valable 72 heures.
+
+— Ianua · ianua.world""",
+    },
+    "en": {
+        "subject": "Ianua — Confirm your support",
+        "body": """Thank you {pseudo} for supporting the Ianua initiative.
+
+To confirm your signature, click here:
+{confirm_url}
+
+This link is valid for 72 hours.
+
+— Ianua · ianua.world""",
+    },
+    "es": {
+        "subject": "Ianua — Confirme su apoyo",
+        "body": """Gracias {pseudo} por apoyar la iniciativa Ianua.
+
+Para confirmar su firma, haga clic aquí:
+{confirm_url}
+
+Este enlace es válido durante 72 horas.
+
+— Ianua · ianua.world""",
+    },
+}
+
+
+async def send_signature_confirmation(email: str, pseudo: str, token: str, lang: str = "fr") -> bool:
+    if lang not in SIGNATURE_TEMPLATES:
+        lang = "en"
+
+    confirm_url = f"{API_URL}/signatures/confirm/{token}"
+
+    template = SIGNATURE_TEMPLATES[lang]
+    body = template["body"].format(confirm_url=confirm_url, pseudo=pseudo)
+
+    msg = MIMEMultipart("alternative")
+    msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
+    msg["To"] = email
+    msg["Subject"] = template["subject"]
+    msg.attach(MIMEText(body, "plain", "utf-8"))
+
+    try:
+        await aiosmtplib.send(
+            msg,
+            hostname=SMTP_HOST,
+            port=SMTP_PORT,
+            username=SMTP_USER,
+            password=SMTP_PASS,
+            start_tls=True,
+        )
+        return True
+    except Exception as e:
+        print(f"[EMAIL ERROR] {e}")
+        return False

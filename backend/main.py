@@ -18,8 +18,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from database import get_db, engine, Base, IS_SQLITE, create_tables_sync
-from models import Subscriber, Comment, Reaction, Amendment, AmendmentVote
-from email_service import send_confirmation_email
+from models import Subscriber, Comment, Reaction, Amendment, AmendmentVote, Signature
+from email_service import send_confirmation_email, send_signature_confirmation
 
 # ── App ──────────────────────────────────────────
 app = FastAPI(title="Ianua API", version="1.0.0")
@@ -80,6 +80,12 @@ class CommentRequest(BaseModel):
 class ReactionRequest(BaseModel):
     comment_id: int
     reaction_type: str
+
+
+class SignatureRequest(BaseModel):
+    pseudo: str
+    email: EmailStr
+    lang: str = "fr"
 
 
 # ── Startup ──────────────────────────────────────
@@ -456,6 +462,105 @@ async def governance_stats(db: AsyncSession = Depends(get_db)):
         "amendments_ratified": ratified.scalar() or 0,
         "amendments_deliberation": deliberation.scalar() or 0,
         "last_updated": "2026-03-10",
+    }
+
+
+# ── SIGNATURES — Global support ──────────────────
+
+@app.get("/signatures/count")
+async def signatures_count(db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(func.count()).select_from(Signature).where(Signature.confirmed == True)
+    )
+    return {"count": result.scalar() or 0}
+
+
+@app.post("/signatures")
+@limiter.limit("3/day", key_func=get_remote_address)
+async def post_signature(
+    body: SignatureRequest, request: Request, db: AsyncSession = Depends(get_db)
+):
+    if not body.pseudo.strip():
+        raise HTTPException(status_code=400, detail="Pseudo required")
+    if len(body.pseudo.strip()) > 100:
+        raise HTTPException(status_code=400, detail="Pseudo too long (max 100)")
+
+    lang = body.lang if body.lang in ("fr", "en", "es") else "fr"
+
+    # Check if email already used
+    result = await db.execute(
+        select(Signature).where(Signature.email == body.email)
+    )
+    existing = result.scalar_one_or_none()
+
+    if existing and existing.confirmed:
+        # Already signed — don't reveal, return ok
+        return {"message": "ok"}
+
+    if existing and not existing.confirmed:
+        # Resend with new token
+        token = uuid.uuid4().hex
+        existing.token = token
+        existing.pseudo = body.pseudo.strip()
+        existing.lang = lang
+        await db.commit()
+        await send_signature_confirmation(body.email, body.pseudo.strip(), token, lang)
+        return {"message": "ok"}
+
+    # New signature
+    token = uuid.uuid4().hex
+    sig = Signature(
+        pseudo=body.pseudo.strip(),
+        email=body.email,
+        lang=lang,
+        token=token,
+    )
+    db.add(sig)
+    await db.commit()
+    await send_signature_confirmation(body.email, body.pseudo.strip(), token, lang)
+    return {"message": "ok"}
+
+
+@app.get("/signatures/confirm/{token}")
+async def confirm_signature(token: str, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Signature).where(Signature.token == token)
+    )
+    sig = result.scalar_one_or_none()
+
+    if not sig:
+        return RedirectResponse(url=f"{BASE_URL}/confirmed.html?type=signature&error=invalid")
+
+    # Check 72h expiry
+    if sig.created_at:
+        created = sig.created_at
+        if created.tzinfo is None:
+            created = created.replace(tzinfo=timezone.utc)
+        if datetime.utcnow() - created > timedelta(hours=72):
+            return RedirectResponse(url=f"{BASE_URL}/confirmed.html?type=signature&lang={sig.lang}&error=expired")
+
+    sig.confirmed = True
+    sig.confirmed_at = datetime.utcnow()
+    await db.commit()
+
+    return RedirectResponse(url=f"{BASE_URL}/confirmed.html?type=signature&lang={sig.lang}")
+
+
+@app.get("/signatures/public")
+async def signatures_public(db: AsyncSession = Depends(get_db)):
+    """Return list of confirmed signatures (pseudo + date only, no emails)."""
+    result = await db.execute(
+        select(Signature.pseudo, Signature.confirmed_at)
+        .where(Signature.confirmed == True)
+        .order_by(Signature.confirmed_at.desc())
+        .limit(100)
+    )
+    rows = result.all()
+    return {
+        "signatures": [
+            {"pseudo": r.pseudo, "confirmed_at": r.confirmed_at.isoformat() if r.confirmed_at else None}
+            for r in rows
+        ]
     }
 
 

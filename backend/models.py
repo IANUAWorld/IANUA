@@ -100,6 +100,21 @@ class Amendment(Base):
     text_after_es = Column(Text, nullable=True)
 
 
+# ── Signatures — Soutien global à la démarche ────────────────────────
+
+class Signature(Base):
+    __tablename__ = "signatures"
+
+    id = Column(Integer, primary_key=True, index=True)
+    pseudo = Column(String(100), nullable=False)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    lang = Column(String(5), default="fr")
+    token = Column(String(64), unique=True)
+    confirmed = Column(Boolean, default=False)
+    created_at = Column(DateTime, server_default=func.now())
+    confirmed_at = Column(DateTime, nullable=True)
+
+
 class AmendmentVote(Base):
     __tablename__ = "amendment_votes"
 

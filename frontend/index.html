@@ -1117,6 +1117,7 @@
       <li><a href="/gouvernance" data-fr="Gouvernance" data-en="Governance" data-es="Gobernanza">Gouvernance</a></li>
       <li><a href="#roadmap">Roadmap</a></li>
       <li><a href="#rejoindre">Rejoindre</a></li>
+      <li><a href="#signer" data-fr="Signer" data-en="Sign" data-es="Firmar">Signer</a></li>
     </ul>
     <div class="lang-switcher">
       <button class="lang-btn active" onclick="setLang('fr')">FR</button>
@@ -1483,6 +1484,34 @@ Source  : ianua.world</pre>
       </div>
     </div>
   </section>
+
+  <!-- SIGNER LA DÉMARCHE -->
+  <section class="section" id="signer" style="padding:4rem 2rem;text-align:center;">
+    <div style="max-width:600px;margin:0 auto;">
+      <div class="section-label" data-fr="Signer" data-en="Sign" data-es="Firmar">Signer</div>
+      <h2 class="section-title" style="font-size:1.6rem;margin-bottom:0.8rem;" data-fr="Je soutiens la démarche Ianua" data-en="I support the Ianua initiative" data-es="Apoyo la iniciativa Ianua">Je soutiens la démarche Ianua</h2>
+      <p class="section-body" style="font-size:0.95rem;margin-bottom:2rem;" data-fr="Pas un vote. Pas un like. Un acte. Vous avez lu, vous adhérez à la direction. Votre signature est publique — votre email reste privé." data-en="Not a vote. Not a like. An act. You have read, you support the direction. Your signature is public — your email stays private." data-es="No es un voto. No es un like. Un acto. Ha leído, apoya la dirección. Su firma es pública — su email permanece privado.">Pas un vote. Pas un like. Un acte. Vous avez lu, vous adhérez à la direction. Votre signature est publique — votre email reste privé.</p>
+
+      <div id="signature-counter" style="font-family:'Cinzel',serif;font-size:2.2rem;font-weight:600;color:var(--gold);margin-bottom:1.5rem;display:none;">
+        <span id="signature-count">0</span>
+        <span style="font-size:0.9rem;color:var(--grey);display:block;font-family:'Source Sans 3',sans-serif;font-weight:300;margin-top:0.3rem;" data-fr="signatures" data-en="signatures" data-es="firmas">signatures</span>
+      </div>
+
+      <div id="signature-form" style="display:flex;flex-direction:column;gap:0.6rem;max-width:400px;margin:0 auto;">
+        <input type="text" id="sig-pseudo" maxlength="100" placeholder="Votre nom ou pseudo" style="padding:0.8rem 1rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-family:'Source Sans 3',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" />
+        <input type="email" id="sig-email" placeholder="votre@email.com" style="padding:0.8rem 1rem;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:var(--white);font-family:'Source Sans 3',sans-serif;font-size:0.9rem;outline:none;transition:border-color 0.3s;" onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'" />
+        <button onclick="submitSignature()" style="padding:0.8rem;background:var(--gold);color:var(--dark);font-family:'Cinzel',serif;font-size:0.85rem;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;border:none;cursor:pointer;transition:background 0.3s;" onmouseover="this.style.background='var(--gold-light)'" onmouseout="this.style.background='var(--gold)'" data-fr="Signer" data-en="Sign" data-es="Firmar">Signer</button>
+      </div>
+      <p id="sig-message" style="color:var(--gold);font-size:0.9rem;margin-top:1rem;min-height:1.5rem;"></p>
+
+      <div id="signatures-list" style="margin-top:2rem;display:none;">
+        <div style="width:60px;height:1px;background:var(--gold);margin:0 auto 1.5rem;opacity:0.3;"></div>
+        <div id="signatures-names" style="font-size:0.85rem;color:var(--grey);line-height:2;"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="gold-divider"></div>
 
   <!-- FOOTER -->
   <footer>
@@ -1891,6 +1920,81 @@ Source  : ianua.world</pre>
       el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
       observer.observe(el);
     });
+
+    // ── SIGNATURES ──────────────────────────────
+    async function loadSignatureCount() {
+      try {
+        const res = await fetch(`${API_BASE}/signatures/count`);
+        const data = await res.json();
+        if (data.count > 0) {
+          document.getElementById('signature-count').textContent = data.count;
+          document.getElementById('signature-counter').style.display = '';
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadSignaturesList() {
+      try {
+        const res = await fetch(`${API_BASE}/signatures/public`);
+        const data = await res.json();
+        if (data.signatures && data.signatures.length > 0) {
+          const list = document.getElementById('signatures-list');
+          const names = document.getElementById('signatures-names');
+          names.innerHTML = data.signatures.map(s => s.pseudo).join(' · ');
+          list.style.display = '';
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    async function submitSignature() {
+      const pseudo = document.getElementById('sig-pseudo').value.trim();
+      const email = document.getElementById('sig-email').value.trim();
+      const msgEl = document.getElementById('sig-message');
+
+      if (!pseudo || !email) {
+        const msgs = { fr: 'Pseudo et email requis.', en: 'Name and email required.', es: 'Nombre y email requeridos.' };
+        msgEl.textContent = msgs[currentLang];
+        msgEl.style.color = '#CA2E2E';
+        return;
+      }
+
+      const btn = document.querySelector('#signature-form button');
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+
+      try {
+        const res = await fetch(`${API_BASE}/signatures`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pseudo, email, lang: currentLang }),
+        });
+
+        if (res.status === 429) {
+          msgEl.textContent = { fr: 'Trop de tentatives.', en: 'Too many attempts.', es: 'Demasiados intentos.' }[currentLang];
+          msgEl.style.color = '#CA2E2E';
+          return;
+        }
+
+        const msgs = {
+          fr: 'Merci ! Un email de confirmation vous a été envoyé.',
+          en: 'Thank you! A confirmation email has been sent.',
+          es: '¡Gracias! Se ha enviado un email de confirmación.'
+        };
+        msgEl.textContent = msgs[currentLang];
+        msgEl.style.color = 'var(--gold)';
+        document.getElementById('sig-pseudo').value = '';
+        document.getElementById('sig-email').value = '';
+      } catch (e) {
+        msgEl.textContent = { fr: 'Erreur de connexion.', en: 'Connection error.', es: 'Error de conexión.' }[currentLang];
+        msgEl.style.color = '#CA2E2E';
+      } finally {
+        btn.disabled = false;
+        btn.style.opacity = '1';
+      }
+    }
+
+    loadSignatureCount();
+    loadSignaturesList();
   </script>
 
 </body>
