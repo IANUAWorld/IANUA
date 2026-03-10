@@ -948,6 +948,38 @@
     }
 
     .comment-form button:hover { background: var(--gold-light); }
+    .comment-form button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .form-loader {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+    }
+    .form-loader .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(201,168,76,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .form-success {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.2rem;
+      background: rgba(46,202,140,0.08);
+      border: 1px solid rgba(46,202,140,0.25);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.85rem;
+      color: var(--green);
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
     .form-note {
       font-family: 'Source Sans 3', sans-serif;
@@ -1620,7 +1652,37 @@ Source  : ianua.world</pre>
 
       if (!name || !content) return;
 
+      const btn = document.querySelector(`#forum-form-${principleId} .comment-form button`);
+      const msgEl = document.getElementById(`form-message-${principleId}`);
+      const formPanel = document.getElementById(`forum-form-${principleId}`);
+
+      /* — Loader state — */
+      const btnOriginal = btn.textContent;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="form-loader"><span class="spinner"></span></span>';
+      msgEl.textContent = '';
+      msgEl.className = 'form-message';
+
+      const msgs = {
+        fr: 'Commentaire bien envoyé — il sera publié après modération.',
+        en: 'Comment sent — it will be published after moderation.',
+        es: 'Comentario enviado — será publicado tras la moderación.'
+      };
+      const errMsgs = {
+        fr: 'Limite atteinte (3 commentaires par 24h).',
+        en: 'Limit reached (3 comments per 24h).',
+        es: 'Límite alcanzado (3 comentarios por 24h).'
+      };
+      const timeoutMsgs = {
+        fr: 'Le serveur ne répond pas. Réessayez plus tard.',
+        en: 'Server not responding. Please try again later.',
+        es: 'El servidor no responde. Inténtelo más tarde.'
+      };
+
       try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 12000);
+
         const res = await fetch(`${API_BASE}/comments`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1630,31 +1692,38 @@ Source  : ianua.world</pre>
             author_country: country,
             content: content,
             lang: currentLang
-          })
+          }),
+          signal: controller.signal
         });
+        clearTimeout(timeout);
 
-        const msgs = {
-          fr: 'Merci — votre commentaire sera publié après modération.',
-          en: 'Thank you — your comment will be published after moderation.',
-          es: 'Gracias — su comentario será publicado tras la moderación.'
-        };
-        const errMsgs = {
-          fr: 'Limite atteinte (3 commentaires par 24h).',
-          en: 'Limit reached (3 comments per 24h).',
-          es: 'Límite alcanzado (3 comentarios por 24h).'
-        };
-
-        const msgEl = document.getElementById(`form-message-${principleId}`);
         if (res.ok) {
-          msgEl.textContent = msgs[currentLang];
+          /* — Success notification — */
           document.getElementById(`name-${principleId}`).value = '';
           document.getElementById(`country-${principleId}`).value = '';
           document.getElementById(`content-${principleId}`).value = '';
+          msgEl.innerHTML = `<span class="form-success">✓ ${msgs[currentLang]}</span>`;
+          /* Auto-close form after 2.5s */
+          setTimeout(() => {
+            formPanel.style.display = 'none';
+            msgEl.textContent = '';
+            msgEl.className = 'form-message';
+          }, 2500);
         } else if (res.status === 429) {
           msgEl.textContent = errMsgs[currentLang];
+        } else {
+          msgEl.textContent = timeoutMsgs[currentLang];
         }
       } catch (e) {
-        console.error(e);
+        if (e.name === 'AbortError') {
+          msgEl.textContent = timeoutMsgs[currentLang];
+        } else {
+          msgEl.textContent = timeoutMsgs[currentLang];
+          console.error(e);
+        }
+      } finally {
+        btn.disabled = false;
+        btn.textContent = btnOriginal;
       }
     }
 
