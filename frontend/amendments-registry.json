@@ -1,6 +1,6 @@
 {
   "registry_version": "1.0",
-  "charte_version": "v2.2",
+  "charte_version": "v2.3",
   "last_updated": "2026-03-10",
   "governance_phases": [
     {
@@ -128,6 +128,56 @@
           "IV": "souverainete", "V": "refus", "VI": "proactive",
           "VII": "agentique", "VIII": "deliberation"
         }
+      }
+    },
+    {
+      "code": "A003",
+      "date": "2026-03-10",
+      "principle_id": "transparence",
+      "target": "principle_body",
+      "type": "addition",
+      "source_type": "founder",
+      "proposed_by": "Max",
+      "phase": "phase_1",
+      "status": "ratified",
+      "ratified_by": "Max",
+      "ratified_at": "2026-03-10",
+      "charte_version_after": "v2.3",
+      "inspiration": "Analyse comparative vs UNESCO/OCDE/EU AI Act — Max/Claude",
+      "motivation": {
+        "fr": "Les deepfakes et la desinformation IA constituent une lacune majeure face aux textes institutionnels. La distinction fiction assumee / tromperie deliberee est centrale.",
+        "en": "Deepfakes and AI disinformation represent a major gap vs institutional texts. The distinction between assumed fiction and deliberate deception is central.",
+        "es": "Los deepfakes y la desinformacion IA representan una laguna mayor frente a los textos institucionales."
+      },
+      "text_added": {
+        "fr": "La transparence s'etend a l'integrite du reel lui-meme. Produire, diffuser ou amplifier des contenus qui falsifient deliberement la realite trahit le pacte a sa racine. Une IA peut imiter, simuler, creer. Elle ne peut pas mentir sur ce qui est reel.",
+        "en": "Transparency extends to the integrity of reality itself. An AI can imitate, simulate, create. It cannot lie about what is real.",
+        "es": "La transparencia se extiende a la integridad de la realidad. Una IA puede imitar, simular, crear. No puede mentir sobre lo que es real."
+      }
+    },
+    {
+      "code": "A003-R",
+      "date": "2026-03-10",
+      "principle_id": null,
+      "target": "redline",
+      "type": "new_redline",
+      "source_type": "founder",
+      "proposed_by": "Max",
+      "phase": "phase_1",
+      "status": "ratified",
+      "ratified_by": "Max",
+      "ratified_at": "2026-03-10",
+      "charte_version_after": "v2.3",
+      "linked_to": "A003",
+      "motivation": {
+        "fr": "Complement operationnel de A003.",
+        "en": "Operational complement to A003.",
+        "es": "Complemento operacional de A003."
+      },
+      "text_added": {
+        "fr": "Falsification du reel — Utiliser l'IA pour produire ou amplifier des contenus qui usurpent l'identite d'une personne reelle, fabriquent des evenements qui n'ont pas eu lieu, ou manipulent deliberement la perception collective de la realite. La creation fictive assumee n'est pas concernee — c'est la tromperie qui est la ligne rouge.",
+        "en": "Falsification of reality — Using AI to produce or amplify content that usurps the identity of a real person, fabricates events that did not occur, or deliberately manipulates the collective perception of reality. Assumed fictional creation is not concerned — deception is the red line.",
+        "es": "Falsificacion de la realidad — Usar la IA para producir contenidos que usurpan la identidad de una persona real o fabrican eventos que no ocurrieron. La creacion ficticia asumida no esta concernida — el engano es la linea roja."
       }
     }
   ]
