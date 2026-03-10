@@ -47,7 +47,15 @@ def upgrade() -> None:
             f"UPDATE comments SET principle_id = '{new_id}' WHERE principle_id = '{old_id}'"
         )
 
-    # Rename principle_ids in amendments table (already VARCHAR(10) from 002b)
+    # Widen amendments.principle_id from VARCHAR(10) to VARCHAR(20)
+    op.alter_column(
+        "amendments", "principle_id",
+        type_=sa.String(20),
+        existing_type=sa.String(10),
+        existing_nullable=True,
+    )
+
+    # Rename principle_ids in amendments table
     for old_id, new_id in MAPPING.items():
         op.execute(
             f"UPDATE amendments SET principle_id = '{new_id}' WHERE principle_id = '{old_id}'"
@@ -63,6 +71,13 @@ def downgrade() -> None:
         op.execute(
             f"UPDATE amendments SET principle_id = '{old_id}' WHERE principle_id = '{new_id}'"
         )
+
+    op.alter_column(
+        "amendments", "principle_id",
+        type_=sa.String(10),
+        existing_type=sa.String(20),
+        existing_nullable=True,
+    )
 
     op.alter_column(
         "comments", "principle_id",

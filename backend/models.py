@@ -56,7 +56,7 @@ class Amendment(Base):
     code = Column(String(10), unique=True, nullable=False, index=True)  # "A001", "A001-R"
 
     # Cible
-    principle_id = Column(String(10), nullable=True)                     # "I"..."VIII", NULL si global
+    principle_id = Column(String(20), nullable=True)                     # semantic id, NULL si global
     target = Column(String(20), nullable=False)                          # principle_body / redline / global
     amendment_type = Column(String(20), nullable=False)                  # addition / modification / suppression / new_redline
 

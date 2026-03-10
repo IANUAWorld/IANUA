@@ -29,7 +29,7 @@ def upgrade() -> None:
         sa.Column("code", sa.String(10), unique=True, nullable=False),
 
         # Cible
-        sa.Column("principle_id", sa.String(10), nullable=True),
+        sa.Column("principle_id", sa.String(20), nullable=True),
         sa.Column("target", sa.String(20), nullable=False),
         sa.Column("amendment_type", sa.String(20), nullable=False),
 
