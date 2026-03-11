@@ -1608,31 +1608,49 @@ Source  : ianua.world</pre>
 
     // ── NEWSLETTER ────────────────────────
     async function handleSubmit() {
-      const email = document.getElementById('emailInput').value;
-      if (!email || !email.includes('@')) return;
+      const email = document.getElementById('emailInput').value.trim();
+      const msgEl = document.getElementById('cta-message');
+
+      if (!email || !email.includes('@')) {
+        msgEl.textContent = { fr: 'Veuillez entrer un email valide.', en: 'Please enter a valid email.', es: 'Por favor ingrese un email válido.' }[currentLang];
+        msgEl.style.color = '#CA2E2E';
+        return;
+      }
 
       const btn = document.querySelector('.cta-submit');
       btn.disabled = true;
+      btn.style.opacity = '0.5';
 
       try {
-        await fetch(`${API_BASE}/subscribe`, {
+        const res = await fetch(`${API_BASE}/subscribe`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, lang: currentLang })
         });
 
-        const msgs = {
-          fr: 'Merci — vérifiez votre boîte mail pour confirmer votre inscription.',
-          en: 'Thank you — check your inbox to confirm your subscription.',
-          es: 'Gracias — revise su correo para confirmar su suscripción.'
-        };
+        if (res.status === 429) {
+          msgEl.textContent = { fr: 'Trop de tentatives. Réessayez plus tard.', en: 'Too many attempts. Try again later.', es: 'Demasiados intentos. Inténtelo más tarde.' }[currentLang];
+          msgEl.style.color = '#CA2E2E';
+          return;
+        }
 
-        document.getElementById('cta-message').textContent = msgs[currentLang];
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          msgEl.textContent = data.detail || { fr: 'Erreur. Réessayez.', en: 'Error. Try again.', es: 'Error. Inténtelo de nuevo.' }[currentLang];
+          msgEl.style.color = '#CA2E2E';
+          return;
+        }
+
+        msgEl.textContent = { fr: 'Merci — vérifiez votre boîte mail pour confirmer votre inscription.', en: 'Thank you — check your inbox to confirm your subscription.', es: 'Gracias — revise su correo para confirmar su suscripción.' }[currentLang];
+        msgEl.style.color = 'var(--gold)';
         document.getElementById('emailInput').value = '';
       } catch (e) {
         console.error(e);
+        msgEl.textContent = { fr: 'Erreur de connexion au serveur.', en: 'Server connection error.', es: 'Error de conexión al servidor.' }[currentLang];
+        msgEl.style.color = '#CA2E2E';
       } finally {
         btn.disabled = false;
+        btn.style.opacity = '1';
       }
     }
 
