@@ -1,5 +1,7 @@
 import os
+import re
 import uuid
+import hmac
 import hashlib
 from datetime import datetime, timedelta, timezone
 
@@ -34,15 +36,40 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
 
 
 # ── CORS ─────────────────────────────────────────
+ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "https://ianua.world,https://www.ianua.world"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST", "PUT"],
+    allow_headers=["Content-Type", "X-Admin-Key"],
 )
 
+
+# ── Security headers ─────────────────────────────
+from starlette.middleware.base import BaseHTTPMiddleware
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
+
 # ── Config ───────────────────────────────────────
-ADMIN_KEY = os.getenv("ADMIN_KEY", "changeme_strong_random_key")
+ADMIN_KEY = os.getenv("ADMIN_KEY", "")
+if not ADMIN_KEY:
+    import warnings
+    warnings.warn("ADMIN_KEY not set — admin endpoints will reject all requests")
 BASE_URL = os.getenv("BASE_URL", "https://ianua.world")
 VALID_PRINCIPLES = {
     "bienveillance", "transparence", "reciprocite", "souverainete",
@@ -59,8 +86,13 @@ def get_fingerprint(request: Request) -> str:
 
 
 def verify_admin(x_admin_key: str = Header(None)):
-    if not x_admin_key or x_admin_key != ADMIN_KEY:
+    if not x_admin_key or not ADMIN_KEY or not hmac.compare_digest(x_admin_key, ADMIN_KEY):
         raise HTTPException(status_code=403, detail="Forbidden")
+
+
+def strip_html(text: str) -> str:
+    """Remove HTML tags from user input (defense-in-depth)."""
+    return re.sub(r'<[^>]+>', '', text)
 
 
 # ── Pydantic models ─────────────────────────────
@@ -118,7 +150,8 @@ async def stats(db: AsyncSession = Depends(get_db)):
 
 
 @app.post("/subscribe")
-async def subscribe(body: SubscribeRequest, db: AsyncSession = Depends(get_db)):
+@limiter.limit("5/hour", key_func=get_remote_address)
+async def subscribe(body: SubscribeRequest, request: Request, db: AsyncSession = Depends(get_db)):
     lang = body.lang if body.lang in ("fr", "en", "es") else "en"
 
     # Check if already confirmed
@@ -256,10 +289,17 @@ async def post_comment(
     if body.principle_id not in VALID_PRINCIPLES:
         raise HTTPException(status_code=400, detail="Invalid principle_id")
 
-    if not body.author_name.strip() or not body.content.strip():
+    author_name = strip_html(body.author_name.strip())
+    content = strip_html(body.content.strip())
+    author_country = strip_html(body.author_country.strip()) if body.author_country else None
+
+    if not author_name or not content:
         raise HTTPException(status_code=400, detail="Name and content required")
 
-    if len(body.content) > 2000:
+    if len(author_name) > 100:
+        raise HTTPException(status_code=400, detail="Name too long (max 100)")
+
+    if len(content) > 2000:
         raise HTTPException(status_code=400, detail="Content too long (max 2000)")
 
     fingerprint = get_fingerprint(request)
@@ -280,9 +320,9 @@ async def post_comment(
 
     comment = Comment(
         principle_id=body.principle_id,
-        author_name=body.author_name.strip(),
-        author_country=body.author_country.strip() if body.author_country else None,
-        content=body.content.strip(),
+        author_name=author_name,
+        author_country=author_country,
+        content=content,
         lang=lang,
         fingerprint=fingerprint,
     )
@@ -356,11 +396,15 @@ async def list_amendments(
     db: AsyncSession = Depends(get_db),
 ):
     """List all public amendments, optionally filtered by status or principle."""
-    stmt = select(Amendment).where(
-        Amendment.status.in_(["deliberation", "accepted", "ratified", "rejected"])
-    )
+    VALID_PUBLIC_STATUSES = {"deliberation", "accepted", "ratified", "rejected"}
+
+    stmt = select(Amendment)
     if status:
-        stmt = select(Amendment).where(Amendment.status == status)
+        if status not in VALID_PUBLIC_STATUSES:
+            raise HTTPException(status_code=400, detail="Invalid status filter")
+        stmt = stmt.where(Amendment.status == status)
+    else:
+        stmt = stmt.where(Amendment.status.in_(VALID_PUBLIC_STATUSES))
     if principle_id:
         stmt = stmt.where(Amendment.principle_id == principle_id)
     stmt = stmt.order_by(Amendment.proposed_at.desc())
@@ -480,9 +524,10 @@ async def signatures_count(db: AsyncSession = Depends(get_db)):
 async def post_signature(
     body: SignatureRequest, request: Request, db: AsyncSession = Depends(get_db)
 ):
-    if not body.pseudo.strip():
+    pseudo = strip_html(body.pseudo.strip())
+    if not pseudo:
         raise HTTPException(status_code=400, detail="Pseudo required")
-    if len(body.pseudo.strip()) > 100:
+    if len(pseudo) > 100:
         raise HTTPException(status_code=400, detail="Pseudo too long (max 100)")
 
     lang = body.lang if body.lang in ("fr", "en", "es") else "fr"
@@ -501,23 +546,23 @@ async def post_signature(
         # Resend with new token
         token = uuid.uuid4().hex
         existing.token = token
-        existing.pseudo = body.pseudo.strip()
+        existing.pseudo = pseudo
         existing.lang = lang
         await db.commit()
-        await send_signature_confirmation(body.email, body.pseudo.strip(), token, lang)
+        await send_signature_confirmation(body.email, pseudo, token, lang)
         return {"message": "ok"}
 
     # New signature
     token = uuid.uuid4().hex
     sig = Signature(
-        pseudo=body.pseudo.strip(),
+        pseudo=pseudo,
         email=body.email,
         lang=lang,
         token=token,
     )
     db.add(sig)
     await db.commit()
-    await send_signature_confirmation(body.email, body.pseudo.strip(), token, lang)
+    await send_signature_confirmation(body.email, pseudo, token, lang)
     return {"message": "ok"}
 
 

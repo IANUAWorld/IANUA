@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /moderation-7x9k2m.html
+
+Sitemap: https://www.ianua.world/sitemap.xml

@@ -1873,16 +1873,17 @@ Source  : ianua.world</pre>
 
     function loadCommunityCounter() {
       fetch(`${API_BASE}/stats`).then(r => r.json()).then(data => {
-        const total = data.subscribers + data.comments;
-        if (total > 0) {
+        const subs = parseInt(data.subscribers, 10) || 0;
+        const cmts = parseInt(data.comments, 10) || 0;
+        if (subs + cmts > 0) {
           const el = document.getElementById('community-counter');
           const text = document.getElementById('counter-text');
           const labels = {
-            fr: `<strong>${data.subscribers}</strong> signataire${data.subscribers > 1 ? 's' : ''} · <strong>${data.comments}</strong> contribution${data.comments > 1 ? 's' : ''}`,
-            en: `<strong>${data.subscribers}</strong> signator${data.subscribers > 1 ? 'ies' : 'y'} · <strong>${data.comments}</strong> contribution${data.comments > 1 ? 's' : ''}`,
-            es: `<strong>${data.subscribers}</strong> firmante${data.subscribers > 1 ? 's' : ''} · <strong>${data.comments}</strong> contribuci${data.comments > 1 ? 'ones' : 'ón'}`
+            fr: `${subs} signataire${subs > 1 ? 's' : ''} · ${cmts} contribution${cmts > 1 ? 's' : ''}`,
+            en: `${subs} signator${subs > 1 ? 'ies' : 'y'} · ${cmts} contribution${cmts > 1 ? 's' : ''}`,
+            es: `${subs} firmante${subs > 1 ? 's' : ''} · ${cmts} contribuci${cmts > 1 ? 'ones' : 'ón'}`
           };
-          text.innerHTML = labels[currentLang] || labels.fr;
+          text.textContent = labels[currentLang] || labels.fr;
           el.style.display = 'block';
         }
       }).catch(() => {});
@@ -1940,7 +1941,7 @@ Source  : ianua.world</pre>
         if (data.signatures && data.signatures.length > 0) {
           const list = document.getElementById('signatures-list');
           const names = document.getElementById('signatures-names');
-          names.innerHTML = data.signatures.map(s => s.pseudo).join(' · ');
+          names.textContent = data.signatures.map(s => s.pseudo).join(' · ');
           list.style.display = '';
         }
       } catch (e) { console.error(e); }
