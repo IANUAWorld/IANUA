@@ -88,6 +88,25 @@
 
     .nav-links a:hover { color: var(--gold); }
 
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 101;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--gold);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.active span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
     .lang-switcher { display: flex; gap: 0.5rem; }
 
     .lang-btn {
@@ -1092,7 +1111,22 @@
     /* ── RESPONSIVE ──────────────────────── */
     @media (max-width: 768px) {
       nav { padding: 1rem 1.5rem; }
-      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .nav-links {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(13,13,26,0.97);
+        backdrop-filter: blur(16px);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        z-index: 99;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 1.1rem; letter-spacing: 0.2em; }
+      .lang-switcher { z-index: 101; }
       .principle-item { grid-template-columns: 1fr; gap: 1rem; }
       .principle-num { font-size: 2rem; }
       .voices { grid-template-columns: 1fr; }
@@ -1110,6 +1144,9 @@
   <!-- NAV -->
   <nav>
     <a href="#" class="nav-logo">IANUA</a>
+    <div class="nav-hamburger" onclick="toggleMobileNav()">
+      <span></span><span></span><span></span>
+    </div>
     <ul class="nav-links">
       <li><a href="#genese">Genèse</a></li>
       <li><a href="#principes">Principes</a></li>
@@ -1533,6 +1570,18 @@ Source  : ianua.world</pre>
     const commentsCache = {};
     const COMMENTS_PER_PAGE = 10;
     const commentsShown = {};
+
+    // ── MOBILE NAV ───────────────────────
+    function toggleMobileNav() {
+      document.querySelector('.nav-hamburger').classList.toggle('active');
+      document.querySelector('.nav-links').classList.toggle('open');
+    }
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.addEventListener('click', () => {
+        document.querySelector('.nav-hamburger').classList.remove('active');
+        document.querySelector('.nav-links').classList.remove('open');
+      });
+    });
 
     // ── LANG ──────────────────────────────
     function setLang(lang) {
