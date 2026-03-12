@@ -142,21 +142,28 @@ async def health():
 @app.get("/debug/email")
 async def debug_email():
     """Temporary debug endpoint — remove after testing"""
-    import aiosmtplib
-    from email_service import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, FROM_EMAIL
+    from email_service import BREVO_API_KEY, FROM_EMAIL, BREVO_SEND_URL
+    import httpx
     result = {
-        "smtp_host": SMTP_HOST,
-        "smtp_port": SMTP_PORT,
-        "smtp_user": SMTP_USER[:10] + "..." if SMTP_USER else "(empty)",
-        "smtp_pass_set": bool(SMTP_PASS),
+        "method": "Brevo HTTP API",
+        "api_key_set": bool(BREVO_API_KEY),
+        "api_key_prefix": BREVO_API_KEY[:8] + "..." if BREVO_API_KEY else "(empty)",
         "from_email": FROM_EMAIL,
+        "brevo_url": BREVO_SEND_URL,
     }
     try:
-        smtp = aiosmtplib.SMTP(hostname=SMTP_HOST, port=SMTP_PORT, start_tls=True)
-        await smtp.connect()
-        await smtp.login(SMTP_USER, SMTP_PASS)
-        await smtp.quit()
-        result["connection"] = "OK"
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            resp = await client.get(
+                "https://api.brevo.com/v3/account",
+                headers={"api-key": BREVO_API_KEY},
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                result["connection"] = "OK"
+                result["account_email"] = data.get("email", "?")
+                result["plan"] = data.get("plan", [{}])[0].get("type", "?") if data.get("plan") else "?"
+            else:
+                result["connection"] = f"FAILED: HTTP {resp.status_code} — {resp.text[:200]}"
     except Exception as e:
         result["connection"] = f"FAILED: {str(e)}"
     return result

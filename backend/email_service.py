@@ -1,15 +1,12 @@
 import os
-import aiosmtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import httpx
 
-SMTP_HOST = os.getenv("BREVO_SMTP_HOST", "smtp-relay.brevo.com")
-SMTP_PORT = int(os.getenv("BREVO_SMTP_PORT", "587"))
-SMTP_USER = os.getenv("BREVO_SMTP_USER", "")
-SMTP_PASS = os.getenv("BREVO_SMTP_PASS", "")
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "ianua@outlook.fr")
 FROM_NAME = os.getenv("FROM_NAME", "Ianua")
 API_URL = os.getenv("API_URL", "https://api.ianua.world")
+
+BREVO_SEND_URL = "https://api.brevo.com/v3/smtp/email"
 
 TEMPLATES = {
     "fr": {
@@ -54,6 +51,40 @@ UNSUBSCRIBE_FOOTER = {
 }
 
 
+async def _send_via_brevo(to_email: str, subject: str, text_content: str) -> bool:
+    """Send email via Brevo HTTP API (port 443, never blocked)."""
+    if not BREVO_API_KEY:
+        print("[EMAIL ERROR] BREVO_API_KEY not set")
+        return False
+
+    payload = {
+        "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
+        "to": [{"email": to_email}],
+        "subject": subject,
+        "textContent": text_content,
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                BREVO_SEND_URL,
+                json=payload,
+                headers={
+                    "api-key": BREVO_API_KEY,
+                    "Content-Type": "application/json",
+                },
+            )
+            if resp.status_code in (200, 201):
+                print(f"[EMAIL OK] Sent to {to_email}")
+                return True
+            else:
+                print(f"[EMAIL ERROR] Brevo {resp.status_code}: {resp.text}")
+                return False
+    except Exception as e:
+        print(f"[EMAIL ERROR] {e}")
+        return False
+
+
 async def send_confirmation_email(email: str, token: str, lang: str = "fr") -> bool:
     if lang not in TEMPLATES:
         lang = "en"
@@ -65,25 +96,7 @@ async def send_confirmation_email(email: str, token: str, lang: str = "fr") -> b
     body = template["body"].format(confirm_url=confirm_url)
     body += UNSUBSCRIBE_FOOTER[lang].format(unsubscribe_url=unsubscribe_url)
 
-    msg = MIMEMultipart("alternative")
-    msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
-    msg["To"] = email
-    msg["Subject"] = template["subject"]
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-
-    try:
-        await aiosmtplib.send(
-            msg,
-            hostname=SMTP_HOST,
-            port=SMTP_PORT,
-            username=SMTP_USER,
-            password=SMTP_PASS,
-            start_tls=True,
-        )
-        return True
-    except Exception as e:
-        print(f"[EMAIL ERROR] {e}")
-        return False
+    return await _send_via_brevo(email, template["subject"], body)
 
 
 # ── Signature confirmation ────────────────────────
@@ -134,22 +147,4 @@ async def send_signature_confirmation(email: str, pseudo: str, token: str, lang:
     template = SIGNATURE_TEMPLATES[lang]
     body = template["body"].format(confirm_url=confirm_url, pseudo=pseudo)
 
-    msg = MIMEMultipart("alternative")
-    msg["From"] = f"{FROM_NAME} <{FROM_EMAIL}>"
-    msg["To"] = email
-    msg["Subject"] = template["subject"]
-    msg.attach(MIMEText(body, "plain", "utf-8"))
-
-    try:
-        await aiosmtplib.send(
-            msg,
-            hostname=SMTP_HOST,
-            port=SMTP_PORT,
-            username=SMTP_USER,
-            password=SMTP_PASS,
-            start_tls=True,
-        )
-        return True
-    except Exception as e:
-        print(f"[EMAIL ERROR] {e}")
-        return False
+    return await _send_via_brevo(email, template["subject"], body)
