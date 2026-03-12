@@ -1565,6 +1565,12 @@ Source  : ianua.world</pre>
   </footer>
 
   <script>
+    window.onerror = function(msg, src, line) {
+      const d = document.createElement('div');
+      d.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:red;color:white;padding:12px;z-index:9999;font-size:14px;';
+      d.textContent = 'JS Error: ' + msg + ' (line ' + line + ')';
+      document.body.appendChild(d);
+    };
     const API_BASE = 'https://api.ianua.world';
     let currentLang = 'fr';
     const commentsCache = {};
@@ -1608,24 +1614,28 @@ Source  : ianua.world</pre>
 
     // ── NEWSLETTER ────────────────────────
     async function handleSubmit() {
-      const email = document.getElementById('emailInput').value.trim();
       const msgEl = document.getElementById('cta-message');
-
-      if (!email || !email.includes('@')) {
-        msgEl.textContent = { fr: 'Veuillez entrer un email valide.', en: 'Please enter a valid email.', es: 'Por favor ingrese un email válido.' }[currentLang];
-        msgEl.style.color = '#CA2E2E';
-        return;
-      }
-
       const btn = document.querySelector('.cta-submit');
+
+      // Feedback immédiat — preuve que le clic fonctionne
+      msgEl.textContent = 'Envoi en cours...';
+      msgEl.style.color = 'var(--gold)';
       btn.disabled = true;
       btn.style.opacity = '0.5';
 
       try {
-        const res = await fetch(`${API_BASE}/subscribe`, {
+        const email = document.getElementById('emailInput').value.trim();
+
+        if (!email || !email.includes('@')) {
+          msgEl.textContent = { fr: 'Veuillez entrer un email valide.', en: 'Please enter a valid email.', es: 'Por favor ingrese un email válido.' }[currentLang];
+          msgEl.style.color = '#CA2E2E';
+          return;
+        }
+
+        const res = await fetch(API_BASE + '/subscribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, lang: currentLang })
+          body: JSON.stringify({ email: email, lang: currentLang })
         });
 
         if (res.status === 429) {
@@ -1635,18 +1645,16 @@ Source  : ianua.world</pre>
         }
 
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          msgEl.textContent = data.detail || { fr: 'Erreur. Réessayez.', en: 'Error. Try again.', es: 'Error. Inténtelo de nuevo.' }[currentLang];
+          msgEl.textContent = 'Erreur serveur (' + res.status + ')';
           msgEl.style.color = '#CA2E2E';
           return;
         }
 
-        msgEl.textContent = { fr: 'Merci — vérifiez votre boîte mail pour confirmer votre inscription.', en: 'Thank you — check your inbox to confirm your subscription.', es: 'Gracias — revise su correo para confirmar su suscripción.' }[currentLang];
+        msgEl.textContent = { fr: 'Merci — vérifiez votre boîte mail pour confirmer.', en: 'Thank you — check your inbox to confirm.', es: 'Gracias — revise su correo para confirmar.' }[currentLang];
         msgEl.style.color = 'var(--gold)';
         document.getElementById('emailInput').value = '';
       } catch (e) {
-        console.error(e);
-        msgEl.textContent = { fr: 'Erreur de connexion au serveur.', en: 'Server connection error.', es: 'Error de conexión al servidor.' }[currentLang];
+        msgEl.textContent = 'Erreur: ' + e.message;
         msgEl.style.color = '#CA2E2E';
       } finally {
         btn.disabled = false;
