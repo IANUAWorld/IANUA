@@ -139,6 +139,29 @@ async def health():
     return {"status": "ok"}
 
 
+@app.get("/debug/email")
+async def debug_email():
+    """Temporary debug endpoint — remove after testing"""
+    import aiosmtplib
+    from email_service import SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, FROM_EMAIL
+    result = {
+        "smtp_host": SMTP_HOST,
+        "smtp_port": SMTP_PORT,
+        "smtp_user": SMTP_USER[:10] + "..." if SMTP_USER else "(empty)",
+        "smtp_pass_set": bool(SMTP_PASS),
+        "from_email": FROM_EMAIL,
+    }
+    try:
+        smtp = aiosmtplib.SMTP(hostname=SMTP_HOST, port=SMTP_PORT, start_tls=True)
+        await smtp.connect()
+        await smtp.login(SMTP_USER, SMTP_PASS)
+        await smtp.quit()
+        result["connection"] = "OK"
+    except Exception as e:
+        result["connection"] = f"FAILED: {str(e)}"
+    return result
+
+
 @app.get("/stats")
 async def stats(db: AsyncSession = Depends(get_db)):
     subscribers = await db.execute(select(func.count()).where(Subscriber.confirmed == True))
