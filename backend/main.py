@@ -142,6 +142,42 @@ async def health():
     return {"status": "ok"}
 
 
+@app.get("/debug/send-test")
+async def debug_send_test():
+    """Temporary: send a real test email and return the full Brevo response."""
+    import httpx as _httpx
+    from email_service import BREVO_API_KEY, FROM_EMAIL, FROM_NAME, BREVO_SEND_URL
+
+    if not BREVO_API_KEY:
+        return {"error": "BREVO_API_KEY not set", "key_prefix": "N/A"}
+
+    payload = {
+        "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
+        "to": [{"email": "mquittet@outlook.fr"}],
+        "subject": "Ianua — Test email diagnostic",
+        "textContent": "Ceci est un email de test. Si vous le recevez, Brevo fonctionne !",
+    }
+
+    try:
+        async with _httpx.AsyncClient(timeout=15.0) as client:
+            resp = await client.post(
+                BREVO_SEND_URL,
+                json=payload,
+                headers={
+                    "api-key": BREVO_API_KEY,
+                    "Content-Type": "application/json",
+                },
+            )
+            return {
+                "status_code": resp.status_code,
+                "response": resp.text,
+                "sender_used": FROM_EMAIL,
+                "api_key_prefix": BREVO_API_KEY[:12] + "...",
+            }
+    except Exception as e:
+        return {"error": str(e)}
+
+
 @app.get("/stats")
 async def stats(db: AsyncSession = Depends(get_db)):
     subscribers = await db.execute(select(func.count()).where(Subscriber.confirmed == True))
