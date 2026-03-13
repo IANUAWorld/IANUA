@@ -136,7 +136,7 @@ async def startup():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "email": "brevo-http-api"}
+    return {"status": "ok", "email": "brevo-http-api", "deploy": 3}
 
 
 @app.get("/debug/email")
