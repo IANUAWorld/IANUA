@@ -142,12 +142,19 @@ async def health():
 @app.get("/debug/email")
 async def debug_email():
     """Temporary debug endpoint — remove after testing"""
-    from email_service import BREVO_API_KEY, FROM_EMAIL, BREVO_SEND_URL
     import httpx
+    # Read DIRECTLY from os.getenv to bypass any caching
+    raw_key = os.getenv("BREVO_API_KEY", "")
+    from email_service import BREVO_API_KEY, FROM_EMAIL, BREVO_SEND_URL
+    # List all BREVO-related env vars
+    brevo_vars = {k: v[:8] + "..." for k, v in os.environ.items() if "BREVO" in k.upper() or "API_KEY" in k.upper()}
     result = {
         "method": "Brevo HTTP API",
         "api_key_set": bool(BREVO_API_KEY),
         "api_key_prefix": BREVO_API_KEY[:8] + "..." if BREVO_API_KEY else "(empty)",
+        "raw_key_set": bool(raw_key),
+        "raw_key_prefix": raw_key[:8] + "..." if raw_key else "(empty)",
+        "brevo_env_vars": brevo_vars,
         "from_email": FROM_EMAIL,
         "brevo_url": BREVO_SEND_URL,
     }
