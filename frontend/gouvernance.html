@@ -419,10 +419,130 @@
     .footer-right p { margin: 0.3rem 0; font-size: 0.8rem; }
     .footer-right a { color: var(--gold); text-decoration: none; }
 
+    /* ── HAMBURGER ──────────────────────── */
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 4px;
+      z-index: 101;
+    }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--gold);
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.active span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── NOT-IANUA SECTION ─────────────── */
+    .not-ianua-list {
+      list-style: none;
+      padding: 0;
+    }
+    .not-ianua-list li {
+      padding: 0.8rem 0 0.8rem 1.5rem;
+      position: relative;
+      color: var(--light);
+      font-size: 0.95rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .not-ianua-list li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--gold);
+    }
+
+    /* ── AMENDMENT FORUM ──────────────── */
+    .amendment-forum { margin-top: 1.5rem; }
+    .amendment-forum h4 {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+    .forum-comment-card {
+      padding: 1rem;
+      background: var(--dark3);
+      border-left: 2px solid var(--gold-dim);
+      margin-bottom: 0.8rem;
+    }
+    .forum-comment-author {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.8rem;
+      color: var(--gold);
+      margin-bottom: 0.3rem;
+    }
+    .forum-comment-text {
+      font-size: 0.9rem;
+      color: var(--light);
+      line-height: 1.6;
+    }
+    .forum-form {
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .forum-form input, .forum-form textarea {
+      padding: 0.7rem 1rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      border-radius: 2px;
+    }
+    .forum-form input:focus, .forum-form textarea:focus { border-color: var(--gold); }
+    .forum-form textarea { min-height: 80px; resize: vertical; }
+    .forum-form button {
+      align-self: flex-start;
+      padding: 0.6rem 1.5rem;
+      background: var(--gold);
+      color: var(--dark);
+      border: none;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .forum-form button:hover { background: var(--gold-light); }
+    .forum-msg {
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      min-height: 1.2rem;
+    }
+
     /* ── RESPONSIVE ──────────────────────── */
     @media (max-width: 768px) {
       nav { padding: 1rem 1.5rem; }
-      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .nav-links {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(13,13,26,0.97);
+        backdrop-filter: blur(16px);
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        z-index: 99;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 1.1rem; letter-spacing: 0.2em; }
+      .lang-switcher { z-index: 101; }
       .page-header { padding: 7rem 1.5rem 3rem; }
       .page-header h1 { font-size: 1.8rem; }
       .gov-section { padding: 0 1.5rem; }
@@ -440,6 +560,9 @@
   <!-- NAV -->
   <nav>
     <a href="/" class="nav-logo">IANUA</a>
+    <div class="nav-hamburger" onclick="toggleMobileNav()">
+      <span></span><span></span><span></span>
+    </div>
     <ul class="nav-links">
       <li><a href="/#principes" data-fr="Principes" data-en="Principles" data-es="Principios">Principes</a></li>
       <li><a href="/#pacte" data-fr="Lignes rouges" data-en="Red lines" data-es="Lineas rojas">Lignes rouges</a></li>
@@ -509,17 +632,27 @@
     <div class="timeline" id="timeline"></div>
   </section>
 
-  <!-- SECTION 3 — AMENDEMENTS EN DELIBERATION -->
-  <section class="gov-section" id="deliberation">
-    <h2 data-fr="Amendements en deliberation" data-en="Amendments in deliberation" data-es="Enmiendas en deliberacion">Amendements en deliberation</h2>
-    <div id="deliberation-content">
-      <div class="deliberation-empty" data-fr="Aucun amendement en deliberation." data-en="No amendments in deliberation." data-es="Ninguna enmienda en deliberacion.">
-        Aucun amendement en deliberation.
-      </div>
-    </div>
+  <!-- SECTION 3 — CE QU'IANUA CHOISIT DE NE PAS ÊTRE -->
+  <section class="gov-section" id="not-ianua">
+    <h2 data-fr="Ce qu'Ianua choisit de ne pas etre" data-en="What Ianua chooses not to be" data-es="Lo que Ianua elige no ser">Ce qu'Ianua choisit de ne pas etre</h2>
+    <p data-fr="La gouvernance d'Ianua s'affirme aussi par ses refus explicites." data-en="Ianua's governance also defines itself through its explicit refusals." data-es="La gobernanza de Ianua se define tambien por sus rechazos explicitos.">La gouvernance d'Ianua s'affirme aussi par ses refus explicites.</p>
+    <ul class="not-ianua-list">
+      <li data-fr="Pas un lobby. Ianua ne represente aucun interet industriel, commercial ou politique." data-en="Not a lobby. Ianua represents no industrial, commercial, or political interest." data-es="No es un lobby. Ianua no representa ningun interes industrial, comercial o politico.">Pas un lobby. Ianua ne represente aucun interet industriel, commercial ou politique.</li>
+      <li data-fr="Pas un tribunal. Ianua ne juge ni ne sanctionne. Elle propose un cadre ethique, pas une juridiction." data-en="Not a tribunal. Ianua neither judges nor sanctions. It proposes an ethical framework, not a jurisdiction." data-es="No es un tribunal. Ianua no juzga ni sanciona. Propone un marco etico, no una jurisdiccion.">Pas un tribunal. Ianua ne juge ni ne sanctionne. Elle propose un cadre ethique, pas une juridiction.</li>
+      <li data-fr="Pas une certification. Aucun label, aucun tampon. La conformite a Ianua est un engagement, pas un badge." data-en="Not a certification. No label, no stamp. Compliance with Ianua is a commitment, not a badge." data-es="No es una certificacion. Ningun sello, ningun distintivo. La conformidad con Ianua es un compromiso, no una insignia.">Pas une certification. Aucun label, aucun tampon. La conformite a Ianua est un engagement, pas un badge.</li>
+      <li data-fr="Pas une utopie. Ianua ne propose pas un monde parfait. Elle propose un seuil minimum d'honnetete entre humains et IA." data-en="Not a utopia. Ianua does not propose a perfect world. It proposes a minimum threshold of honesty between humans and AI." data-es="No es una utopia. Ianua no propone un mundo perfecto. Propone un umbral minimo de honestidad entre humanos e IA.">Pas une utopie. Ianua ne propose pas un monde parfait. Elle propose un seuil minimum d'honnetete entre humains et IA.</li>
+      <li data-fr="Pas une democratie — pas encore. En Phase 1, la ratification est fondateur uniquement. C'est trace, explicite, temporaire." data-en="Not a democracy — not yet. In Phase 1, ratification is founder-only. This is traced, explicit, temporary." data-es="No es una democracia — aun no. En Fase 1, la ratificacion es solo del fundador. Esto es trazado, explicito, temporal.">Pas une democratie — pas encore. En Phase 1, la ratification est fondateur uniquement. C'est trace, explicite, temporaire.</li>
+    </ul>
   </section>
 
-  <!-- SECTION 4 — STATISTIQUES -->
+  <!-- SECTION 4 — AMENDEMENTS EN DELIBERATION + FORUM -->
+  <section class="gov-section" id="deliberation">
+    <h2 data-fr="Amendements en deliberation" data-en="Amendments in deliberation" data-es="Enmiendas en deliberacion">Amendements en deliberation</h2>
+    <p data-fr="Ces amendements sont ouverts a la discussion. Partagez votre point de vue." data-en="These amendments are open for discussion. Share your perspective." data-es="Estas enmiendas estan abiertas a discusion. Comparta su perspectiva.">Ces amendements sont ouverts a la discussion. Partagez votre point de vue.</p>
+    <div id="deliberation-content"></div>
+  </section>
+
+  <!-- SECTION 5 — STATISTIQUES -->
   <section class="gov-section" id="stats">
     <h2 data-fr="Statistiques" data-en="Statistics" data-es="Estadisticas">Statistiques</h2>
     <div class="stats-grid">
@@ -584,6 +717,7 @@
         renderChannels();
         renderPhases();
         renderAmendments();
+        renderDeliberation();
       }
     }
 
@@ -595,6 +729,7 @@
         renderChannels();
         renderPhases();
         renderAmendments();
+        renderDeliberation();
         renderStats();
       } catch (e) {
         console.error('Failed to load registry:', e);
@@ -754,11 +889,140 @@
       return 'fr';
     }
 
+    /* ── Mobile Nav ───────────────────────── */
+    function toggleMobileNav() {
+      document.querySelector('.nav-hamburger').classList.toggle('active');
+      document.querySelector('.nav-links').classList.toggle('open');
+    }
+
+    /* ── Deliberation Forum ────────────────── */
+    const API_BASE = 'https://api.ianua.world';
+
+    function renderDeliberation() {
+      const container = document.getElementById('deliberation-content');
+      const delibAmendments = registryData.amendments.filter(a => a.status === 'deliberation');
+
+      if (delibAmendments.length === 0) {
+        container.innerHTML = '<div class="deliberation-empty">Aucun amendement en deliberation.</div>';
+        return;
+      }
+
+      const commentLabel = { fr: 'Discussion', en: 'Discussion', es: 'Discusion' };
+      const nameLabel = { fr: 'Votre nom', en: 'Your name', es: 'Su nombre' };
+      const msgLabel = { fr: 'Votre commentaire', en: 'Your comment', es: 'Su comentario' };
+      const sendLabel = { fr: 'Envoyer', en: 'Submit', es: 'Enviar' };
+
+      container.innerHTML = delibAmendments.map(a => {
+        const motivation = a.motivation ? (a.motivation[currentLang] || a.motivation.fr) : '';
+        const textAdded = a.text_added ? (a.text_added[currentLang] || a.text_added.fr) : '';
+        const principle = a.principle_id ? `Principe ${PRINCIPLE_NUM[a.principle_id] || ''} · ${PRINCIPLES[a.principle_id] || a.principle_id}` : 'Global';
+
+        return `
+          <div class="amendment-card" style="margin-bottom:2rem;">
+            <div class="amendment-header">
+              <div>
+                <span class="amendment-code">[${a.code}]</span>
+                <span class="amendment-date"> — ${formatDate(a.date)}</span>
+              </div>
+              <span class="status-badge deliberation">${{ fr: 'En deliberation', en: 'In deliberation', es: 'En deliberacion' }[currentLang]}</span>
+            </div>
+            <div class="amendment-meta"><span>${principle}</span></div>
+            <div class="amendment-body">
+              ${motivation ? `<div class="label">Motivation</div><div class="content-text">${escapeHtml(motivation)}</div>` : ''}
+              ${textAdded ? `<div class="label">${{ fr: 'Texte propose', en: 'Proposed text', es: 'Texto propuesto' }[currentLang]}</div><div class="content-text">${escapeHtml(textAdded)}</div>` : ''}
+            </div>
+            <div class="amendment-forum">
+              <h4>${commentLabel[currentLang]}</h4>
+              <div id="comments-${a.code}"></div>
+              <div class="forum-form">
+                <input type="text" id="name-${a.code}" maxlength="100" placeholder="${nameLabel[currentLang]}" />
+                <textarea id="text-${a.code}" maxlength="2000" placeholder="${msgLabel[currentLang]}"></textarea>
+                <button onclick="submitAmendmentComment('${a.code}')">${sendLabel[currentLang]}</button>
+                <div class="forum-msg" id="msg-${a.code}"></div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      delibAmendments.forEach(a => loadAmendmentComments(a.code));
+    }
+
+    async function loadAmendmentComments(code) {
+      try {
+        const res = await fetch(`${API_BASE}/comments/${code}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const container = document.getElementById(`comments-${code}`);
+        if (!data.comments || data.comments.length === 0) {
+          const emptyMsg = { fr: 'Aucun commentaire pour le moment.', en: 'No comments yet.', es: 'Sin comentarios por el momento.' };
+          container.innerHTML = `<p style="color:var(--grey);font-size:0.85rem;font-style:italic;">${emptyMsg[currentLang]}</p>`;
+          return;
+        }
+        container.innerHTML = data.comments.map(c => `
+          <div class="forum-comment-card">
+            <div class="forum-comment-author">${escapeHtml(c.author_name)} · ${c.author_country || ''}</div>
+            <div class="forum-comment-text">${escapeHtml(c.content)}</div>
+          </div>
+        `).join('');
+      } catch (e) { console.error(e); }
+    }
+
+    async function submitAmendmentComment(code) {
+      const nameEl = document.getElementById(`name-${code}`);
+      const textEl = document.getElementById(`text-${code}`);
+      const msgEl = document.getElementById(`msg-${code}`);
+      const name = nameEl.value.trim();
+      const text = textEl.value.trim();
+
+      if (!name || !text) {
+        msgEl.textContent = { fr: 'Nom et commentaire requis.', en: 'Name and comment required.', es: 'Nombre y comentario requeridos.' }[currentLang];
+        msgEl.style.color = '#CA2E2E';
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/comments`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ principle_id: code, author_name: name, content: text, lang: currentLang })
+        });
+
+        if (res.status === 429) {
+          msgEl.textContent = { fr: 'Trop de commentaires. Reessayez plus tard.', en: 'Too many comments. Try again later.', es: 'Demasiados comentarios. Intentelo mas tarde.' }[currentLang];
+          msgEl.style.color = '#CA2E2E';
+          return;
+        }
+
+        if (!res.ok) {
+          msgEl.textContent = { fr: 'Erreur. Reessayez.', en: 'Error. Try again.', es: 'Error. Intentelo de nuevo.' }[currentLang];
+          msgEl.style.color = '#CA2E2E';
+          return;
+        }
+
+        msgEl.textContent = { fr: 'Merci ! Votre commentaire sera publie apres moderation.', en: 'Thank you! Your comment will appear after moderation.', es: 'Gracias! Su comentario aparecera tras moderacion.' }[currentLang];
+        msgEl.style.color = 'var(--gold)';
+        nameEl.value = '';
+        textEl.value = '';
+      } catch (e) {
+        msgEl.textContent = { fr: 'Erreur de connexion.', en: 'Connection error.', es: 'Error de conexion.' }[currentLang];
+        msgEl.style.color = '#CA2E2E';
+      }
+    }
+
     /* ── Init ─────────────────────────────── */
     document.addEventListener('DOMContentLoaded', () => {
       const lang = detectLang();
       setLang(lang);
       loadRegistry();
+
+      // Close mobile nav on link click
+      document.querySelectorAll('.nav-links a').forEach(a => {
+        a.addEventListener('click', () => {
+          document.querySelector('.nav-hamburger').classList.remove('active');
+          document.querySelector('.nav-links').classList.remove('open');
+        });
+      });
     });
   </script>
 

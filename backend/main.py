@@ -75,6 +75,9 @@ VALID_PRINCIPLES = {
     "bienveillance", "transparence", "reciprocite", "souverainete",
     "refus", "proactive", "agentique", "deliberation",
 }
+# Amendment codes accepted as principle_id for the forum
+VALID_AMENDMENT_CODES = {"A003", "A003-R", "A004"}
+VALID_COMMENT_TARGETS = VALID_PRINCIPLES | VALID_AMENDMENT_CODES
 VALID_REACTIONS = {"pertinent", "enrichissant", "hors_sujet"}
 
 
@@ -136,44 +139,7 @@ async def startup():
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "email": "brevo-http-api", "deploy": 3}
-
-
-@app.get("/debug/email")
-async def debug_email():
-    """Temporary debug endpoint — remove after testing"""
-    import httpx
-    # Read DIRECTLY from os.getenv to bypass any caching
-    raw_key = os.getenv("BREVO_API_KEY", "")
-    from email_service import BREVO_API_KEY, FROM_EMAIL, BREVO_SEND_URL
-    # List all BREVO-related env vars
-    brevo_vars = {k: v[:8] + "..." for k, v in os.environ.items() if "BREVO" in k.upper() or "API_KEY" in k.upper()}
-    result = {
-        "method": "Brevo HTTP API",
-        "api_key_set": bool(BREVO_API_KEY),
-        "api_key_prefix": BREVO_API_KEY[:8] + "..." if BREVO_API_KEY else "(empty)",
-        "raw_key_set": bool(raw_key),
-        "raw_key_prefix": raw_key[:8] + "..." if raw_key else "(empty)",
-        "brevo_env_vars": brevo_vars,
-        "from_email": FROM_EMAIL,
-        "brevo_url": BREVO_SEND_URL,
-    }
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.get(
-                "https://api.brevo.com/v3/account",
-                headers={"api-key": BREVO_API_KEY},
-            )
-            if resp.status_code == 200:
-                data = resp.json()
-                result["connection"] = "OK"
-                result["account_email"] = data.get("email", "?")
-                result["plan"] = data.get("plan", [{}])[0].get("type", "?") if data.get("plan") else "?"
-            else:
-                result["connection"] = f"FAILED: HTTP {resp.status_code} — {resp.text[:200]}"
-    except Exception as e:
-        result["connection"] = f"FAILED: {str(e)}"
-    return result
+    return {"status": "ok"}
 
 
 @app.get("/stats")
@@ -261,7 +227,7 @@ async def unsubscribe(token: str, db: AsyncSession = Depends(get_db)):
 
 @app.get("/comments/{principle_id}")
 async def get_comments(principle_id: str, db: AsyncSession = Depends(get_db)):
-    if principle_id not in VALID_PRINCIPLES:
+    if principle_id not in VALID_COMMENT_TARGETS:
         raise HTTPException(status_code=400, detail="Invalid principle_id")
 
     # Get approved comments with reaction counts
@@ -323,7 +289,7 @@ async def get_comments(principle_id: str, db: AsyncSession = Depends(get_db)):
 async def post_comment(
     body: CommentRequest, request: Request, db: AsyncSession = Depends(get_db)
 ):
-    if body.principle_id not in VALID_PRINCIPLES:
+    if body.principle_id not in VALID_COMMENT_TARGETS:
         raise HTTPException(status_code=400, detail="Invalid principle_id")
 
     author_name = strip_html(body.author_name.strip())
