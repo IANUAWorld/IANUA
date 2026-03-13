@@ -1,7 +1,8 @@
 import os
 import httpx
 
-BREVO_API_KEY = os.getenv("BREVO_API_KEY", "")
+# Try BREVO_API_KEY first, fallback to BREVO_SMTP_PASS (Railway env var workaround)
+BREVO_API_KEY = os.getenv("BREVO_API_KEY", "") or os.getenv("BREVO_SMTP_PASS", "")
 FROM_EMAIL = os.getenv("FROM_EMAIL", "ianua@outlook.fr")
 FROM_NAME = os.getenv("FROM_NAME", "Ianua")
 API_URL = os.getenv("API_URL", "https://api.ianua.world")
