@@ -422,7 +422,7 @@ async def list_amendments(
     db: AsyncSession = Depends(get_db),
 ):
     """List all public amendments, optionally filtered by status or principle."""
-    VALID_PUBLIC_STATUSES = {"deliberation", "accepted", "ratified", "rejected"}
+    VALID_PUBLIC_STATUSES = {"proposed", "deliberation", "accepted", "ratified", "rejected", "expired", "withdrawn", "deleted"}
 
     stmt = select(Amendment)
     if status:

@@ -702,6 +702,9 @@
       <button class="filter-btn active" onclick="filterAmendments('all')" data-fr="Tous" data-en="All" data-es="Todos">Tous</button>
       <button class="filter-btn" onclick="filterAmendments('ratified')" data-fr="Ratifies" data-en="Ratified" data-es="Ratificados">Ratifies</button>
       <button class="filter-btn" onclick="filterAmendments('deliberation')" data-fr="En deliberation" data-en="In deliberation" data-es="En deliberacion">En deliberation</button>
+      <button class="filter-btn" onclick="filterAmendments('proposed')" data-fr="Proposes" data-en="Proposed" data-es="Propuestos">Proposes</button>
+      <button class="filter-btn" onclick="filterAmendments('expired')" data-fr="Expires" data-en="Expired" data-es="Expirados">Expires</button>
+      <button class="filter-btn" onclick="filterAmendments('withdrawn')" data-fr="Retires" data-en="Withdrawn" data-es="Retirados">Retires</button>
     </div>
 
     <div class="timeline" id="timeline"></div>
@@ -783,6 +786,7 @@
   <script>
     let currentLang = 'fr';
     let registryData = null;
+    let liveAmendments = [];
     let currentFilter = 'all';
 
     const PRINCIPLES = {
@@ -818,15 +822,23 @@
     /* ── Load registry JSON ──────────────── */
     async function loadRegistry() {
       try {
-        const res = await fetch('/amendments-registry.json');
-        registryData = await res.json();
+        // Static governance rules (phases, channels)
+        const staticRes = await fetch('/amendments-registry.json');
+        const staticData = await staticRes.json();
+        registryData = staticData;
         renderChannels();
         renderPhases();
+
+        // Live amendments from API
+        const apiRes = await fetch(`${GOV_API}/amendments`);
+        const apiData = await apiRes.json();
+        liveAmendments = apiData.amendments || [];
+
         renderAmendments();
         renderDeliberation();
         renderStats();
       } catch (e) {
-        console.error('Failed to load registry:', e);
+        console.error('Failed to load:', e);
       }
     }
 
@@ -847,6 +859,7 @@
       const tbody = document.getElementById('phases-body');
       const statusLabels = {
         active: { fr: 'En cours', en: 'Active', es: 'En curso' },
+        complete: { fr: 'Complete', en: 'Complete', es: 'Completa' },
         upcoming: { fr: 'A venir', en: 'Upcoming', es: 'Proximo' }
       };
       tbody.innerHTML = registryData.governance_phases.map(ph => `
@@ -872,7 +885,7 @@
     /* ── Render amendments timeline ──────── */
     function renderAmendments() {
       const timeline = document.getElementById('timeline');
-      let amendments = registryData.amendments;
+      let amendments = liveAmendments;
 
       if (currentFilter !== 'all') {
         amendments = amendments.filter(a => a.status === currentFilter);
@@ -895,6 +908,11 @@
         ratified: { fr: 'Ratifie', en: 'Ratified', es: 'Ratificado' },
         deliberation: { fr: 'En deliberation', en: 'In deliberation', es: 'En deliberacion' },
         rejected: { fr: 'Rejete', en: 'Rejected', es: 'Rechazado' },
+        proposed: { fr: 'Propose', en: 'Proposed', es: 'Propuesto' },
+        expired: { fr: 'Expire', en: 'Expired', es: 'Expirado' },
+        withdrawn: { fr: 'Retire', en: 'Withdrawn', es: 'Retirado' },
+        deleted: { fr: 'Supprime', en: 'Deleted', es: 'Eliminado' },
+        accepted: { fr: 'Accepte', en: 'Accepted', es: 'Aceptado' },
         draft: { fr: 'Brouillon', en: 'Draft', es: 'Borrador' }
       };
 
@@ -913,18 +931,19 @@
 
       timeline.innerHTML = amendments.map(a => {
         const principle = a.principle_id ? `Principe ${PRINCIPLE_NUM[a.principle_id] || a.principle_id} · ${PRINCIPLES[a.principle_id] || a.principle_id}` : 'Global';
-        const type = typeLabels[a.type] ? typeLabels[a.type][currentLang] : a.type;
+        const type = typeLabels[a.amendment_type] ? typeLabels[a.amendment_type][currentLang] : a.amendment_type;
         const source = sourceLabels[a.source_type] ? sourceLabels[a.source_type][currentLang] : a.source_type;
         const status = statusLabels[a.status] ? statusLabels[a.status][currentLang] : a.status;
-        const motivation = a.motivation ? (a.motivation[currentLang] || a.motivation.fr) : '';
-        const textAdded = a.text_added ? (a.text_added[currentLang] || a.text_added.fr) : '';
+        const motivation = a.motivation ? (currentLang === 'en' && a.motivation_en ? a.motivation_en : currentLang === 'es' && a.motivation_es ? a.motivation_es : a.motivation) : '';
+        const textAdded = a.text_after ? (currentLang === 'en' && a.text_after_en ? a.text_after_en : currentLang === 'es' && a.text_after_es ? a.text_after_es : a.text_after) : '';
+        const dateStr = a.proposed_at ? a.proposed_at.split('T')[0] : null;
 
         return `
           <div class="amendment-card" data-status="${a.status}">
             <div class="amendment-header">
               <div>
                 <span class="amendment-code">[${a.code}]</span>
-                <span class="amendment-date"> — ${formatDate(a.date)}</span>
+                <span class="amendment-date"> — ${formatDate(dateStr)}</span>
               </div>
               <span class="status-badge ${a.status}">${status} ${a.status === 'ratified' ? '&#10003;' : ''}</span>
             </div>
@@ -932,7 +951,7 @@
               <span>${principle}</span>
               <span>· ${type}</span>
               <span>· ${source}</span>
-              <span>· ${a.phase.replace('_', ' ')}</span>
+              <span>· ${a.phase ? a.phase.replace('_', ' ') : ''}</span>
             </div>
             <div class="amendment-body">
               ${motivation ? `<div class="label">${motivLabel[currentLang]}</div><div class="content-text">${escapeHtml(motivation)}</div>` : ''}
@@ -940,8 +959,8 @@
               ${a.inspiration ? `<div class="label">${inspLabel[currentLang]}</div><div class="content-text">${escapeHtml(a.inspiration)}</div>` : ''}
             </div>
             <div class="amendment-footer">
-              ${a.ratified_by ? `<span>${ratifLabel[currentLang]} : ${a.ratified_by} · ${formatDate(a.ratified_at)}</span>` : ''}
-              ${a.charte_version_after ? `<span>${charteLabel[currentLang]} ${a.charte_version_after}</span>` : ''}
+              ${a.ratified_by ? `<span>${ratifLabel[currentLang]} : ${a.ratified_by} · ${formatDate(a.ratified_at ? a.ratified_at.split('T')[0] : null)}</span>` : ''}
+              ${a.charte_version ? `<span>${charteLabel[currentLang]} ${a.charte_version}</span>` : ''}
               ${a.principle_id ? `<a href="/#principes" class="amendment-link">${seeCharte[currentLang]} &rarr;</a>` : ''}
             </div>
             ${a.status === 'deliberation' ? `
@@ -974,12 +993,12 @@
 
     /* ── Render stats ────────────────────── */
     function renderStats() {
-      const ratified = registryData.amendments.filter(a => a.status === 'ratified').length;
-      const deliberation = registryData.amendments.filter(a => a.status === 'deliberation').length;
+      const ratified = liveAmendments.filter(a => a.status === 'ratified').length;
+      const deliberation = liveAmendments.filter(a => a.status === 'deliberation').length;
       document.getElementById('stat-version').textContent = registryData.charte_version;
       document.getElementById('stat-ratified').textContent = ratified;
       document.getElementById('stat-deliberation').textContent = deliberation;
-      document.getElementById('stat-updated').textContent = formatDate(registryData.last_updated);
+      document.getElementById('stat-updated').textContent = new Date().toLocaleDateString('fr-FR');
     }
 
     /* ── Helpers ──────────────────────────── */
@@ -1019,7 +1038,7 @@
 
     function renderDeliberation() {
       const container = document.getElementById('deliberation-content');
-      const delibAmendments = registryData.amendments.filter(a => a.status === 'deliberation');
+      const delibAmendments = liveAmendments.filter(a => a.status === 'deliberation');
 
       if (delibAmendments.length === 0) {
         container.innerHTML = '<div class="deliberation-empty">Aucun amendement en deliberation.</div>';
@@ -1032,16 +1051,17 @@
       const sendLabel = { fr: 'Envoyer', en: 'Submit', es: 'Enviar' };
 
       container.innerHTML = delibAmendments.map(a => {
-        const motivation = a.motivation ? (a.motivation[currentLang] || a.motivation.fr) : '';
-        const textAdded = a.text_added ? (a.text_added[currentLang] || a.text_added.fr) : '';
+        const motivation = a.motivation ? (currentLang === 'en' && a.motivation_en ? a.motivation_en : currentLang === 'es' && a.motivation_es ? a.motivation_es : a.motivation) : '';
+        const textAdded = a.text_after ? (currentLang === 'en' && a.text_after_en ? a.text_after_en : currentLang === 'es' && a.text_after_es ? a.text_after_es : a.text_after) : '';
         const principle = a.principle_id ? `Principe ${PRINCIPLE_NUM[a.principle_id] || ''} · ${PRINCIPLES[a.principle_id] || a.principle_id}` : 'Global';
+        const dateStr = a.proposed_at ? a.proposed_at.split('T')[0] : null;
 
         return `
           <div class="amendment-card" style="margin-bottom:2rem;">
             <div class="amendment-header">
               <div>
                 <span class="amendment-code">[${a.code}]</span>
-                <span class="amendment-date"> — ${formatDate(a.date)}</span>
+                <span class="amendment-date"> — ${formatDate(dateStr)}</span>
               </div>
               <span class="status-badge deliberation">${{ fr: 'En deliberation', en: 'In deliberation', es: 'En deliberacion' }[currentLang]}</span>
             </div>

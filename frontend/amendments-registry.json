@@ -6,14 +6,14 @@
     {
       "id": "phase_1",
       "name": { "fr": "Phase 1 — Ancrage", "en": "Phase 1 — Anchoring", "es": "Fase 1 — Anclaje" },
-      "status": "active",
+      "status": "complete",
       "ratification": { "fr": "Fondateur uniquement", "en": "Founder only", "es": "Fundador solamente" },
       "mechanism": { "fr": "Manuel, public, tracer dans git", "en": "Manual, public, traced in git", "es": "Manual, publico, trazado en git" }
     },
     {
       "id": "phase_2",
       "name": { "fr": "Phase 2 — Deliberation", "en": "Phase 2 — Deliberation", "es": "Fase 2 — Deliberacion" },
-      "status": "upcoming",
+      "status": "complete",
       "ratification": { "fr": "Vote communautaire, identite verifiee OAuth", "en": "Community vote, OAuth-verified identity", "es": "Voto comunitario, identidad verificada OAuth" },
       "mechanism": { "fr": "Vote ouvert, seuil a definir", "en": "Open vote, threshold TBD", "es": "Voto abierto, umbral por definir" }
     },
@@ -35,14 +35,14 @@
     {
       "id": "community",
       "name": { "fr": "Communaute", "en": "Community", "es": "Comunidad" },
-      "condition": { "fr": "Commentaires convergents", "en": "Converging comments", "es": "Comentarios convergentes" },
-      "threshold": { "fr": "3+ independants", "en": "3+ independent", "es": "3+ independientes" }
+      "condition": { "fr": "Soutiens convergents", "en": "Converging support", "es": "Apoyos convergentes" },
+      "threshold": { "fr": "Seuil adaptatif par palier", "en": "Adaptive threshold by tier", "es": "Umbral adaptativo por nivel" }
     },
     {
       "id": "ia_audit",
       "name": { "fr": "Audit IA", "en": "AI Audit", "es": "Auditoria IA" },
-      "condition": { "fr": "Modeles convergents", "en": "Converging models", "es": "Modelos convergentes" },
-      "threshold": { "fr": "3+ modeles", "en": "3+ models", "es": "3+ modelos" }
+      "condition": { "fr": "Audit multi-modeles", "en": "Multi-model audit", "es": "Auditoria multi-modelos" },
+      "threshold": { "fr": "Admin technique", "en": "Technical admin", "es": "Admin tecnico" }
     }
   ],
   "amendments": [
