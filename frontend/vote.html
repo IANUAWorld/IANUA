@@ -342,6 +342,14 @@
                 <div class="motivations-title">Motivations</div>
                 <div id="motivations-list-${a.id}"><em class="no-votes">Chargement...</em></div>
             </div>
+
+            <div class="ia-voices-section" id="ia-voices-${a.id}" style="margin-top:1rem;border-top:1px solid rgba(46,156,202,0.15);padding-top:1rem;">
+                <div onclick="toggleIaVoices(${a.id})" style="cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:0.9rem;color:var(--cyan);display:flex;align-items:center;gap:0.5rem;">
+                    <span id="ia-toggle-${a.id}">&#9654;</span> Voix IA
+                    <span style="font-size:0.75rem;color:var(--grey);font-style:italic;">&mdash; &eacute;clairent la d&eacute;lib&eacute;ration, ne participent pas au vote</span>
+                </div>
+                <div id="ia-content-${a.id}" style="display:none;margin-top:0.8rem;"></div>
+            </div>
         </div>`;
     }
 
@@ -459,6 +467,51 @@
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    // ── IA Voices ────────────────────────────
+    async function toggleIaVoices(amendmentId) {
+        const content = document.getElementById(`ia-content-${amendmentId}`);
+        const toggle = document.getElementById(`ia-toggle-${amendmentId}`);
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.textContent = '\u25BC';
+            await loadIaVoices(amendmentId);
+        } else {
+            content.style.display = 'none';
+            toggle.textContent = '\u25B6';
+        }
+    }
+
+    async function loadIaVoices(amendmentId) {
+        const container = document.getElementById(`ia-content-${amendmentId}`);
+        try {
+            const resp = await fetch(`${API}/amendments/${amendmentId}/audit-responses`);
+            const data = await resp.json();
+            if (!data.responses || data.responses.length === 0) {
+                container.innerHTML = '<p style="color:var(--grey);font-style:italic;font-size:0.9rem;">Aucun audit IA disponible pour cet amendement.</p>';
+                return;
+            }
+            // Show prompt header
+            const prompt = data.responses[0].prompt_used;
+            container.innerHTML = `
+                <div style="background:rgba(46,156,202,0.05);border:1px solid rgba(46,156,202,0.15);border-radius:4px;padding:0.8rem;margin-bottom:1rem;">
+                    <div style="font-family:'Source Sans 3',sans-serif;font-size:0.8rem;color:var(--cyan);margin-bottom:0.3rem;">Prompt utilis\u00e9</div>
+                    <div style="font-size:0.85rem;color:var(--light);white-space:pre-wrap;">${escapeHtml(prompt)}</div>
+                </div>
+                ${data.responses.map(r => `
+                    <div style="background:rgba(46,156,202,0.03);border-left:3px solid var(--cyan);padding:0.8rem 1rem;margin-bottom:0.8rem;border-radius:0 4px 4px 0;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                            <span style="font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--cyan);font-size:0.9rem;">${escapeHtml(r.model_name)} <span style="color:var(--grey);font-weight:400;font-size:0.8rem;">${escapeHtml(r.model_version || '')}</span></span>
+                            <span style="font-family:'Source Sans 3',sans-serif;font-size:0.75rem;color:var(--grey);">${r.audited_at ? new Date(r.audited_at).toLocaleDateString('fr-FR') : ''}</span>
+                        </div>
+                        <div style="font-size:0.9rem;color:var(--light);line-height:1.6;white-space:pre-wrap;">${escapeHtml(r.response_text)}</div>
+                    </div>
+                `).join('')}
+            `;
+        } catch (err) {
+            container.innerHTML = '<p style="color:var(--red);">Erreur de chargement des voix IA.</p>';
+        }
     }
 
     // ── Init ────────────────────────────────────
