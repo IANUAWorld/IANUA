@@ -130,13 +130,11 @@ async def trigger_audit(
 
     results = []
     for model_name in body.models:
-        # Check provider exists
         provider = AI_PROVIDERS.get(model_name)
         if not provider:
             results.append({"model_name": model_name, "success": False, "error": f"Unknown provider: {model_name}"})
             continue
 
-        # Check uniqueness: one audit per model per amendment
         existing = await db.execute(
             select(AuditResponse).where(
                 AuditResponse.amendment_id == amendment.id,
@@ -147,7 +145,6 @@ async def trigger_audit(
             results.append({"model_name": model_name, "success": False, "error": "Already audited by this model"})
             continue
 
-        # Call provider
         try:
             response_text, model_version = await provider(body.prompt)
         except Exception as exc:
@@ -157,6 +154,57 @@ async def trigger_audit(
 
         audit = AuditResponse(
             amendment_id=amendment.id,
+            audit_scope="amendment",
+            model_name=model_name,
+            model_version=model_version,
+            prompt_used=body.prompt,
+            response_text=response_text,
+            published=False,
+        )
+        db.add(audit)
+        await db.flush()
+        results.append({"model_name": model_name, "success": True})
+
+    await db.commit()
+    return results
+
+
+@router.post("/admin/audit/global")
+async def trigger_global_audit(
+    body: AuditTriggerRequest,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Trigger AI audit on the full charter (no specific amendment)."""
+    results = []
+    for model_name in body.models:
+        provider = AI_PROVIDERS.get(model_name)
+        if not provider:
+            results.append({"model_name": model_name, "success": False, "error": f"Unknown provider: {model_name}"})
+            continue
+
+        # Check uniqueness: one global audit per model
+        existing = await db.execute(
+            select(AuditResponse).where(
+                AuditResponse.amendment_id.is_(None),
+                AuditResponse.audit_scope == "global",
+                AuditResponse.model_name == model_name,
+            )
+        )
+        if existing.scalar_one_or_none():
+            results.append({"model_name": model_name, "success": False, "error": "Already audited by this model"})
+            continue
+
+        try:
+            response_text, model_version = await provider(body.prompt)
+        except Exception as exc:
+            print(f"[AUDIT ERROR] {model_name}: {exc}")
+            results.append({"model_name": model_name, "success": False, "error": "AI provider call failed"})
+            continue
+
+        audit = AuditResponse(
+            amendment_id=None,
+            audit_scope="global",
             model_name=model_name,
             model_version=model_version,
             prompt_used=body.prompt,
@@ -173,19 +221,20 @@ async def trigger_audit(
 
 @router.post("/admin/amendments/{amendment_id}/audit/{audit_id}/publish")
 async def publish_audit(
-    amendment_id: int,
+    amendment_id: int,  # 0 for global audits
     audit_id: int,
     body: PublishRejectRequest,
     db: AsyncSession = Depends(get_db),
     _: None = Depends(verify_admin),
 ):
     """Publish an audit response (make it visible publicly)."""
-    result = await db.execute(
-        select(AuditResponse).where(
-            AuditResponse.id == audit_id,
-            AuditResponse.amendment_id == amendment_id,
-        )
-    )
+    # For global audits, amendment_id=0 → lookup by audit_id only
+    if amendment_id == 0:
+        query = select(AuditResponse).where(AuditResponse.id == audit_id, AuditResponse.amendment_id.is_(None))
+    else:
+        query = select(AuditResponse).where(AuditResponse.id == audit_id, AuditResponse.amendment_id == amendment_id)
+
+    result = await db.execute(query)
     audit = result.scalar_one_or_none()
     if not audit:
         raise HTTPException(status_code=404, detail="Audit response not found")
@@ -196,7 +245,7 @@ async def publish_audit(
     audit.publication_decision_logged = True
 
     action = AdminAction(
-        amendment_id=amendment_id,
+        amendment_id=amendment_id if amendment_id != 0 else None,
         action="audit_published",
         via="audit",
         reason=body.reason,
@@ -217,12 +266,12 @@ async def reject_audit(
     _: None = Depends(verify_admin),
 ):
     """Reject an audit response (keep unpublished, log decision)."""
-    result = await db.execute(
-        select(AuditResponse).where(
-            AuditResponse.id == audit_id,
-            AuditResponse.amendment_id == amendment_id,
-        )
-    )
+    if amendment_id == 0:
+        query = select(AuditResponse).where(AuditResponse.id == audit_id, AuditResponse.amendment_id.is_(None))
+    else:
+        query = select(AuditResponse).where(AuditResponse.id == audit_id, AuditResponse.amendment_id == amendment_id)
+
+    result = await db.execute(query)
     audit = result.scalar_one_or_none()
     if not audit:
         raise HTTPException(status_code=404, detail="Audit response not found")
@@ -230,7 +279,7 @@ async def reject_audit(
     audit.publication_decision_logged = True
 
     action = AdminAction(
-        amendment_id=amendment_id,
+        amendment_id=amendment_id if amendment_id != 0 else None,
         action="audit_rejected",
         via="audit",
         reason=body.reason,
@@ -294,3 +343,59 @@ async def admin_audit_responses(
         }
         for r in responses
     ]
+
+
+@router.get("/audit/global/responses")
+async def public_global_audit_responses(db: AsyncSession = Depends(get_db)):
+    """Return published global audit responses (public)."""
+    result = await db.execute(
+        select(AuditResponse).where(
+            AuditResponse.audit_scope == "global",
+            AuditResponse.published == True,
+        ).order_by(AuditResponse.audited_at.desc())
+    )
+    responses = result.scalars().all()
+
+    return {
+        "responses": [
+            {
+                "id": r.id,
+                "model_name": r.model_name,
+                "model_version": r.model_version,
+                "prompt_used": r.prompt_used,
+                "response_text": r.response_text,
+                "audited_at": r.audited_at.isoformat() if r.audited_at else None,
+            }
+            for r in responses
+        ]
+    }
+
+
+@router.get("/admin/audit/global/responses")
+async def admin_global_audit_responses(
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Return ALL global audit responses including unpublished (admin)."""
+    result = await db.execute(
+        select(AuditResponse).where(
+            AuditResponse.audit_scope == "global",
+        ).order_by(AuditResponse.audited_at.desc())
+    )
+    responses = result.scalars().all()
+
+    return {
+        "responses": [
+            {
+                "id": r.id,
+                "model_name": r.model_name,
+                "model_version": r.model_version,
+                "prompt_used": r.prompt_used,
+                "response_text": r.response_text,
+                "audited_at": r.audited_at.isoformat() if r.audited_at else None,
+                "published": r.published,
+                "publication_decision_logged": r.publication_decision_logged,
+            }
+            for r in responses
+        ]
+    }

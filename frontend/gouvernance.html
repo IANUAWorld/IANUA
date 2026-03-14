@@ -771,6 +771,13 @@
     </div>
   </section>
 
+  <!-- VOIX IA SUR LA CHARTE -->
+  <section class="gov-section" id="voix-ia-charte">
+    <h2 data-fr="Voix IA sur la charte" data-en="AI Voices on the charter" data-es="Voces IA sobre la carta" style="font-family:'Cinzel',serif;font-size:1.3rem;font-weight:600;color:var(--cyan);margin-bottom:0.5rem;">Voix IA sur la charte</h2>
+    <p style="font-family:'Source Sans 3',sans-serif;font-size:0.85rem;color:var(--grey);margin-bottom:2rem;font-style:italic;" data-fr="Audit global de la charte par des modèles IA indépendants. Les voix IA éclairent — elles ne décident pas." data-en="Global charter audit by independent AI models. AI voices illuminate — they do not decide." data-es="Auditoría global de la carta por modelos IA independientes. Las voces IA iluminan — no deciden.">Audit global de la charte par des modèles IA indépendants. Les voix IA éclairent — elles ne décident pas.</p>
+    <div id="global-ia-voices"><em style="color:var(--grey);font-family:'Source Sans 3',sans-serif;font-size:0.9rem;">Chargement...</em></div>
+  </section>
+
   <footer>
     <div class="footer-left">
       <div class="footer-logo">IANUA</div>
@@ -1511,6 +1518,37 @@
       govCheckAuth();
       setTimeout(enrichDeliberationCards, 800);
       startGovPolling();
+
+      // Load global IA voices
+      (async function() {
+        const container = document.getElementById('global-ia-voices');
+        try {
+          const resp = await fetch(`${GOV_API}/audit/global/responses`);
+          const data = await resp.json();
+          if (!data.responses || data.responses.length === 0) {
+            container.innerHTML = '<p style="color:var(--grey);font-style:italic;font-family:\'Source Sans 3\',sans-serif;font-size:0.9rem;">Aucun audit global publié pour le moment.</p>';
+            return;
+          }
+          const prompt = data.responses[0].prompt_used;
+          container.innerHTML = `
+            <details style="margin-bottom:1rem;">
+              <summary style="cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:0.8rem;color:var(--cyan);">Voir le prompt utilisé</summary>
+              <div style="background:rgba(46,156,202,0.05);border:1px solid rgba(46,156,202,0.15);border-radius:4px;padding:0.8rem;margin-top:0.5rem;font-size:0.8rem;color:var(--light);white-space:pre-wrap;max-height:300px;overflow-y:auto;">${escapeHtml(prompt)}</div>
+            </details>
+            ${data.responses.map(r => `
+              <div style="background:rgba(46,156,202,0.03);border-left:3px solid var(--cyan);padding:1rem 1.2rem;margin-bottom:1rem;border-radius:0 4px 4px 0;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.6rem;">
+                  <span style="font-family:'Source Sans 3',sans-serif;font-weight:600;color:var(--cyan);font-size:0.95rem;">${escapeHtml(r.model_name)} <span style="color:var(--grey);font-weight:400;font-size:0.8rem;">${escapeHtml(r.model_version || '')}</span></span>
+                  <span style="font-family:'Source Sans 3',sans-serif;font-size:0.75rem;color:var(--grey);">${r.audited_at ? new Date(r.audited_at).toLocaleDateString('fr-FR') : ''}</span>
+                </div>
+                <div style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--light);line-height:1.7;white-space:pre-wrap;">${escapeHtml(r.response_text)}</div>
+              </div>
+            `).join('')}
+          `;
+        } catch (err) {
+          container.innerHTML = '<p style="color:var(--grey);font-style:italic;">Aucun audit global disponible.</p>';
+        }
+      })();
 
       // Close mobile nav on link click
       document.querySelectorAll('.nav-links a').forEach(a => {

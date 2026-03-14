@@ -233,7 +233,7 @@ class AdminAction(Base):
     __tablename__ = "admin_actions"
 
     id = Column(Integer, primary_key=True, index=True)
-    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=True)
     action = Column(String(30), nullable=False)
     reason = Column(Text, nullable=False)
     via = Column(String(20), nullable=False)
@@ -245,7 +245,8 @@ class AuditResponse(Base):
     __tablename__ = "audit_responses"
 
     id = Column(Integer, primary_key=True, index=True)
-    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False, index=True)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=True, index=True)
+    audit_scope = Column(String(20), default="amendment")  # "amendment" or "global"
     model_name = Column(String(50), nullable=False)
     model_version = Column(String(50), nullable=True)
     prompt_used = Column(Text, nullable=False)
