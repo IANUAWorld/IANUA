@@ -750,3 +750,32 @@ async def admin_open_votes(
 
     await db.commit()
     return {"message": f"Opened voting on {count} amendments", "count": count}
+
+
+@app.post("/admin/reset-to-deliberation")
+async def admin_reset_to_deliberation(
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Reset ratified Phase 1 amendments back to deliberation and open voting."""
+    result = await db.execute(
+        select(Amendment).where(
+            Amendment.code.in_(["A003", "A003-R", "A004"]),
+        )
+    )
+    amendments = result.scalars().all()
+
+    now = datetime.utcnow()
+    updated = []
+    for a in amendments:
+        a.status = "deliberation"
+        a.ratified_by = None
+        a.ratified_at = None
+        a.vote_opened_at = now
+        a.vote_closed_at = now + timedelta(days=30)
+        if not a.vote_threshold:
+            a.vote_threshold = 50
+        updated.append(a.code)
+
+    await db.commit()
+    return {"message": f"Reset {len(updated)} amendments to deliberation", "codes": updated}
