@@ -1,6 +1,7 @@
 import asyncio
 import pytest
 import pytest_asyncio
+from sqlalchemy import event, Text
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 
 import sys, os
@@ -11,6 +12,12 @@ from models import (
     Subscriber, Comment, Reaction, Amendment, AmendmentVote,
     Signature, MagicToken, VoteHistory
 )
+
+# Patch ARRAY columns to Text for SQLite compatibility in tests
+from sqlalchemy import ARRAY
+for col in Amendment.__table__.columns:
+    if isinstance(col.type, ARRAY):
+        col.type = Text()
 
 
 @pytest.fixture(scope="session")

@@ -22,6 +22,7 @@ load_dotenv()
 from database import get_db, engine, Base, IS_SQLITE, create_tables_sync
 from models import Subscriber, Comment, Reaction, Amendment, AmendmentVote, Signature
 from email_service import send_confirmation_email, send_signature_confirmation
+from auth import router as auth_router
 
 # ── App ──────────────────────────────────────────
 app = FastAPI(title="Ianua API", version="1.0.0")
@@ -44,7 +45,8 @@ ALLOWED_ORIGINS = os.getenv(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
-    allow_methods=["GET", "POST", "PUT"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Content-Type", "X-Admin-Key"],
 )
 
@@ -64,6 +66,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 
 app.add_middleware(SecurityHeadersMiddleware)
+
+app.include_router(auth_router)
 
 # ── Config ───────────────────────────────────────
 ADMIN_KEY = os.getenv("ADMIN_KEY", "")
