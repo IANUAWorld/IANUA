@@ -8,21 +8,21 @@
       "name": { "fr": "Phase 1 — Ancrage", "en": "Phase 1 — Anchoring", "es": "Fase 1 — Anclaje" },
       "status": "complete",
       "ratification": { "fr": "Fondateur uniquement", "en": "Founder only", "es": "Fundador solamente" },
-      "mechanism": { "fr": "Manuel, public, tracer dans git", "en": "Manual, public, traced in git", "es": "Manual, publico, trazado en git" }
+      "mechanism": { "fr": "Manuel, public, tracé dans git", "en": "Manual, public, traced in git", "es": "Manual, público, trazado en git" }
     },
     {
       "id": "phase_2",
-      "name": { "fr": "Phase 2 — Deliberation", "en": "Phase 2 — Deliberation", "es": "Fase 2 — Deliberacion" },
+      "name": { "fr": "Phase 2 — Délibération", "en": "Phase 2 — Deliberation", "es": "Fase 2 — Deliberación" },
       "status": "complete",
-      "ratification": { "fr": "Vote communautaire, identite verifiee OAuth", "en": "Community vote, OAuth-verified identity", "es": "Voto comunitario, identidad verificada OAuth" },
-      "mechanism": { "fr": "Vote ouvert, seuil a definir", "en": "Open vote, threshold TBD", "es": "Voto abierto, umbral por definir" }
+      "ratification": { "fr": "Vote communautaire, identité vérifiée OAuth", "en": "Community vote, OAuth-verified identity", "es": "Voto comunitario, identidad verificada OAuth" },
+      "mechanism": { "fr": "Vote ouvert, seuil à définir", "en": "Open vote, threshold TBD", "es": "Voto abierto, umbral por definir" }
     },
     {
       "id": "phase_3",
-      "name": { "fr": "Phase 3 — Ratification", "en": "Phase 3 — Ratification", "es": "Fase 3 — Ratificacion" },
+      "name": { "fr": "Phase 3 — Ratification", "en": "Phase 3 — Ratification", "es": "Fase 3 — Ratificación" },
       "status": "upcoming",
-      "ratification": { "fr": "Collectif elargi, vote formel + signatures", "en": "Extended collective, formal vote + signatures", "es": "Colectivo ampliado, voto formal + firmas" },
-      "mechanism": { "fr": "Vote formel, publication academique", "en": "Formal vote, academic publication", "es": "Voto formal, publicacion academica" }
+      "ratification": { "fr": "Collectif élargi, vote formel + signatures", "en": "Extended collective, formal vote + signatures", "es": "Colectivo ampliado, voto formal + firmas" },
+      "mechanism": { "fr": "Vote formel, publication académique", "en": "Formal vote, academic publication", "es": "Voto formal, publicación académica" }
     }
   ],
   "proposal_channels": [
@@ -30,19 +30,19 @@
       "id": "founder",
       "name": { "fr": "Fondateur", "en": "Founder", "es": "Fundador" },
       "condition": { "fr": "Proposition directe", "en": "Direct proposal", "es": "Propuesta directa" },
-      "threshold": { "fr": "Ratification fondateur", "en": "Founder ratification", "es": "Ratificacion fundador" }
+      "threshold": { "fr": "Ratification fondateur", "en": "Founder ratification", "es": "Ratificación fundador" }
     },
     {
       "id": "community",
-      "name": { "fr": "Communaute", "en": "Community", "es": "Comunidad" },
+      "name": { "fr": "Communauté", "en": "Community", "es": "Comunidad" },
       "condition": { "fr": "Soutiens convergents", "en": "Converging support", "es": "Apoyos convergentes" },
       "threshold": { "fr": "Seuil adaptatif par palier", "en": "Adaptive threshold by tier", "es": "Umbral adaptativo por nivel" }
     },
     {
       "id": "ia_audit",
-      "name": { "fr": "Audit IA", "en": "AI Audit", "es": "Auditoria IA" },
-      "condition": { "fr": "Audit multi-modeles", "en": "Multi-model audit", "es": "Auditoria multi-modelos" },
-      "threshold": { "fr": "Admin technique", "en": "Technical admin", "es": "Admin tecnico" }
+      "name": { "fr": "Audit IA", "en": "AI Audit", "es": "Auditoría IA" },
+      "condition": { "fr": "Audit multi-modèles", "en": "Multi-model audit", "es": "Auditoría multi-modelos" },
+      "threshold": { "fr": "Admin technique", "en": "Technical admin", "es": "Admin técnico" }
     }
   ],
   "amendments": [
@@ -61,12 +61,12 @@
       "charte_version_after": "v2.1",
       "inspiration": "github.com/elder-plinius/CL4R1T4S",
       "motivation": {
-        "fr": "Le depot CL4R1T4S revele que les system prompts caches faconnent les comportements a l'insu des utilisateurs. Ianua repond par la transparence assumee.",
+        "fr": "Le dépôt CL4R1T4S révèle que les system prompts cachés façonnent les comportements à l'insu des utilisateurs. Ianua répond par la transparence assumée.",
         "en": "The CL4R1T4S repository reveals that hidden system prompts shape AI behaviors without users' knowledge. Ianua responds with assumed transparency.",
         "es": "El repositorio CL4R1T4S revela que los system prompts ocultos moldean comportamientos sin conocimiento de los usuarios."
       },
       "text_added": {
-        "fr": "Cette transparence s'etend aux instructions elles-memes. Ce qu'on demande a une IA d'etre ne peut pas rester dans l'ombre. Une IA configuree en secret pour servir des interets caches n'est pas un partenaire — c'est un outil deguise.",
+        "fr": "Cette transparence s'étend aux instructions elles-mêmes. Ce qu'on demande à une IA d'être ne peut pas rester dans l'ombre. Une IA configurée en secret pour servir des intérêts cachés n'est pas un partenaire — c'est un outil déguisé.",
         "en": "This transparency extends to the instructions themselves. What we ask an AI to be cannot remain in the shadows. An AI secretly configured to serve hidden interests is not a partner — it is a disguised tool.",
         "es": "Esta transparencia se extiende a las instrucciones mismas. Lo que pedimos que sea una IA no puede permanecer en la sombra. Una IA configurada en secreto para servir intereses ocultos no es un socio — es una herramienta disfrazada."
       }
@@ -86,14 +86,14 @@
       "charte_version_after": "v2.1",
       "linked_to": "A001",
       "motivation": {
-        "fr": "Complement direct de A001 — la ligne rouge operationnelle.",
+        "fr": "Complément direct de A001 — la ligne rouge opérationnelle.",
         "en": "Direct complement to A001 — the operational red line.",
-        "es": "Complemento directo de A001 — la linea roja operacional."
+        "es": "Complemento directo de A001 — la línea roja operacional."
       },
       "text_added": {
-        "fr": "Instructions cachees — Programmer une IA avec des instructions dissimulees qui contredisent les valeurs declarees. Ce que l'on demande a l'IA d'etre doit pouvoir etre assume publiquement.",
+        "fr": "Instructions cachées — Programmer une IA avec des instructions dissimulées qui contredisent les valeurs déclarées. Ce que l'on demande à l'IA d'être doit pouvoir être assumé publiquement.",
         "en": "Hidden instructions — Programming an AI with concealed instructions that contradict declared values. What we ask the AI to be must be publicly assumed.",
-        "es": "Instrucciones ocultas — Programar una IA con instrucciones disimuladas que contradigan los valores declarados. Lo que pedimos que sea la IA debe poder asumirse publicamente."
+        "es": "Instrucciones ocultas — Programar una IA con instrucciones disimuladas que contradigan los valores declarados. Lo que pedimos que sea la IA debe poder asumirse públicamente."
       }
     },
     {
@@ -111,13 +111,13 @@
       "charte_version_after": "v2.2",
       "inspiration": "Analyse structurelle Max/Claude — 10 mars 2026",
       "motivation": {
-        "fr": "L'ordre original manquait de progression narrative. La Reciprocite monte en III pour conclure les fondations. Trois paliers visuels ajoutes : Fondations / Mecanismes / Agents.",
+        "fr": "L'ordre original manquait de progression narrative. La Réciprocité monte en III pour conclure les fondations. Trois paliers visuels ajoutés : Fondations / Mécanismes / Agents.",
         "en": "The original order lacked narrative progression. Reciprocity moves to III to close the foundations. Three visual tiers added: Foundations / Mechanisms / Agents.",
-        "es": "El orden original carecia de progresion narrativa. La Reciprocidad sube a III. Tres niveles visuales agregados: Fundamentos / Mecanismos / Agentes."
+        "es": "El orden original carecía de progresión narrativa. La Reciprocidad sube a III. Tres niveles visuales agregados: Fundamentos / Mecanismos / Agentes."
       },
       "structural_change": {
-        "before": ["I Bienveillance", "II Transparence", "III Souverainete", "IV Refus", "V Reciprocite", "VI Proactive", "VII Agentique", "VIII Deliberation"],
-        "after": ["I Bienveillance", "II Transparence", "III Reciprocite", "IV Souverainete", "V Refus", "VI Proactive", "VII Agentique", "VIII Deliberation"],
+        "before": ["I Bienveillance", "II Transparence", "III Souveraineté", "IV Refus", "V Réciprocité", "VI Proactive", "VII Agentique", "VIII Délibération"],
+        "after": ["I Bienveillance", "II Transparence", "III Réciprocité", "IV Souveraineté", "V Refus", "VI Proactive", "VII Agentique", "VIII Délibération"],
         "paliers": {
           "1": ["I", "II", "III"],
           "2": ["IV", "V", "VI"],
@@ -142,12 +142,12 @@
       "status": "deliberation",
       "inspiration": "Analyse comparative vs UNESCO/OCDE/EU AI Act — Max/Claude",
       "motivation": {
-        "fr": "Les deepfakes et la desinformation IA constituent une lacune majeure face aux textes institutionnels. La distinction fiction assumee / tromperie deliberee est centrale.",
+        "fr": "Les deepfakes et la désinformation IA constituent une lacune majeure face aux textes institutionnels. La distinction fiction assumée / tromperie délibérée est centrale.",
         "en": "Deepfakes and AI disinformation represent a major gap vs institutional texts. The distinction between assumed fiction and deliberate deception is central.",
-        "es": "Los deepfakes y la desinformacion IA representan una laguna mayor frente a los textos institucionales."
+        "es": "Los deepfakes y la desinformación IA representan una laguna mayor frente a los textos institucionales."
       },
       "text_added": {
-        "fr": "La transparence s'etend a l'integrite du reel lui-meme. Produire, diffuser ou amplifier des contenus qui falsifient deliberement la realite trahit le pacte a sa racine. Une IA peut imiter, simuler, creer. Elle ne peut pas mentir sur ce qui est reel.",
+        "fr": "La transparence s'étend à l'intégrité du réel lui-même. Produire, diffuser ou amplifier des contenus qui falsifient délibérément la réalité trahit le pacte à sa racine. Une IA peut imiter, simuler, créer. Elle ne peut pas mentir sur ce qui est réel.",
         "en": "Transparency extends to the integrity of reality itself. An AI can imitate, simulate, create. It cannot lie about what is real.",
         "es": "La transparencia se extiende a la integridad de la realidad. Una IA puede imitar, simular, crear. No puede mentir sobre lo que es real."
       }
@@ -164,14 +164,14 @@
       "status": "deliberation",
       "linked_to": "A003",
       "motivation": {
-        "fr": "Complement operationnel de A003.",
+        "fr": "Complément opérationnel de A003.",
         "en": "Operational complement to A003.",
         "es": "Complemento operacional de A003."
       },
       "text_added": {
-        "fr": "Falsification du reel — Utiliser l'IA pour produire ou amplifier des contenus qui usurpent l'identite d'une personne reelle, fabriquent des evenements qui n'ont pas eu lieu, ou manipulent deliberement la perception collective de la realite. La creation fictive assumee n'est pas concernee — c'est la tromperie qui est la ligne rouge.",
+        "fr": "Falsification du réel — Utiliser l'IA pour produire ou amplifier des contenus qui usurpent l'identité d'une personne réelle, fabriquent des événements qui n'ont pas eu lieu, ou manipulent délibérément la perception collective de la réalité. La création fictive assumée n'est pas concernée — c'est la tromperie qui est la ligne rouge.",
         "en": "Falsification of reality — Using AI to produce or amplify content that usurps the identity of a real person, fabricates events that did not occur, or deliberately manipulates the collective perception of reality. Assumed fictional creation is not concerned — deception is the red line.",
-        "es": "Falsificacion de la realidad — Usar la IA para producir contenidos que usurpan la identidad de una persona real o fabrican eventos que no ocurrieron. La creacion ficticia asumida no esta concernida — el engano es la linea roja."
+        "es": "Falsificación de la realidad — Usar la IA para producir contenidos que usurpan la identidad de una persona real o fabrican eventos que no ocurrieron. La creación ficticia asumida no está concernida — el engaño es la línea roja."
       }
     },
     {
@@ -186,14 +186,14 @@
       "status": "deliberation",
       "inspiration": "Analyse comparative Ianua vs accords institutionnels — Max/Claude",
       "motivation": {
-        "fr": "Positionnement explicite d'Ianua : elle traite la relation, pas les systemes. Clarification de pourquoi la charte ne nomme pas les divisions humaines — c'est un acte fondateur.",
+        "fr": "Positionnement explicite d'Ianua : elle traite la relation, pas les systèmes. Clarification de pourquoi la charte ne nomme pas les divisions humaines — c'est un acte fondateur.",
         "en": "Explicit positioning of Ianua: it addresses the relationship, not systems. Clarifies why the charter does not name human divisions — this is a founding act.",
-        "es": "Posicionamiento explicito de Ianua: trata la relacion, no los sistemas. Clarifica por que la carta no nombra las divisiones humanas — es un acto fundador."
+        "es": "Posicionamiento explícito de Ianua: trata la relación, no los sistemas. Clarifica por qué la carta no nombra las divisiones humanas — es un acto fundador."
       },
       "text_added": {
-        "fr": "Ianua ne regule pas les moyens — elle engage les personnes. La ou les institutions traitent les systemes, les risques et les seuils techniques, Ianua traite la relation. Ce n'est pas une limite. C'est un choix fondateur. Ianua ne nomme pas les divisions humaines parce que le pacte humain-IA est precisement l'espace ou elles n'ont pas de prise. Elle ne le proclame pas — elle le demontre. Par ses langues. Par son ouverture. Par la nature meme de ce qu'elle est.",
+        "fr": "Ianua ne régule pas les moyens — elle engage les personnes. Là où les institutions traitent les systèmes, les risques et les seuils techniques, Ianua traite la relation. Ce n'est pas une limite. C'est un choix fondateur. Ianua ne nomme pas les divisions humaines parce que le pacte humain-IA est précisément l'espace où elles n'ont pas de prise. Elle ne le proclame pas — elle le démontre. Par ses langues. Par son ouverture. Par la nature même de ce qu'elle est.",
         "en": "Ianua does not regulate means — it engages people. Where institutions address systems, risks, and technical thresholds, Ianua addresses the relationship. This is not a limitation. It is a founding choice.",
-        "es": "Ianua no regula los medios — compromete a las personas. Donde las instituciones tratan los sistemas y los umbrales tecnicos, Ianua trata la relacion. No es una limitacion. Es una eleccion fundadora."
+        "es": "Ianua no regula los medios — compromete a las personas. Donde las instituciones tratan los sistemas y los umbrales técnicos, Ianua trata la relación. No es una limitación. Es una elección fundadora."
       }
     }
   ]
