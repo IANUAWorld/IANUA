@@ -376,8 +376,21 @@
     }
 
     // ── Vote action ─────────────────────────────
+    let voteInProgress = {};
+
     async function vote(amendmentId, voteValue) {
+        // Prevent double-click
+        if (voteInProgress[amendmentId]) return;
+        voteInProgress[amendmentId] = true;
+
         const comment = document.getElementById(`comment-${amendmentId}`)?.value?.trim() || null;
+
+        // Immediate visual feedback — highlight the clicked button
+        const section = document.getElementById(`vote-section-${amendmentId}`);
+        if (section) {
+            section.querySelectorAll('.btn-vote').forEach(btn => btn.classList.remove('active'));
+            section.querySelector(`.btn-vote.${voteValue.toLowerCase()}`)?.classList.add('active');
+        }
 
         try {
             const resp = await fetch(`${API}/amendments/${amendmentId}/vote`, {
@@ -399,10 +412,36 @@
                 return;
             }
 
-            // Reload votes and counters
-            loadAmendments();
+            // Update only the counters for this amendment, not the whole page
+            await updateAmendmentCounters(amendmentId);
+            await loadVotes(amendmentId);
         } catch (err) {
             alert('Erreur de connexion');
+        } finally {
+            voteInProgress[amendmentId] = false;
+        }
+    }
+
+    async function updateAmendmentCounters(amendmentId) {
+        try {
+            const resp = await fetch(`${API}/amendments/voting`);
+            const data = await resp.json();
+            const updated = (data.amendments || []).find(a => a.id === amendmentId);
+            if (updated) {
+                // Update the local data
+                const idx = amendments.findIndex(a => a.id === amendmentId);
+                if (idx >= 0) amendments[idx] = updated;
+
+                // Re-render only the results bars
+                const resultsEl = document.getElementById(`results-${amendmentId}`);
+                if (resultsEl) {
+                    const total = (updated.votes_for || 0) + (updated.votes_against || 0) + (updated.votes_abstain || 0);
+                    resultsEl.innerHTML = `<div class="results-title">Resultats</div>` +
+                        renderBars(updated.votes_for || 0, updated.votes_against || 0, updated.votes_abstain || 0, total);
+                }
+            }
+        } catch (err) {
+            console.error('Failed to update counters:', err);
         }
     }
 
@@ -457,7 +496,8 @@
     // ── Polling ─────────────────────────────────
     function startPolling() {
         pollingInterval = setInterval(() => {
-            loadAmendments();
+            // Only update counters, don't re-render the whole page
+            amendments.forEach(a => updateAmendmentCounters(a.id));
         }, 30000);
     }
 
