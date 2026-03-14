@@ -75,17 +75,17 @@ async def verify_magic_link(token: str, db: AsyncSession = Depends(get_db)):
     magic_token = result.scalar_one_or_none()
 
     if not magic_token:
-        return RedirectResponse(url=f"{BASE_URL}/vote.html?error=invalid")
+        return RedirectResponse(url=f"{BASE_URL}/gouvernance?error=invalid")
 
     if magic_token.used:
-        return RedirectResponse(url=f"{BASE_URL}/vote.html?error=used")
+        return RedirectResponse(url=f"{BASE_URL}/gouvernance?error=used")
 
     now = datetime.utcnow()
     expires = magic_token.expires_at
     if expires.tzinfo is not None:
         expires = expires.replace(tzinfo=None)
     if now > expires:
-        return RedirectResponse(url=f"{BASE_URL}/vote.html?error=expired")
+        return RedirectResponse(url=f"{BASE_URL}/gouvernance?error=expired")
 
     # Mark token as used
     magic_token.used = True
@@ -98,12 +98,12 @@ async def verify_magic_link(token: str, db: AsyncSession = Depends(get_db)):
     signer = signer_result.scalar_one_or_none()
 
     if not signer:
-        return RedirectResponse(url=f"{BASE_URL}/vote.html?error=invalid")
+        return RedirectResponse(url=f"{BASE_URL}/gouvernance?error=invalid")
 
     # Create JWT
     jwt_token = create_jwt(signer_id=signer.id, display_name=signer.pseudo)
 
-    response = RedirectResponse(url=f"{BASE_URL}/vote.html", status_code=307)
+    response = RedirectResponse(url=f"{BASE_URL}/gouvernance#deliberation", status_code=307)
     response.set_cookie(
         key=COOKIE_NAME,
         value=jwt_token,
