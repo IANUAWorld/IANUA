@@ -24,6 +24,10 @@ from models import Subscriber, Comment, Reaction, Amendment, AmendmentVote, Sign
 from email_service import send_confirmation_email, send_signature_confirmation
 from auth import router as auth_router
 from voting import router as voting_router
+from crons import router as crons_router
+from proposals import router as proposals_router
+from governance import router as governance_router
+from audit_ia import router as audit_router
 
 # ── App ──────────────────────────────────────────
 app = FastAPI(title="Ianua API", version="1.0.0")
@@ -70,6 +74,10 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 app.include_router(auth_router)
 app.include_router(voting_router)
+app.include_router(crons_router)
+app.include_router(proposals_router)
+app.include_router(governance_router)
+app.include_router(audit_router)
 
 # ── Config ───────────────────────────────────────
 ADMIN_KEY = os.getenv("ADMIN_KEY", "")

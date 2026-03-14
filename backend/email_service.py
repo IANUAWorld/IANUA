@@ -182,6 +182,108 @@ async def send_magic_link_email(email: str, token: str, lang: str = "fr") -> boo
     return await _send_via_brevo(email, template["subject"], body)
 
 
+# ── Tier requalification notification ─────────────
+TIER_REQUALIFIED_TEMPLATES = {
+    "fr": {
+        "subject": "Ianua — Palier de votre proposition requalifie",
+        "body": """Votre proposition [{code}] "{title}" a ete requalifiee.
+
+Ancien palier : {old_tier}
+Nouveau palier : {new_tier}
+Raison : {reason}
+
+Consultez la gouvernance : {base_url}/gouvernance
+
+— Ianua · ianua.world""",
+    },
+    "en": {
+        "subject": "Ianua — Your proposal tier was requalified",
+        "body": """Your proposal [{code}] "{title}" has been requalified.
+
+Previous tier: {old_tier}
+New tier: {new_tier}
+Reason: {reason}
+
+View governance: {base_url}/gouvernance
+
+— Ianua · ianua.world""",
+    },
+    "es": {
+        "subject": "Ianua — Nivel de su propuesta reclasificado",
+        "body": """Su propuesta [{code}] "{title}" ha sido reclasificada.
+
+Nivel anterior: {old_tier}
+Nuevo nivel: {new_tier}
+Razon: {reason}
+
+Ver gobernanza: {base_url}/gouvernance
+
+— Ianua · ianua.world""",
+    },
+}
+
+# ── Abuse deletion notification ───────────────────
+ABUSE_DELETION_TEMPLATES = {
+    "fr": {
+        "subject": "Ianua — Votre proposition a ete supprimee",
+        "body": """Votre proposition [{code}] "{title}" a ete supprimee pour le motif suivant :
+
+{reason}
+
+Voie : {via}
+
+Le log de cette action est consultable publiquement sur :
+{base_url}/transparence
+
+— Ianua · ianua.world""",
+    },
+    "en": {
+        "subject": "Ianua — Your proposal has been removed",
+        "body": """Your proposal [{code}] "{title}" has been removed for the following reason:
+
+{reason}
+
+Via: {via}
+
+The log of this action is publicly available at:
+{base_url}/transparence
+
+— Ianua · ianua.world""",
+    },
+    "es": {
+        "subject": "Ianua — Su propuesta ha sido eliminada",
+        "body": """Su propuesta [{code}] "{title}" ha sido eliminada por el siguiente motivo:
+
+{reason}
+
+Via: {via}
+
+El registro de esta accion esta disponible publicamente en:
+{base_url}/transparence
+
+— Ianua · ianua.world""",
+    },
+}
+
+BASE_URL_FOR_TEMPLATES = os.getenv("BASE_URL", "https://ianua.world")
+
+
+async def send_tier_requalified_email(email: str, code: str, title: str, old_tier: str, new_tier: str, reason: str, lang: str = "fr") -> bool:
+    if lang not in TIER_REQUALIFIED_TEMPLATES:
+        lang = "en"
+    template = TIER_REQUALIFIED_TEMPLATES[lang]
+    body = template["body"].format(code=code, title=title, old_tier=old_tier, new_tier=new_tier, reason=reason, base_url=BASE_URL_FOR_TEMPLATES)
+    return await _send_via_brevo(email, template["subject"], body)
+
+
+async def send_abuse_deletion_email(email: str, code: str, title: str, reason: str, via: str, lang: str = "fr") -> bool:
+    if lang not in ABUSE_DELETION_TEMPLATES:
+        lang = "en"
+    template = ABUSE_DELETION_TEMPLATES[lang]
+    body = template["body"].format(code=code, title=title, reason=reason, via=via, base_url=BASE_URL_FOR_TEMPLATES)
+    return await _send_via_brevo(email, template["subject"], body)
+
+
 async def send_signature_confirmation(email: str, pseudo: str, token: str, lang: str = "fr") -> bool:
     if lang not in SIGNATURE_TEMPLATES:
         lang = "en"

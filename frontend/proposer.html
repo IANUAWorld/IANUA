@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ianua — Proposer un amendement</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <meta name="description" content="Proposez un amendement a la charte Ianua">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #C9A84C;
+            --gold-light: #E8C97A;
+            --gold-dim: rgba(201,168,76,0.15);
+            --cyan: #2E9CCA;
+            --green: #2ECA8C;
+            --red: #CA2E2E;
+            --dark: #0D0D1A;
+            --dark2: #13131F;
+            --dark3: #1A1A2E;
+            --grey: #8A8A9A;
+            --light: #E8E8F0;
+            --white: #F5F5FA;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--dark);
+            color: var(--light);
+            font-family: 'Cormorant Garamond', serif;
+            min-height: 100vh;
+        }
+
+        /* ── Nav ─── */
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: var(--dark2); border-bottom: 1px solid rgba(201,168,76,0.2); }
+        .nav-logo { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.4rem; text-decoration: none; }
+        .nav-right { display: flex; align-items: center; gap: 1rem; font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem; }
+        .nav-right a { color: var(--grey); text-decoration: none; }
+        .nav-right a:hover { color: var(--gold); }
+        .breadcrumb { padding: 0.8rem 2rem; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; color: var(--grey); }
+        .breadcrumb a { color: var(--gold); text-decoration: none; }
+        .user-name { color: var(--gold); }
+        .btn-logout { background: none; border: 1px solid var(--grey); color: var(--grey); padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; }
+        .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* ── Page ─── */
+        .page-header { text-align: center; padding: 2rem 2rem 1rem; }
+        .page-header h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2rem; font-weight: 600; }
+        .page-header p { color: var(--grey); font-size: 1.1rem; margin-top: 0.5rem; }
+
+        /* ── Login ─── */
+        .login-section { max-width: 500px; margin: 2rem auto; padding: 2rem; background: var(--dark2); border-radius: 8px; border: 1px solid rgba(201,168,76,0.2); text-align: center; }
+        .login-section h2 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 1rem; font-size: 1.3rem; }
+        .login-section p { color: var(--grey); margin-bottom: 1.5rem; font-size: 0.95rem; }
+        .login-form { display: flex; gap: 0.5rem; }
+        .login-form input { flex: 1; padding: 0.7rem 1rem; background: var(--dark3); border: 1px solid var(--grey); border-radius: 4px; color: var(--light); font-family: 'Source Sans 3', sans-serif; }
+        .login-form input:focus { border-color: var(--gold); outline: none; }
+        .btn-primary { background: var(--gold); color: var(--dark); padding: 0.7rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-weight: 600; }
+        .btn-primary:hover { background: var(--gold-light); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .login-msg { margin-top: 1rem; font-size: 0.9rem; }
+        .login-msg.success { color: var(--green); }
+        .login-msg.error { color: var(--red); }
+
+        /* ── Sections ─── */
+        .content { max-width: 900px; margin: 0 auto; padding: 0 1rem 2rem; }
+        .section-title { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.4rem; font-weight: 600; margin: 2rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(201,168,76,0.2); }
+
+        /* ── Draft cards ─── */
+        .draft-card { background: var(--dark2); border-radius: 8px; border: 1px solid rgba(201,168,76,0.15); margin-bottom: 1rem; padding: 1.2rem 1.5rem; }
+        .draft-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+        .draft-title { font-family: 'Source Sans 3', sans-serif; font-weight: 600; color: var(--light); font-size: 1.05rem; }
+        .draft-meta { font-family: 'Source Sans 3', sans-serif; font-size: 0.8rem; color: var(--grey); display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+        .draft-meta span { display: inline-flex; align-items: center; gap: 0.3rem; }
+        .draft-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .btn-action { padding: 0.4rem 1rem; border: 1px solid; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; background: transparent; transition: all 0.2s; }
+        .btn-action.edit { border-color: var(--cyan); color: var(--cyan); }
+        .btn-action.edit:hover { background: var(--cyan); color: var(--dark); }
+        .btn-action.preview { border-color: var(--gold); color: var(--gold); }
+        .btn-action.preview:hover { background: var(--gold); color: var(--dark); }
+        .btn-action.share { border-color: var(--grey); color: var(--grey); }
+        .btn-action.share:hover { background: var(--grey); color: var(--dark); }
+        .btn-action.submit { border-color: var(--green); color: var(--green); }
+        .btn-action.submit:hover { background: var(--green); color: var(--dark); }
+        .btn-action.delete { border-color: var(--red); color: var(--red); }
+        .btn-action.delete:hover { background: var(--red); color: var(--white); }
+        .btn-action.withdraw { border-color: var(--red); color: var(--red); }
+        .btn-action.withdraw:hover { background: var(--red); color: var(--white); }
+
+        .btn-new { display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 1.5rem; }
+
+        /* ── Form ─── */
+        .proposal-form { background: var(--dark2); border-radius: 8px; border: 1px solid rgba(201,168,76,0.2); padding: 1.5rem; margin-bottom: 2rem; display: none; }
+        .proposal-form.visible { display: block; }
+        .form-title { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.2rem; margin-bottom: 1.2rem; }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; font-family: 'Source Sans 3', sans-serif; font-weight: 600; color: var(--light); font-size: 0.9rem; margin-bottom: 0.4rem; }
+        .form-group .hint { font-family: 'Source Sans 3', sans-serif; font-size: 0.8rem; color: var(--grey); margin-bottom: 0.4rem; }
+        .form-group select,
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            background: var(--dark3);
+            border: 1px solid var(--grey);
+            border-radius: 4px;
+            color: var(--light);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.95rem;
+        }
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus { border-color: var(--gold); outline: none; }
+        .form-group textarea { resize: vertical; min-height: 100px; }
+        .form-group select { cursor: pointer; }
+        .form-group select option { background: var(--dark3); color: var(--light); }
+        .form-group input:read-only,
+        .form-group textarea:read-only { opacity: 0.6; cursor: not-allowed; }
+        .form-group input:disabled,
+        .form-group select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .type-selector { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .type-btn { flex: 1; padding: 0.8rem; border: 2px solid var(--grey); border-radius: 4px; background: transparent; color: var(--grey); cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-weight: 600; font-size: 0.9rem; text-align: center; transition: all 0.2s; }
+        .type-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .type-btn.active { border-color: var(--gold); background: var(--gold-dim); color: var(--gold); }
+
+        .tier-info { font-family: 'Source Sans 3', sans-serif; font-size: 0.8rem; color: var(--grey); padding: 0.6rem 0.8rem; background: var(--dark3); border-radius: 4px; margin-top: 0.4rem; line-height: 1.4; }
+        .tier-info strong { color: var(--gold); }
+
+        .form-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.5rem; }
+        .btn-cancel { background: none; border: 1px solid var(--grey); color: var(--grey); padding: 0.7rem 1.5rem; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-weight: 600; }
+        .btn-cancel:hover { border-color: var(--light); color: var(--light); }
+
+        /* ── Diff preview ─── */
+        .diff-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: center; justify-content: center; }
+        .diff-overlay.visible { display: flex; }
+        .diff-modal { background: var(--dark2); border: 1px solid rgba(201,168,76,0.3); border-radius: 8px; padding: 2rem; max-width: 700px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .diff-modal h3 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 1rem; }
+        .diff-block { background: var(--dark3); border-radius: 4px; padding: 1rem; margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.6; }
+        .diff-before { color: var(--red); text-decoration: line-through; opacity: 0.7; }
+        .diff-after { color: var(--green); }
+        .diff-close { margin-top: 1rem; }
+
+        /* ── Share link ─── */
+        .share-link { font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; color: var(--cyan); word-break: break-all; margin-top: 0.4rem; padding: 0.4rem 0.6rem; background: var(--dark3); border-radius: 4px; display: none; }
+        .share-link.visible { display: block; }
+
+        /* ── Submitted cards ─── */
+        .submitted-card { background: var(--dark2); border-radius: 8px; border: 1px solid rgba(201,168,76,0.15); margin-bottom: 1rem; padding: 1.2rem 1.5rem; }
+        .submitted-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+        .submitted-code { font-family: 'Source Sans 3', sans-serif; font-weight: 600; color: var(--gold); font-size: 1.05rem; }
+        .submitted-status { font-family: 'Source Sans 3', sans-serif; font-size: 0.75rem; padding: 0.2rem 0.6rem; border-radius: 12px; }
+        .submitted-status.proposed { background: rgba(46,156,202,0.2); color: var(--cyan); }
+        .submitted-status.deliberation { background: rgba(201,168,76,0.2); color: var(--gold); }
+        .submitted-status.accepted { background: rgba(46,202,140,0.2); color: var(--green); }
+        .submitted-status.rejected { background: rgba(202,46,46,0.2); color: var(--red); }
+        .submitted-status.withdrawn { background: rgba(138,138,154,0.2); color: var(--grey); }
+        .submitted-meta { font-family: 'Source Sans 3', sans-serif; font-size: 0.8rem; color: var(--grey); display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.8rem; }
+
+        /* ── Empty state ─── */
+        .empty-state { text-align: center; padding: 2rem; color: var(--grey); font-family: 'Source Sans 3', sans-serif; font-size: 0.95rem; }
+
+        /* ── Footer ─── */
+        .footer { text-align: center; padding: 2rem; margin-top: 3rem; border-top: 1px solid rgba(201,168,76,0.1); }
+        .footer a { color: var(--grey); text-decoration: none; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; margin: 0 0.5rem; }
+        .footer a:hover { color: var(--gold); }
+
+        /* ── Loading ─── */
+        .loading { color: var(--grey); font-style: italic; text-align: center; padding: 1rem; font-family: 'Source Sans 3', sans-serif; }
+
+        @media (max-width: 768px) {
+            .nav { padding: 0.8rem 1rem; }
+            .page-header h1 { font-size: 1.5rem; }
+            .login-form { flex-direction: column; }
+            .type-selector { flex-direction: column; }
+            .draft-actions { flex-direction: column; }
+            .form-actions { flex-direction: column; }
+            .form-actions .btn-primary,
+            .form-actions .btn-cancel { width: 100%; text-align: center; }
+            .submitted-header { flex-direction: column; gap: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-logo">IANUA</a>
+        <div class="nav-right">
+            <a href="gouvernance.html">&larr; Gouvernance</a>
+            <span id="auth-status"></span>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <a href="gouvernance.html">Gouvernance</a> &rsaquo; Proposer
+    </div>
+
+    <div class="page-header">
+        <h1>Proposer un amendement</h1>
+        <p>Redigez, partagez et soumettez vos propositions de modification de la charte</p>
+    </div>
+
+    <!-- Login section (shown when not authenticated) -->
+    <div id="login-section" class="login-section" style="display:none;">
+        <h2>Se connecter pour proposer</h2>
+        <p>Entrez l'email utilise pour signer la charte</p>
+        <form class="login-form" id="login-form">
+            <input type="email" id="login-email" placeholder="votre@email.com" required>
+            <button type="submit" class="btn-primary">Envoyer le lien</button>
+        </form>
+        <div id="login-msg" class="login-msg"></div>
+    </div>
+
+    <!-- Main content (hidden until auth) -->
+    <div id="main-content" class="content" style="display:none;">
+
+        <!-- Section 1: Mes brouillons -->
+        <h2 class="section-title">Mes brouillons</h2>
+        <button class="btn-primary btn-new" onclick="openNewForm()">+ Nouveau brouillon</button>
+        <div id="drafts-list"><div class="loading">Chargement...</div></div>
+
+        <!-- Section 2: Formulaire de proposition -->
+        <div id="proposal-form" class="proposal-form">
+            <h3 class="form-title" id="form-title">Nouveau brouillon</h3>
+
+            <label class="form-group" style="margin-bottom:0.4rem;">
+                <span style="font-family:'Source Sans 3',sans-serif;font-weight:600;font-size:0.9rem;color:var(--light)">Type de proposition</span>
+            </label>
+            <div class="type-selector">
+                <button type="button" class="type-btn active" data-type="modification" onclick="selectType('modification')">Modification</button>
+                <button type="button" class="type-btn" data-type="ajout" onclick="selectType('ajout')">Ajout</button>
+                <button type="button" class="type-btn" data-type="suppression" onclick="selectType('suppression')">Suppression</button>
+            </div>
+
+            <form id="draft-form" onsubmit="saveDraft(event)">
+                <input type="hidden" id="draft-id" value="">
+
+                <!-- Modification fields -->
+                <div id="fields-modification">
+                    <div class="form-group">
+                        <label for="mod-principle">Principe a modifier</label>
+                        <select id="mod-principle" onchange="onPrincipleSelect()">
+                            <option value="">-- Selectionnez un principe --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="mod-text-before">Texte actuel</label>
+                        <textarea id="mod-text-before" readonly></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="mod-text-after">Texte propose</label>
+                        <textarea id="mod-text-after" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="mod-motivation">Motivation</label>
+                        <div class="hint">Expliquez pourquoi cette modification est necessaire</div>
+                        <textarea id="mod-motivation" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="mod-tier">Niveau (tier)</label>
+                        <select id="mod-tier">
+                            <option value="mineur">Mineur</option>
+                            <option value="substantiel">Substantiel</option>
+                            <option value="fondateur">Fondateur</option>
+                        </select>
+                        <div class="tier-info" id="mod-tier-info">
+                            <strong>Mineur :</strong> clarification, reformulation sans changement de sens.
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="mod-langue">Langue</label>
+                        <select id="mod-langue">
+                            <option value="fr">Francais</option>
+                            <option value="en">English</option>
+                            <option value="es">Espanol</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Ajout fields -->
+                <div id="fields-ajout" style="display:none;">
+                    <div class="form-group">
+                        <label for="ajout-text">Texte du nouveau principe</label>
+                        <textarea id="ajout-text" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ajout-position">Position suggeree</label>
+                        <div class="hint">Numero ou emplacement ou inserer le nouveau principe</div>
+                        <input type="text" id="ajout-position" placeholder="ex: apres le principe 7">
+                    </div>
+                    <div class="form-group">
+                        <label for="ajout-motivation">Motivation</label>
+                        <textarea id="ajout-motivation" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="ajout-tier">Niveau (tier)</label>
+                        <select id="ajout-tier" disabled>
+                            <option value="fondateur" selected>Fondateur</option>
+                        </select>
+                        <div class="tier-info">
+                            <strong>Fondateur :</strong> l'ajout d'un nouveau principe est toujours de niveau fondateur (lignes rouges, structure).
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ajout-langue">Langue</label>
+                        <select id="ajout-langue">
+                            <option value="fr">Francais</option>
+                            <option value="en">English</option>
+                            <option value="es">Espanol</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Suppression fields -->
+                <div id="fields-suppression" style="display:none;">
+                    <div class="form-group">
+                        <label for="sup-principle">Principe a supprimer</label>
+                        <select id="sup-principle" onchange="onSupPrincipleSelect()">
+                            <option value="">-- Selectionnez un principe --</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sup-text-before">Texte actuel</label>
+                        <textarea id="sup-text-before" readonly></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="sup-justification">Justification</label>
+                        <div class="hint">Justifiez pourquoi ce principe doit etre supprime (obligatoire)</div>
+                        <textarea id="sup-justification" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="sup-motivation">Motivation</label>
+                        <textarea id="sup-motivation" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="sup-tier">Niveau (tier)</label>
+                        <select id="sup-tier" disabled>
+                            <option value="fondateur" selected>Fondateur</option>
+                        </select>
+                        <div class="tier-info">
+                            <strong>Fondateur :</strong> la suppression d'un principe est toujours de niveau fondateur (lignes rouges, structure).
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="sup-langue">Langue</label>
+                        <select id="sup-langue">
+                            <option value="fr">Francais</option>
+                            <option value="en">English</option>
+                            <option value="es">Espanol</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn-cancel" onclick="closeForm()">Annuler</button>
+                    <button type="submit" class="btn-primary">Enregistrer le brouillon</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Section 3: Mes propositions soumises -->
+        <h2 class="section-title">Mes propositions soumises</h2>
+        <div id="submitted-list"><div class="loading">Chargement...</div></div>
+    </div>
+
+    <!-- Diff preview overlay -->
+    <div id="diff-overlay" class="diff-overlay" onclick="closeDiff(event)">
+        <div class="diff-modal" onclick="event.stopPropagation()">
+            <h3>Apercu des modifications</h3>
+            <div id="diff-content" class="diff-block"></div>
+            <button class="btn-primary diff-close" onclick="closeDiff()">Fermer</button>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <a href="gouvernance.html">Gouvernance</a>
+        <a href="https://github.com/IANUAWorld" target="_blank">GitHub</a>
+        <a href="https://x.com/ianua_world" target="_blank">X</a>
+        <a href="mailto:ianua@outlook.fr">Contact</a>
+    </footer>
+
+    <script>
+    const API = window.location.hostname === 'localhost'
+        ? 'http://localhost:8000'
+        : 'https://api.ianua.world';
+
+    let currentUser = null;
+    let drafts = [];
+    let principles = [];
+    let currentType = 'modification';
+    let editingDraftId = null;
+
+    // ── Auth ────────────────────────────────────
+    async function checkAuth() {
+        try {
+            const resp = await fetch(`${API}/auth/me`, { credentials: 'include' });
+            if (resp.ok) {
+                currentUser = await resp.json();
+                showAuthState(true);
+            } else {
+                showAuthState(false);
+            }
+        } catch {
+            showAuthState(false);
+        }
+    }
+
+    function showAuthState(loggedIn) {
+        const el = document.getElementById('auth-status');
+        const loginSection = document.getElementById('login-section');
+        const mainContent = document.getElementById('main-content');
+
+        if (loggedIn && currentUser) {
+            el.innerHTML = `<span class="user-name">${escapeHtml(currentUser.name)}</span> <button class="btn-logout" onclick="logout()">Deconnexion</button>`;
+            loginSection.style.display = 'none';
+            mainContent.style.display = 'block';
+            loadDrafts();
+            loadSubmitted();
+            loadPrinciples();
+        } else {
+            el.innerHTML = '<a href="#login-section">Se connecter</a>';
+            loginSection.style.display = 'block';
+            mainContent.style.display = 'none';
+        }
+    }
+
+    async function logout() {
+        await fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' });
+        currentUser = null;
+        showAuthState(false);
+    }
+
+    // ── Login form ──────────────────────────────
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const msgEl = document.getElementById('login-msg');
+
+        try {
+            const resp = await fetch(`${API}/auth/magic-link`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ email }),
+            });
+
+            if (resp.status === 429) {
+                msgEl.className = 'login-msg error';
+                msgEl.textContent = 'Trop de tentatives. Reessayez plus tard.';
+                return;
+            }
+
+            msgEl.className = 'login-msg success';
+            msgEl.textContent = 'Si cette adresse est associee a un signataire verifie, un lien de connexion a ete envoye. Verifiez votre boite mail.';
+        } catch {
+            msgEl.className = 'login-msg error';
+            msgEl.textContent = 'Erreur de connexion au serveur.';
+        }
+    });
+
+    // ── URL auth errors ─────────────────────────
+    const urlParams = new URLSearchParams(window.location.search);
+    const authError = urlParams.get('error');
+    if (authError) {
+        const msgEl = document.getElementById('login-msg');
+        const msgs = {
+            expired: 'Lien expire. Demandez-en un nouveau.',
+            used: 'Ce lien a deja ete utilise. Demandez-en un nouveau.',
+            invalid: 'Lien invalide.',
+        };
+        msgEl.className = 'login-msg error';
+        msgEl.textContent = msgs[authError] || 'Erreur d\'authentification.';
+        document.getElementById('login-section').style.display = 'block';
+        history.replaceState(null, '', window.location.pathname);
+    }
+
+    // ── Load principles ─────────────────────────
+    async function loadPrinciples() {
+        try {
+            const resp = await fetch(`${API}/charter/principles`);
+            if (resp.ok) {
+                const data = await resp.json();
+                principles = data.principles || data || [];
+                populatePrincipleSelects();
+            }
+        } catch (err) {
+            console.error('Failed to load principles:', err);
+        }
+    }
+
+    function populatePrincipleSelects() {
+        const selects = [
+            document.getElementById('mod-principle'),
+            document.getElementById('sup-principle'),
+        ];
+        selects.forEach(sel => {
+            // Keep first option
+            sel.innerHTML = '<option value="">-- Selectionnez un principe --</option>';
+            principles.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.id || p.number || '';
+                opt.textContent = (p.number ? p.number + '. ' : '') + (p.title || p.text || '').substring(0, 80);
+                sel.appendChild(opt);
+            });
+        });
+    }
+
+    function onPrincipleSelect() {
+        const sel = document.getElementById('mod-principle');
+        const p = principles.find(pr => String(pr.id || pr.number) === sel.value);
+        document.getElementById('mod-text-before').value = p ? (p.text || p.content || '') : '';
+    }
+
+    function onSupPrincipleSelect() {
+        const sel = document.getElementById('sup-principle');
+        const p = principles.find(pr => String(pr.id || pr.number) === sel.value);
+        document.getElementById('sup-text-before').value = p ? (p.text || p.content || '') : '';
+    }
+
+    // ── Tier info ───────────────────────────────
+    const tierDescriptions = {
+        mineur: '<strong>Mineur :</strong> clarification, reformulation sans changement de sens.',
+        substantiel: '<strong>Substantiel :</strong> modification du contenu d\'un principe existant.',
+        fondateur: '<strong>Fondateur :</strong> lignes rouges, structure fondamentale de la charte.',
+    };
+
+    document.getElementById('mod-tier').addEventListener('change', (e) => {
+        document.getElementById('mod-tier-info').innerHTML = tierDescriptions[e.target.value] || '';
+    });
+
+    // ── Type selection ──────────────────────────
+    function selectType(type) {
+        currentType = type;
+        document.querySelectorAll('.type-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.type === type);
+        });
+        document.getElementById('fields-modification').style.display = type === 'modification' ? 'block' : 'none';
+        document.getElementById('fields-ajout').style.display = type === 'ajout' ? 'block' : 'none';
+        document.getElementById('fields-suppression').style.display = type === 'suppression' ? 'block' : 'none';
+
+        // Toggle required attributes
+        toggleRequired('fields-modification', type === 'modification');
+        toggleRequired('fields-ajout', type === 'ajout');
+        toggleRequired('fields-suppression', type === 'suppression');
+    }
+
+    function toggleRequired(containerId, required) {
+        const container = document.getElementById(containerId);
+        container.querySelectorAll('textarea[required], select[required]').forEach(el => {
+            // We handle validation manually to avoid conflicts
+        });
+    }
+
+    // ── Form open/close ─────────────────────────
+    function openNewForm() {
+        editingDraftId = null;
+        document.getElementById('draft-id').value = '';
+        document.getElementById('form-title').textContent = 'Nouveau brouillon';
+        resetForm();
+        selectType('modification');
+        document.getElementById('proposal-form').classList.add('visible');
+        document.getElementById('proposal-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function closeForm() {
+        document.getElementById('proposal-form').classList.remove('visible');
+        editingDraftId = null;
+        resetForm();
+    }
+
+    function resetForm() {
+        document.getElementById('draft-form').reset();
+        document.getElementById('mod-text-before').value = '';
+        document.getElementById('sup-text-before').value = '';
+        document.getElementById('mod-tier-info').innerHTML = tierDescriptions.mineur;
+    }
+
+    // ── Edit draft ──────────────────────────────
+    function editDraft(draftId) {
+        const draft = drafts.find(d => d.id === draftId);
+        if (!draft) return;
+
+        editingDraftId = draftId;
+        document.getElementById('draft-id').value = draftId;
+        document.getElementById('form-title').textContent = 'Modifier le brouillon';
+
+        const type = draft.type || 'modification';
+        selectType(type);
+
+        if (type === 'modification') {
+            if (draft.principle_id) document.getElementById('mod-principle').value = draft.principle_id;
+            document.getElementById('mod-text-before').value = draft.text_before || '';
+            document.getElementById('mod-text-after').value = draft.text_after || '';
+            document.getElementById('mod-motivation').value = draft.motivation || '';
+            document.getElementById('mod-tier').value = draft.tier || 'mineur';
+            document.getElementById('mod-tier-info').innerHTML = tierDescriptions[draft.tier || 'mineur'];
+            if (draft.langue) document.getElementById('mod-langue').value = draft.langue;
+        } else if (type === 'ajout') {
+            document.getElementById('ajout-text').value = draft.text_after || '';
+            document.getElementById('ajout-position').value = draft.position || '';
+            document.getElementById('ajout-motivation').value = draft.motivation || '';
+            if (draft.langue) document.getElementById('ajout-langue').value = draft.langue;
+        } else if (type === 'suppression') {
+            if (draft.principle_id) document.getElementById('sup-principle').value = draft.principle_id;
+            document.getElementById('sup-text-before').value = draft.text_before || '';
+            document.getElementById('sup-justification').value = draft.justification || '';
+            document.getElementById('sup-motivation').value = draft.motivation || '';
+            if (draft.langue) document.getElementById('sup-langue').value = draft.langue;
+        }
+
+        document.getElementById('proposal-form').classList.add('visible');
+        document.getElementById('proposal-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ── Save draft ──────────────────────────────
+    async function saveDraft(e) {
+        e.preventDefault();
+
+        let body = { type: currentType };
+
+        if (currentType === 'modification') {
+            body.principle_id = document.getElementById('mod-principle').value;
+            body.text_before = document.getElementById('mod-text-before').value;
+            body.text_after = document.getElementById('mod-text-after').value;
+            body.motivation = document.getElementById('mod-motivation').value;
+            body.tier = document.getElementById('mod-tier').value;
+            body.langue = document.getElementById('mod-langue').value;
+
+            if (!body.principle_id || !body.text_after || !body.motivation) {
+                alert('Veuillez remplir tous les champs obligatoires.');
+                return;
+            }
+        } else if (currentType === 'ajout') {
+            body.text_after = document.getElementById('ajout-text').value;
+            body.position = document.getElementById('ajout-position').value;
+            body.motivation = document.getElementById('ajout-motivation').value;
+            body.tier = 'fondateur';
+            body.langue = document.getElementById('ajout-langue').value;
+
+            if (!body.text_after || !body.motivation) {
+                alert('Veuillez remplir tous les champs obligatoires.');
+                return;
+            }
+        } else if (currentType === 'suppression') {
+            body.principle_id = document.getElementById('sup-principle').value;
+            body.text_before = document.getElementById('sup-text-before').value;
+            body.justification = document.getElementById('sup-justification').value;
+            body.motivation = document.getElementById('sup-motivation').value;
+            body.tier = 'fondateur';
+            body.langue = document.getElementById('sup-langue').value;
+
+            if (!body.principle_id || !body.justification || !body.motivation) {
+                alert('Veuillez remplir tous les champs obligatoires.');
+                return;
+            }
+        }
+
+        try {
+            const draftId = document.getElementById('draft-id').value;
+            const url = draftId
+                ? `${API}/proposals/drafts/${draftId}`
+                : `${API}/proposals/drafts`;
+            const method = draftId ? 'PUT' : 'POST';
+
+            const resp = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(body),
+            });
+
+            if (resp.status === 401) {
+                currentUser = null;
+                showAuthState(false);
+                return;
+            }
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                alert(err.detail || 'Erreur lors de l\'enregistrement.');
+                return;
+            }
+
+            closeForm();
+            loadDrafts();
+        } catch (err) {
+            alert('Erreur de connexion au serveur.');
+        }
+    }
+
+    // ── Load drafts ─────────────────────────────
+    async function loadDrafts() {
+        try {
+            const resp = await fetch(`${API}/proposals/drafts`, { credentials: 'include' });
+            if (resp.status === 401) {
+                currentUser = null;
+                showAuthState(false);
+                return;
+            }
+            if (!resp.ok) throw new Error('Failed');
+
+            const data = await resp.json();
+            drafts = data.drafts || data || [];
+            renderDrafts();
+        } catch (err) {
+            document.getElementById('drafts-list').innerHTML = '<div class="empty-state">Impossible de charger les brouillons.</div>';
+        }
+    }
+
+    function renderDrafts() {
+        const container = document.getElementById('drafts-list');
+
+        if (drafts.length === 0) {
+            container.innerHTML = '<div class="empty-state">Aucun brouillon. Cliquez sur "Nouveau brouillon" pour commencer.</div>';
+            return;
+        }
+
+        container.innerHTML = drafts.map(d => {
+            const typeLabel = { modification: 'Modification', ajout: 'Ajout', suppression: 'Suppression' }[d.type] || d.type;
+            const tierLabel = { mineur: 'Mineur', substantiel: 'Substantiel', fondateur: 'Fondateur' }[d.tier] || d.tier;
+            const created = d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : '';
+            const title = d.title || d.motivation?.substring(0, 60) || 'Sans titre';
+
+            return `
+            <div class="draft-card">
+                <div class="draft-header">
+                    <span class="draft-title">${escapeHtml(title)}</span>
+                </div>
+                <div class="draft-meta">
+                    <span>Type : ${escapeHtml(typeLabel)}</span>
+                    ${d.principle_id ? `<span>Principe : ${escapeHtml(String(d.principle_id))}</span>` : ''}
+                    <span>Tier : ${escapeHtml(tierLabel)}</span>
+                    ${created ? `<span>Cree le ${created}</span>` : ''}
+                </div>
+                <div class="draft-actions">
+                    <button class="btn-action edit" onclick="editDraft('${d.id}')">Modifier</button>
+                    <button class="btn-action preview" onclick="previewDiff('${d.id}')">Apercu diff</button>
+                    <button class="btn-action share" onclick="shareDraft('${d.id}', this)">Partager</button>
+                    <button class="btn-action submit" onclick="submitDraft('${d.id}')">Soumettre</button>
+                    <button class="btn-action delete" onclick="deleteDraft('${d.id}')">Supprimer</button>
+                </div>
+                <div class="share-link" id="share-link-${d.id}"></div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Draft actions ───────────────────────────
+    function previewDiff(draftId) {
+        const draft = drafts.find(d => d.id === draftId);
+        if (!draft) return;
+
+        const content = document.getElementById('diff-content');
+        let html = '';
+
+        if (draft.type === 'suppression') {
+            html = `<div class="diff-before">${escapeHtml(draft.text_before || '')}</div>
+                    <div style="color:var(--grey);margin-top:0.5rem;font-style:italic;">Principe supprime</div>`;
+        } else if (draft.type === 'ajout') {
+            html = `<div style="color:var(--grey);margin-bottom:0.5rem;font-style:italic;">Nouveau principe</div>
+                    <div class="diff-after">${escapeHtml(draft.text_after || '')}</div>`;
+        } else {
+            if (draft.text_before) {
+                html += `<div class="diff-before">${escapeHtml(draft.text_before)}</div>`;
+            }
+            if (draft.text_after) {
+                html += `<div class="diff-after" style="margin-top:0.8rem;">${escapeHtml(draft.text_after)}</div>`;
+            }
+        }
+
+        content.innerHTML = html || '<em>Aucune modification a afficher.</em>';
+        document.getElementById('diff-overlay').classList.add('visible');
+    }
+
+    function closeDiff(e) {
+        if (e && e.target !== document.getElementById('diff-overlay')) return;
+        document.getElementById('diff-overlay').classList.remove('visible');
+    }
+
+    async function shareDraft(draftId, btnEl) {
+        try {
+            const resp = await fetch(`${API}/proposals/drafts/${draftId}/share`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+
+            if (resp.status === 401) {
+                currentUser = null;
+                showAuthState(false);
+                return;
+            }
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                alert(err.detail || 'Erreur lors du partage.');
+                return;
+            }
+
+            const data = await resp.json();
+            const linkEl = document.getElementById(`share-link-${draftId}`);
+            linkEl.textContent = data.link || data.url || 'Lien genere';
+            linkEl.classList.add('visible');
+
+            if (navigator.clipboard && data.link) {
+                navigator.clipboard.writeText(data.link).catch(() => {});
+            }
+        } catch (err) {
+            alert('Erreur de connexion au serveur.');
+        }
+    }
+
+    async function deleteDraft(draftId) {
+        if (!confirm('Supprimer ce brouillon ? Cette action est irreversible.')) return;
+
+        try {
+            const resp = await fetch(`${API}/proposals/drafts/${draftId}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+
+            if (resp.status === 401) {
+                currentUser = null;
+                showAuthState(false);
+                return;
+            }
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                alert(err.detail || 'Erreur lors de la suppression.');
+                return;
+            }
+
+            loadDrafts();
+        } catch (err) {
+            alert('Erreur de connexion au serveur.');
+        }
+    }
+
+    async function submitDraft(draftId) {
+        if (!confirm('Soumettre cette proposition ? Elle sera visible publiquement et soumise au processus de deliberation.')) return;
+
+        try {
+            const resp = await fetch(`${API}/proposals/drafts/${draftId}/submit`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+
+            if (resp.status === 401) {
+                currentUser = null;
+                showAuthState(false);
+                return;
+            }
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                alert(err.detail || 'Erreur lors de la soumission.');
+                return;
+            }
+
+            loadDrafts();
+            loadSubmitted();
+        } catch (err) {
+            alert('Erreur de connexion au serveur.');
+        }
+    }
+
+    // ── Submitted proposals ─────────────────────
+    async function loadSubmitted() {
+        try {
+            const resp = await fetch(`${API}/proposals/public`);
+            if (!resp.ok) throw new Error('Failed');
+
+            const data = await resp.json();
+            const all = data.proposals || data || [];
+            const mine = all.filter(p => p.author_id === (currentUser.sub || currentUser.id));
+            renderSubmitted(mine);
+        } catch (err) {
+            document.getElementById('submitted-list').innerHTML = '<div class="empty-state">Impossible de charger les propositions.</div>';
+        }
+    }
+
+    function renderSubmitted(proposals) {
+        const container = document.getElementById('submitted-list');
+
+        if (proposals.length === 0) {
+            container.innerHTML = '<div class="empty-state">Aucune proposition soumise.</div>';
+            return;
+        }
+
+        container.innerHTML = proposals.map(p => {
+            const tierLabel = { mineur: 'Mineur', substantiel: 'Substantiel', fondateur: 'Fondateur' }[p.tier] || p.tier;
+            const statusLabel = {
+                proposed: 'Proposee',
+                deliberation: 'En deliberation',
+                accepted: 'Acceptee',
+                rejected: 'Rejetee',
+                withdrawn: 'Retiree',
+            }[p.status] || p.status;
+            const statusClass = p.status || 'proposed';
+            const expires = p.expires_at ? new Date(p.expires_at).toLocaleDateString('fr-FR') : '';
+
+            return `
+            <div class="submitted-card">
+                <div class="submitted-header">
+                    <span class="submitted-code">${escapeHtml(p.code || p.id)}</span>
+                    <span class="submitted-status ${statusClass}">${escapeHtml(statusLabel)}</span>
+                </div>
+                <div style="font-family:'Source Sans 3',sans-serif;font-size:0.95rem;color:var(--light);margin-bottom:0.5rem;">
+                    ${escapeHtml(p.title || p.motivation?.substring(0, 80) || '')}
+                </div>
+                <div class="submitted-meta">
+                    <span>Tier : ${escapeHtml(tierLabel)}</span>
+                    <span>Soutiens : ${p.support_count ?? 0}</span>
+                    ${p.challenges_count !== undefined ? `<span>Contestations : ${p.challenges_count}</span>` : ''}
+                    ${expires ? `<span>Expire le ${expires}</span>` : ''}
+                </div>
+                ${p.status === 'proposed' ? `
+                <div class="draft-actions">
+                    <button class="btn-action withdraw" onclick="withdrawProposal('${p.id}')">Retirer</button>
+                </div>` : ''}
+            </div>`;
+        }).join('');
+    }
+
+    async function withdrawProposal(proposalId) {
+        if (!confirm('Retirer cette proposition ? Cette action est irreversible.')) return;
+
+        try {
+            const resp = await fetch(`${API}/proposals/${proposalId}/withdraw`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+
+            if (resp.status === 401) {
+                currentUser = null;
+                showAuthState(false);
+                return;
+            }
+
+            if (!resp.ok) {
+                const err = await resp.json();
+                alert(err.detail || 'Erreur lors du retrait.');
+                return;
+            }
+
+            loadSubmitted();
+        } catch (err) {
+            alert('Erreur de connexion au serveur.');
+        }
+    }
+
+    // ── Escape HTML ─────────────────────────────
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // ── Init ────────────────────────────────────
+    checkAuth();
+    </script>
+</body>
+</html>

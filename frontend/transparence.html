@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ianua — Transparence</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <meta name="description" content="Log public des actions administratives sur les propositions Ianua">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #C9A84C;
+            --gold-light: #E8C97A;
+            --gold-dim: rgba(201,168,76,0.15);
+            --cyan: #2E9CCA;
+            --green: #2ECA8C;
+            --red: #CA2E2E;
+            --dark: #0D0D1A;
+            --dark2: #13131F;
+            --dark3: #1A1A2E;
+            --grey: #8A8A9A;
+            --light: #E8E8F0;
+            --white: #F5F5FA;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--dark);
+            color: var(--light);
+            font-family: 'Cormorant Garamond', serif;
+            min-height: 100vh;
+        }
+
+        /* -- Nav -- */
+        .nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: var(--dark2); border-bottom: 1px solid rgba(201,168,76,0.2); }
+        .nav-logo { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.4rem; text-decoration: none; }
+        .nav-right { display: flex; align-items: center; gap: 1rem; font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem; }
+        .nav-right a { color: var(--grey); text-decoration: none; }
+        .nav-right a:hover { color: var(--gold); }
+        .breadcrumb { padding: 0.8rem 2rem; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; color: var(--grey); }
+        .breadcrumb a { color: var(--gold); text-decoration: none; }
+        .user-name { color: var(--gold); }
+        .btn-logout { background: none; border: 1px solid var(--grey); color: var(--grey); padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; }
+        .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* -- Page -- */
+        .page-header { text-align: center; padding: 2rem 2rem 1rem; }
+        .page-header h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2rem; font-weight: 600; }
+        .page-header p { color: var(--grey); font-size: 1.1rem; margin-top: 0.5rem; }
+
+        /* -- Intro -- */
+        .intro { max-width: 800px; margin: 0 auto 2rem; padding: 0 2rem; }
+        .intro p { color: var(--light); font-size: 1rem; line-height: 1.7; text-align: center; opacity: 0.85; font-family: 'Source Sans 3', sans-serif; }
+
+        /* -- Timeline -- */
+        .timeline { max-width: 900px; margin: 0 auto 3rem; padding: 0 1rem; }
+        .timeline-entry { display: flex; gap: 1.5rem; padding: 1.2rem 0; border-bottom: 1px solid rgba(201,168,76,0.08); }
+        .timeline-date { min-width: 100px; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; color: var(--grey); padding-top: 0.15rem; }
+        .timeline-body { flex: 1; }
+        .timeline-code { font-family: 'Source Sans 3', sans-serif; font-weight: 600; color: var(--gold); font-size: 0.95rem; margin-bottom: 0.3rem; }
+        .timeline-action { display: inline-block; font-family: 'Source Sans 3', sans-serif; font-size: 0.75rem; padding: 0.15rem 0.6rem; border-radius: 12px; margin-bottom: 0.4rem; }
+        .timeline-action.deleted { background: rgba(202,46,46,0.2); color: var(--red); }
+        .timeline-action.reports_dismissed { background: rgba(138,138,154,0.2); color: var(--grey); }
+        .timeline-action.tier_requalified { background: rgba(46,156,202,0.2); color: var(--cyan); }
+        .timeline-action.audit_published { background: rgba(46,202,140,0.2); color: var(--green); }
+        .timeline-action.audit_rejected { background: rgba(202,46,46,0.15); color: var(--red); }
+        .timeline-reason { font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem; color: var(--light); line-height: 1.5; margin-top: 0.3rem; }
+        .timeline-via { font-family: 'Source Sans 3', sans-serif; font-size: 0.75rem; color: var(--grey); margin-top: 0.3rem; font-style: italic; }
+
+        /* -- Empty state -- */
+        .empty-state { text-align: center; padding: 4rem 2rem; color: var(--grey); }
+        .empty-state h2 { font-family: 'Cinzel', serif; color: var(--gold); margin-bottom: 1rem; }
+
+        /* -- Loading -- */
+        .loading { text-align: center; padding: 3rem; color: var(--grey); font-family: 'Source Sans 3', sans-serif; }
+
+        /* -- Footer -- */
+        .footer { text-align: center; padding: 2rem; margin-top: 3rem; border-top: 1px solid rgba(201,168,76,0.1); }
+        .footer a { color: var(--grey); text-decoration: none; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; margin: 0 0.5rem; }
+        .footer a:hover { color: var(--gold); }
+
+        @media (max-width: 768px) {
+            .nav { padding: 0.8rem 1rem; }
+            .page-header h1 { font-size: 1.5rem; }
+            .timeline-entry { flex-direction: column; gap: 0.3rem; }
+            .timeline-date { min-width: auto; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav">
+        <a href="/" class="nav-logo">IANUA</a>
+        <div class="nav-right">
+            <a href="gouvernance.html">&larr; Gouvernance</a>
+            <span id="auth-status"></span>
+        </div>
+    </nav>
+
+    <div class="breadcrumb">
+        <a href="gouvernance.html">Gouvernance</a> &rsaquo; Transparence
+    </div>
+
+    <div class="page-header">
+        <h1 data-fr="Transparence" data-en="Transparency" data-es="Transparencia">Transparence</h1>
+        <p data-fr="Log public des actions administratives" data-en="Public log of administrative actions" data-es="Registro publico de acciones administrativas">Log public des actions administratives</p>
+    </div>
+
+    <div class="intro">
+        <p data-fr="Toute action administrative sur les propositions est logg&eacute;e publiquement. Ce registre garantit la transparence et la redevabilit&eacute; du pouvoir technique."
+           data-en="Every administrative action on proposals is publicly logged. This register guarantees transparency and accountability of technical authority."
+           data-es="Toda acci&oacute;n administrativa sobre las propuestas se registra p&uacute;blicamente. Este registro garantiza la transparencia y la rendici&oacute;n de cuentas del poder t&eacute;cnico.">
+            Toute action administrative sur les propositions est logg&eacute;e publiquement. Ce registre garantit la transparence et la redevabilit&eacute; du pouvoir technique.
+        </p>
+    </div>
+
+    <div id="timeline-container" class="timeline">
+        <div class="loading">Chargement...</div>
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display:none;">
+        <h2>Aucune action administrative enregistr&eacute;e.</h2>
+    </div>
+
+    <footer class="footer">
+        <a href="gouvernance.html">Gouvernance</a>
+        <a href="https://github.com/IANUAWorld" target="_blank">GitHub</a>
+        <a href="https://x.com/ianua_world" target="_blank">X</a>
+        <a href="mailto:ianua@outlook.fr">Contact</a>
+    </footer>
+
+    <script>
+    const API = window.location.hostname === 'localhost'
+        ? 'http://localhost:8000'
+        : 'https://api.ianua.world';
+
+    const ACTION_LABELS = {
+        deleted: 'Supprim\u00e9',
+        reports_dismissed: 'Signalements rejet\u00e9s',
+        tier_requalified: 'Palier requalifi\u00e9',
+        audit_published: 'Audit publi\u00e9',
+        audit_rejected: 'Audit non publi\u00e9'
+    };
+
+    const VIA_LABELS = {
+        community_report: 'Signalement communautaire',
+        direct_action: 'Action directe',
+        audit: 'Audit'
+    };
+
+    // -- Auth state --
+    async function checkAuth() {
+        try {
+            const resp = await fetch(`${API}/auth/me`, { credentials: 'include' });
+            if (resp.ok) {
+                const user = await resp.json();
+                const el = document.getElementById('auth-status');
+                el.innerHTML = `<span class="user-name">${escapeHtml(user.name)}</span> <button class="btn-logout" onclick="logout()">D\u00e9connexion</button>`;
+            }
+        } catch {}
+    }
+
+    async function logout() {
+        await fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' });
+        location.reload();
+    }
+
+    // -- Load actions --
+    async function loadActions() {
+        const container = document.getElementById('timeline-container');
+        const emptyState = document.getElementById('empty-state');
+
+        try {
+            const resp = await fetch(`${API}/transparency/actions`);
+            const data = await resp.json();
+            const actions = data.actions || data;
+
+            if (!actions || actions.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+            container.innerHTML = actions.map(entry => {
+                const date = entry.created_at || entry.date
+                    ? new Date(entry.created_at || entry.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+                    : '';
+                const actionLabel = ACTION_LABELS[entry.action_type] || entry.action_type;
+                const actionClass = entry.action_type || '';
+                const viaLabel = VIA_LABELS[entry.via] || entry.via || '';
+
+                return `
+                <div class="timeline-entry">
+                    <div class="timeline-date">${escapeHtml(date)}</div>
+                    <div class="timeline-body">
+                        <div class="timeline-code">${escapeHtml(entry.amendment_code || '')}</div>
+                        <span class="timeline-action ${escapeHtml(actionClass)}">${escapeHtml(actionLabel)}</span>
+                        ${entry.reason ? `<div class="timeline-reason">${escapeHtml(entry.reason)}</div>` : ''}
+                        ${viaLabel ? `<div class="timeline-via">via ${escapeHtml(viaLabel)}</div>` : ''}
+                    </div>
+                </div>`;
+            }).join('');
+        } catch (err) {
+            console.error('Failed to load transparency actions:', err);
+            container.innerHTML = '<div class="loading" style="color:var(--red);">Erreur de chargement.</div>';
+        }
+    }
+
+    // -- Escape HTML --
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // -- Init --
+    checkAuth();
+    loadActions();
+    </script>
+</body>
+</html>
