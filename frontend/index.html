@@ -1588,7 +1588,7 @@ Source  : ianua.world</pre>
   </footer>
 
   <script>
-    const API_BASE = 'https://api.ianua.world';
+    const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.ianua.world';
     let currentLang = 'fr';
     const commentsCache = {};
     const COMMENTS_PER_PAGE = 10;
@@ -1962,16 +1962,19 @@ Source  : ianua.world</pre>
     }
 
     function loadCommunityCounter() {
-      fetch(`${API_BASE}/stats`).then(r => r.json()).then(data => {
-        const subs = parseInt(data.subscribers, 10) || 0;
-        const cmts = parseInt(data.comments, 10) || 0;
-        if (subs + cmts > 0) {
+      Promise.all([
+        fetch(`${API_BASE}/signatures/count`).then(r => r.json()),
+        fetch(`${API_BASE}/stats`).then(r => r.json()),
+      ]).then(([sigData, statsData]) => {
+        const sigs = parseInt(sigData.count, 10) || 0;
+        const cmts = parseInt(statsData.comments, 10) || 0;
+        if (sigs + cmts > 0) {
           const el = document.getElementById('community-counter');
           const text = document.getElementById('counter-text');
           const labels = {
-            fr: `${subs} signataire${subs > 1 ? 's' : ''} · ${cmts} contribution${cmts > 1 ? 's' : ''}`,
-            en: `${subs} signator${subs > 1 ? 'ies' : 'y'} · ${cmts} contribution${cmts > 1 ? 's' : ''}`,
-            es: `${subs} firmante${subs > 1 ? 's' : ''} · ${cmts} contribuci${cmts > 1 ? 'ones' : 'ón'}`
+            fr: `${sigs} signataire${sigs > 1 ? 's' : ''} · ${cmts} contribution${cmts > 1 ? 's' : ''}`,
+            en: `${sigs} signator${sigs > 1 ? 'ies' : 'y'} · ${cmts} contribution${cmts > 1 ? 's' : ''}`,
+            es: `${sigs} firmante${sigs > 1 ? 's' : ''} · ${cmts} contribuci${cmts > 1 ? 'ones' : 'ón'}`
           };
           text.textContent = labels[currentLang] || labels.fr;
           el.style.display = 'block';
