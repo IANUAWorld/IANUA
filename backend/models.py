@@ -99,6 +99,21 @@ class Amendment(Base):
     text_after_en = Column(Text, nullable=True)
     text_after_es = Column(Text, nullable=True)
 
+    # Phase 2 — Proposal flow
+    author_id = Column(Integer, nullable=True)
+    title = Column(String(120), nullable=True)
+    tier = Column(String(20), nullable=True)  # mineur / substantiel / fondateur
+    expires_at = Column(DateTime, nullable=True)
+    suggested_position = Column(Integer, nullable=True)
+    submission_language = Column(String(2), nullable=True)
+    deletion_justification = Column(Text, nullable=True)
+    withdrawn_at = Column(DateTime, nullable=True)
+    deliberation_duration_days = Column(Integer, nullable=True)
+    tier_requalified = Column(Boolean, default=False)
+    tier_requalified_by = Column(String(20), nullable=True)
+    tier_requalified_at = Column(DateTime, nullable=True)
+    tier_original = Column(String(20), nullable=True)
+
 
 # ── Signatures — Soutien global à la démarche ────────────────────────
 
@@ -151,3 +166,94 @@ class VoteHistory(Base):
     previous_vote = Column(String(10), nullable=False)  # FOR / AGAINST / ABSTAIN
     previous_comment = Column(Text, nullable=True)
     changed_at = Column(DateTime, server_default=func.now())
+
+
+class DraftShareToken(Base):
+    __tablename__ = "draft_share_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False)
+    token = Column(String(64), unique=True, nullable=False, index=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class DraftComment(Base):
+    __tablename__ = "draft_comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False)
+    author_name = Column(String(100), nullable=False)
+    comment = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class AmendmentSupport(Base):
+    __tablename__ = "amendment_supports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False, index=True)
+    signer_id = Column(Integer, ForeignKey("signatures.id"), nullable=False)
+    comment = Column(Text, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("amendment_id", "signer_id", name="uq_support_per_signer"),
+    )
+
+
+class TierChallenge(Base):
+    __tablename__ = "tier_challenges"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False, index=True)
+    challenger_id = Column(Integer, ForeignKey("signatures.id"), nullable=False)
+    suggested_tier = Column(String(20), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("amendment_id", "challenger_id", name="uq_challenge_per_signer"),
+    )
+
+
+class ContentReport(Base):
+    __tablename__ = "content_reports"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False)
+    reporter_id = Column(Integer, ForeignKey("signatures.id"), nullable=False)
+    category = Column(String(30), nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("amendment_id", "reporter_id", name="uq_report_per_signer"),
+    )
+
+
+class AdminAction(Base):
+    __tablename__ = "admin_actions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False)
+    action = Column(String(30), nullable=False)
+    reason = Column(Text, nullable=False)
+    via = Column(String(20), nullable=False)
+    audit_response_id = Column(Integer, nullable=True)
+    acted_at = Column(DateTime, server_default=func.now())
+
+
+class AuditResponse(Base):
+    __tablename__ = "audit_responses"
+
+    id = Column(Integer, primary_key=True, index=True)
+    amendment_id = Column(Integer, ForeignKey("amendments.id", ondelete="CASCADE"), nullable=False, index=True)
+    model_name = Column(String(50), nullable=False)
+    model_version = Column(String(50), nullable=True)
+    prompt_used = Column(Text, nullable=False)
+    response_text = Column(Text, nullable=False)
+    published = Column(Boolean, default=False)
+    publication_decision_logged = Column(Boolean, default=False)
+    audited_at = Column(DateTime, server_default=func.now())
+
+    __table_args__ = (
+        UniqueConstraint("amendment_id", "model_name", name="uq_audit_per_model"),
+    )

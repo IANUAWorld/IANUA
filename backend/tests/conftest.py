@@ -10,7 +10,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from database import Base
 from models import (
     Subscriber, Comment, Reaction, Amendment, AmendmentVote,
-    Signature, MagicToken, VoteHistory
+    Signature, MagicToken, VoteHistory,
+    DraftShareToken, DraftComment, AmendmentSupport,
+    TierChallenge, ContentReport, AdminAction, AuditResponse
 )
 
 # Patch ARRAY columns to Text for SQLite compatibility in tests
