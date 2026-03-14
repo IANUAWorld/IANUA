@@ -864,6 +864,8 @@
       document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       event.target.classList.add('active');
       renderAmendments();
+      // Re-enrich deliberation cards with live vote data after re-render
+      setTimeout(enrichDeliberationCards, 300);
     }
 
     /* ── Render amendments timeline ──────── */

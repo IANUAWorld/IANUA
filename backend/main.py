@@ -437,6 +437,7 @@ async def list_amendments(
     return {
         "amendments": [
             {
+                "id": a.id,
                 "code": a.code,
                 "principle_id": a.principle_id,
                 "target": a.target,
@@ -453,6 +454,7 @@ async def list_amendments(
                 "proposed_by": a.proposed_by,
                 "phase": a.phase,
                 "status": a.status,
+                "tier": a.tier,
                 "ratified_by": a.ratified_by,
                 "ratified_at": a.ratified_at.isoformat() if a.ratified_at else None,
                 "proposed_at": a.proposed_at.isoformat() if a.proposed_at else None,
@@ -477,6 +479,7 @@ async def get_amendment(code: str, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Amendment not found")
 
     return {
+        "id": a.id,
         "code": a.code,
         "principle_id": a.principle_id,
         "target": a.target,
@@ -493,6 +496,7 @@ async def get_amendment(code: str, db: AsyncSession = Depends(get_db)):
         "proposed_by": a.proposed_by,
         "phase": a.phase,
         "status": a.status,
+        "tier": a.tier,
         "ratified_by": a.ratified_by,
         "ratified_at": a.ratified_at.isoformat() if a.ratified_at else None,
         "proposed_at": a.proposed_at.isoformat() if a.proposed_at else None,

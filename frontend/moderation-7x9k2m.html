@@ -12,8 +12,10 @@
       --gold-light: #E8C97A;
       --gold-dim: rgba(201,168,76,0.15);
       --cyan: #2E9CCA;
+      --cyan-dim: rgba(46,156,202,0.15);
       --green: #2ECA8C;
       --red: #CA2E2E;
+      --orange: #CA8C2E;
       --dark: #0D0D1A;
       --dark2: #13131F;
       --dark3: #1A1A2E;
@@ -146,6 +148,7 @@
       padding: 0 2rem;
       border-bottom: 1px solid rgba(255,255,255,0.06);
       background: var(--dark2);
+      overflow-x: auto;
     }
     .tab {
       padding: 1rem 1.5rem;
@@ -156,6 +159,7 @@
       cursor: pointer;
       border-bottom: 2px solid transparent;
       transition: all 0.3s;
+      white-space: nowrap;
     }
     .tab:hover { color: var(--light); }
     .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
@@ -170,6 +174,7 @@
     .badge-pending { background: rgba(201,168,76,0.2); color: var(--gold); }
     .badge-approved { background: rgba(46,202,140,0.2); color: var(--green); }
     .badge-rejected { background: rgba(202,46,46,0.2); color: var(--red); }
+    .badge-cyan { background: var(--cyan-dim); color: var(--cyan); }
 
     /* ── CONTENT ────────────────── */
     .content { padding: 2rem; max-width: 1100px; margin: 0 auto; }
@@ -253,6 +258,7 @@
     .card-actions {
       display: flex;
       gap: 0.6rem;
+      flex-wrap: wrap;
     }
     .action-btn {
       padding: 0.4rem 1.2rem;
@@ -366,6 +372,274 @@
       line-height: 1.6;
     }
 
+    /* ── AMENDMENT ADMIN CARDS ──── */
+    .amendment-admin-card {
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 0.8rem;
+      background: var(--dark2);
+      border-left: 3px solid rgba(201,168,76,0.3);
+      transition: all 0.3s;
+    }
+    .amendment-admin-card:hover { border-left-color: var(--gold); }
+    .amendment-admin-card.status-deliberation { border-left-color: var(--cyan); }
+    .amendment-admin-card.status-ratified { border-left-color: var(--green); }
+    .amendment-admin-card.status-rejected { border-left-color: var(--red); opacity: 0.7; }
+    .amendment-admin-card.status-proposed { border-left-color: var(--orange); }
+    .amendment-admin-card.status-deleted { border-left-color: var(--grey); opacity: 0.5; }
+    .amendment-admin-card.status-expired { border-left-color: var(--grey); opacity: 0.6; }
+    .amendment-admin-card.status-withdrawn { border-left-color: var(--grey); opacity: 0.6; }
+
+    .amendment-code {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 900;
+      color: var(--gold);
+    }
+    .amendment-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      color: var(--light);
+      line-height: 1.6;
+      margin: 0.4rem 0 0.8rem;
+    }
+    .amendment-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
+      font-size: 0.75rem;
+      color: var(--grey);
+    }
+    .vote-counts {
+      font-size: 0.75rem;
+      color: var(--grey);
+      margin-bottom: 0.8rem;
+    }
+    .vote-counts span { margin-right: 1rem; }
+    .vote-for { color: var(--green); }
+    .vote-against { color: var(--red); }
+    .vote-abstain { color: var(--grey); }
+
+    /* ── STATUS BADGES ─────────── */
+    .status-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.15rem 0.6rem;
+      border-radius: 3px;
+    }
+    .status-badge.deliberation { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(46,156,202,0.25); }
+    .status-badge.ratified { background: rgba(46,202,140,0.1); color: var(--green); border: 1px solid rgba(46,202,140,0.25); }
+    .status-badge.rejected { background: rgba(202,46,46,0.1); color: var(--red); border: 1px solid rgba(202,46,46,0.25); }
+    .status-badge.proposed { background: rgba(202,140,46,0.1); color: var(--orange); border: 1px solid rgba(202,140,46,0.25); }
+    .status-badge.expired,
+    .status-badge.withdrawn,
+    .status-badge.deleted { background: rgba(138,138,154,0.1); color: var(--grey); border: 1px solid rgba(138,138,154,0.25); }
+
+    /* ── DANGER + CYAN BUTTONS ─── */
+    .btn-danger {
+      background: rgba(202,46,46,0.15);
+      color: var(--red);
+      border: 1px solid rgba(202,46,46,0.3);
+    }
+    .btn-danger:hover { background: rgba(202,46,46,0.3); }
+    .btn-cyan {
+      background: var(--cyan-dim);
+      color: var(--cyan);
+      border: 1px solid rgba(46,156,202,0.3);
+    }
+    .btn-cyan:hover { background: rgba(46,156,202,0.3); }
+    .btn-gold {
+      background: var(--gold-dim);
+      color: var(--gold);
+      border: 1px solid rgba(201,168,76,0.3);
+    }
+    .btn-gold:hover { background: rgba(201,168,76,0.3); }
+
+    /* ── AUDIT FORM ────────────── */
+    .audit-form {
+      background: var(--dark2);
+      border: 1px solid rgba(46,156,202,0.15);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    .audit-form h3 {
+      font-family: 'Cinzel', serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--cyan);
+      margin-bottom: 1rem;
+    }
+    .audit-form label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--grey);
+      margin-bottom: 0.4rem;
+      margin-top: 1rem;
+    }
+    .audit-form label:first-of-type { margin-top: 0; }
+    .audit-form select,
+    .audit-form textarea {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    .audit-form select:focus,
+    .audit-form textarea:focus { border-color: var(--cyan); }
+    .audit-form textarea { min-height: 100px; resize: vertical; }
+    .audit-checkboxes {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 0.4rem;
+    }
+    .audit-checkboxes label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.85rem;
+      color: var(--light);
+      margin-top: 0;
+      cursor: pointer;
+    }
+    .audit-checkboxes input[type="checkbox"] {
+      accent-color: var(--cyan);
+    }
+    .audit-checkboxes .disabled-model {
+      color: var(--grey);
+      font-style: italic;
+    }
+    .audit-form .audit-submit {
+      margin-top: 1.2rem;
+    }
+    .audit-results {
+      margin-top: 1rem;
+      font-size: 0.85rem;
+    }
+    .audit-results .result-ok { color: var(--green); }
+    .audit-results .result-err { color: var(--red); }
+
+    /* ── AUDIT RESPONSE CARD ───── */
+    .audit-response-card {
+      padding: 1.2rem 1.5rem;
+      margin-bottom: 0.8rem;
+      background: var(--dark2);
+      border-left: 3px solid rgba(46,156,202,0.4);
+      transition: all 0.3s;
+    }
+    .audit-response-card:hover { border-left-color: var(--cyan); }
+    .audit-response-header {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .audit-model-name {
+      font-family: 'Cinzel', serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--cyan);
+    }
+    .audit-model-version {
+      font-size: 0.7rem;
+      color: var(--grey);
+    }
+    .audit-response-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem;
+      color: var(--light);
+      line-height: 1.7;
+      margin-bottom: 0.8rem;
+      white-space: pre-wrap;
+    }
+    .voir-plus {
+      color: var(--cyan);
+      cursor: pointer;
+      font-size: 0.8rem;
+      border: none;
+      background: none;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .voir-plus:hover { text-decoration: underline; }
+
+    /* ── SECTION TITLES ─────────── */
+    .section-title {
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid rgba(201,168,76,0.15);
+    }
+    .section-title.cyan { color: var(--cyan); border-bottom-color: rgba(46,156,202,0.15); }
+
+    /* ── TRANSPARENCY TABLE ────── */
+    .transparency-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .transparency-table th {
+      text-align: left;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: 0.8rem 0.8rem;
+      border-bottom: 1px solid rgba(201,168,76,0.2);
+    }
+    .transparency-table td {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.8rem;
+      color: var(--light);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+    }
+    .transparency-table .action-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 0.1rem 0.5rem;
+      border-radius: 3px;
+    }
+    .action-label.deleted { background: rgba(202,46,46,0.15); color: var(--red); }
+    .action-label.tier_requalified { background: rgba(201,168,76,0.15); color: var(--gold); }
+    .action-label.reports_dismissed { background: rgba(46,202,140,0.15); color: var(--green); }
+    .action-label.tier_challenge_divergent { background: rgba(202,140,46,0.15); color: var(--orange); }
+    .action-label.audit_published { background: var(--cyan-dim); color: var(--cyan); }
+    .action-label.audit_rejected { background: rgba(202,46,46,0.1); color: var(--red); }
+
+    /* ── TIER SELECT ───────────── */
+    .tier-select-group {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+    .tier-select-group select {
+      padding: 0.3rem 0.6rem;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--white);
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
     .hidden { display: none !important; }
   </style>
 </head>
@@ -389,8 +663,8 @@
       <div class="admin-title">IANUA — Modération</div>
       <div class="admin-stats">
         <span>En attente : <span class="stat-num" id="statPending">0</span></span>
-        <span>Approuvés : <span class="stat-num" id="statApproved">0</span></span>
-        <span>Inscrits : <span class="stat-num" id="statSubscribers">0</span></span>
+        <span>Signataires : <span class="stat-num" id="statSignataires">0</span></span>
+        <span>Amendements : <span class="stat-num" id="statDeliberation">0</span></span>
       </div>
       <button class="logout-btn" onclick="doLogout()">Déconnexion</button>
     </div>
@@ -408,6 +682,18 @@
       <div class="tab" data-tab="subscribers" onclick="switchTab('subscribers')">
         Inscrits newsletter
       </div>
+      <div class="tab" data-tab="amendments" onclick="switchTab('amendments')">
+        Amendements <span class="badge badge-cyan" id="badgeAmendments">0</span>
+      </div>
+      <div class="tab" data-tab="audit" onclick="switchTab('audit')">
+        Audit IA
+      </div>
+      <div class="tab" data-tab="signataires" onclick="switchTab('signataires')">
+        Signataires
+      </div>
+      <div class="tab" data-tab="transparence" onclick="switchTab('transparence')">
+        Transparence
+      </div>
     </div>
 
     <div class="content">
@@ -415,6 +701,10 @@
       <div id="tab-approved" class="hidden"></div>
       <div id="tab-rejected" class="hidden"></div>
       <div id="tab-subscribers" class="hidden"></div>
+      <div id="tab-amendments" class="hidden"></div>
+      <div id="tab-audit" class="hidden"></div>
+      <div id="tab-signataires" class="hidden"></div>
+      <div id="tab-transparence" class="hidden"></div>
     </div>
   </div>
 
@@ -422,6 +712,7 @@
     const API_BASE = 'https://api.ianua.world';
     const ADMIN_USER = 'ianua';
     let adminKey = '';
+    let amendmentsCache = []; // cached for audit tab dropdown
 
     const PRINCIPLES = {
       'bienveillance': { title: 'I · Bienveillance', subtitle: 'la valeur qui précède toutes les autres', desc: 'La bienveillance n\'est pas la gentillesse. C\'est l\'intention fondamentale qui oriente toute action : servir le bien commun.' },
@@ -438,6 +729,27 @@
       'bienveillance': '', 'transparence': '', 'reciprocite': '',
       'souverainete': '', 'refus': '',
       'proactive': 'cyan', 'agentique': 'cyan', 'deliberation': 'green'
+    };
+
+    const STATUS_LABELS = {
+      'deliberation': 'En délibération',
+      'ratified': 'Ratifié',
+      'rejected': 'Rejeté',
+      'proposed': 'Proposé',
+      'expired': 'Expiré',
+      'withdrawn': 'Retiré',
+      'deleted': 'Supprimé',
+      'accepted': 'Accepté',
+      'draft': 'Brouillon'
+    };
+
+    const ACTION_LABELS = {
+      'deleted': 'Suppression',
+      'tier_requalified': 'Requalification palier',
+      'reports_dismissed': 'Signalements rejetés',
+      'tier_challenge_divergent': 'Contestation divergente',
+      'audit_published': 'Audit publié',
+      'audit_rejected': 'Audit rejeté'
     };
 
     // ── LOGIN ──────────────────────
@@ -501,10 +813,12 @@
     })();
 
     // ── TABS ───────────────────────
+    const ALL_TABS = ['pending', 'approved', 'rejected', 'subscribers', 'amendments', 'audit', 'signataires', 'transparence'];
+
     function switchTab(tab) {
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
-      ['pending', 'approved', 'rejected', 'subscribers'].forEach(t => {
+      ALL_TABS.forEach(t => {
         document.getElementById(`tab-${t}`).classList.toggle('hidden', t !== tab);
       });
     }
@@ -515,8 +829,13 @@
         loadComments('pending'),
         loadComments('approved'),
         loadComments('rejected'),
-        loadSubscribers()
+        loadSubscribers(),
+        loadAmendments(),
+        loadSignataires(),
+        loadTransparence()
       ]);
+      // Audit tab depends on amendmentsCache being loaded
+      loadAuditTab();
     }
 
     async function loadComments(status) {
@@ -537,7 +856,6 @@
       // Update badges and stats
       document.getElementById(`badge${capitalize(status)}`).textContent = comments.length;
       if (status === 'pending') document.getElementById('statPending').textContent = comments.length;
-      if (status === 'approved') document.getElementById('statApproved').textContent = comments.length;
 
       if (comments.length === 0) {
         container.innerHTML = `<div class="empty-state">Aucun commentaire ${status === 'pending' ? 'en attente' : status === 'approved' ? 'approuvé' : 'rejeté'}.</div>`;
@@ -622,7 +940,6 @@
           headers: { 'X-Admin-Key': adminKey }
         });
         const data = await res.json();
-        document.getElementById('statSubscribers').textContent = data.subscribers.length;
         renderSubscribers(data.subscribers);
       } catch (e) {
         console.error(e);
@@ -651,7 +968,425 @@
         </table>`;
     }
 
-    // ── ACTIONS ────────────────────
+    // ── TAB 5: AMENDEMENTS ────────
+    async function loadAmendments() {
+      try {
+        const res = await fetch(`${API_BASE}/amendments`, {
+          headers: { 'X-Admin-Key': adminKey }
+        });
+        const data = await res.json();
+        amendmentsCache = data.amendments || [];
+        renderAmendments(amendmentsCache);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderAmendments(amendments) {
+      const container = document.getElementById('tab-amendments');
+      const deliberationCount = amendments.filter(a => a.status === 'deliberation').length;
+      document.getElementById('badgeAmendments').textContent = amendments.length;
+      document.getElementById('statDeliberation').textContent = deliberationCount;
+
+      if (amendments.length === 0) {
+        container.innerHTML = '<div class="empty-state">Aucun amendement enregistré.</div>';
+        return;
+      }
+
+      let html = amendments.map(a => {
+        const date = a.proposed_at ? new Date(a.proposed_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+        const statusLabel = STATUS_LABELS[a.status] || a.status;
+        const motivation = a.motivation || '';
+        const truncatedMotivation = motivation.length > 200 ? motivation.substring(0, 200) + '...' : motivation;
+
+        // Vote counts for deliberation
+        let voteHtml = '';
+        if (a.status === 'deliberation') {
+          voteHtml = `
+            <div class="vote-counts">
+              <span class="vote-for">Pour : ${a.votes_for || 0}</span>
+              <span class="vote-against">Contre : ${a.votes_against || 0}</span>
+              <span class="vote-abstain">Abstention : ${a.votes_abstain || 0}</span>
+            </div>`;
+        }
+
+        // Action buttons
+        let actions = '<div class="card-actions">';
+        if (a.status === 'proposed' || a.status === 'deliberation') {
+          actions += `<button class="action-btn btn-danger" onclick="deleteAmendment(${a.id}, '${escapeAttr(a.code)}')">Supprimer pour abus</button>`;
+        }
+        actions += `<button class="action-btn btn-reject" onclick="dismissReports(${a.id}, '${escapeAttr(a.code)}')">Rejeter les signalements</button>`;
+        actions += `<button class="action-btn btn-gold" onclick="showRequalifyTier(${a.id}, '${escapeAttr(a.code)}', '${a.tier || 'mineur'}')">Requalifier palier</button>`;
+        actions += '</div>';
+
+        // Tier requalify inline form (hidden by default)
+        const tierForm = `
+          <div id="requalify-${a.id}" class="tier-select-group hidden">
+            <select id="tier-select-${a.id}">
+              <option value="mineur">Mineur</option>
+              <option value="substantiel">Substantiel</option>
+              <option value="fondateur">Fondateur</option>
+            </select>
+            <button class="action-btn btn-gold" onclick="requalifyTier(${a.id}, '${escapeAttr(a.code)}')">Confirmer</button>
+            <button class="action-btn" style="color:var(--grey);border:1px solid rgba(255,255,255,0.1)" onclick="document.getElementById('requalify-${a.id}').classList.add('hidden')">Annuler</button>
+          </div>`;
+
+        return `
+          <div class="amendment-admin-card status-${a.status}">
+            <div class="amendment-meta">
+              <span class="amendment-code">${escapeHtml(a.code)}</span>
+              <span class="status-badge ${a.status}">${statusLabel}</span>
+              ${a.tier ? `<span style="font-size:0.65rem;color:var(--grey);text-transform:uppercase;letter-spacing:0.08em">Palier : ${a.tier}</span>` : ''}
+              <span class="card-date">${date}</span>
+            </div>
+            <div class="amendment-title">${escapeHtml(truncatedMotivation)}</div>
+            ${voteHtml}
+            ${actions}
+            ${tierForm}
+          </div>`;
+      }).join('');
+
+      container.innerHTML = html;
+    }
+
+    async function deleteAmendment(id, code) {
+      const reason = prompt(`Raison de la suppression de l'amendement ${code} :`);
+      if (!reason) return;
+      try {
+        await fetch(`${API_BASE}/admin/amendments/${id}/delete`, {
+          method: 'POST',
+          headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: reason, via: 'direct_action' })
+        });
+        loadAmendments();
+        loadTransparence();
+      } catch (e) {
+        console.error(e);
+        alert('Erreur lors de la suppression.');
+      }
+    }
+
+    async function dismissReports(id, code) {
+      const reason = prompt(`Raison du rejet des signalements pour ${code} :`);
+      if (!reason) return;
+      try {
+        await fetch(`${API_BASE}/admin/amendments/${id}/dismiss-reports`, {
+          method: 'POST',
+          headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: reason })
+        });
+        loadTransparence();
+      } catch (e) {
+        console.error(e);
+        alert('Erreur lors du rejet des signalements.');
+      }
+    }
+
+    function showRequalifyTier(id, code, currentTier) {
+      const el = document.getElementById(`requalify-${id}`);
+      el.classList.remove('hidden');
+      document.getElementById(`tier-select-${id}`).value = currentTier;
+    }
+
+    async function requalifyTier(id, code) {
+      const newTier = document.getElementById(`tier-select-${id}`).value;
+      const reason = prompt(`Raison de la requalification de ${code} vers le palier "${newTier}" :`);
+      if (!reason) return;
+      try {
+        await fetch(`${API_BASE}/admin/amendments/${id}/requalify-tier`, {
+          method: 'POST',
+          headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ new_tier: newTier, reason: reason })
+        });
+        document.getElementById(`requalify-${id}`).classList.add('hidden');
+        loadAmendments();
+        loadTransparence();
+      } catch (e) {
+        console.error(e);
+        alert('Erreur lors de la requalification.');
+      }
+    }
+
+    // ── TAB 6: AUDIT IA ───────────
+    function loadAuditTab() {
+      const container = document.getElementById('tab-audit');
+      const eligible = amendmentsCache.filter(a => a.status === 'proposed' || a.status === 'deliberation');
+
+      let optionsHtml = eligible.map(a => `<option value="${a.id}">${escapeHtml(a.code)} — ${escapeHtml((a.motivation || '').substring(0, 80))}</option>`).join('');
+
+      container.innerHTML = `
+        <div class="section-title cyan">Lancer un audit</div>
+        <div class="audit-form">
+          <label>Amendement</label>
+          <select id="auditAmendmentSelect">
+            <option value="">-- Choisir un amendement --</option>
+            ${optionsHtml}
+          </select>
+
+          <label>Modèles IA</label>
+          <div class="audit-checkboxes">
+            <label><input type="checkbox" id="auditModelClaude" value="claude" /> Claude</label>
+            <label><input type="checkbox" id="auditModelGPT" value="gpt-4o" /> GPT-4o</label>
+            <label class="disabled-model"><input type="checkbox" disabled /> Gemini (non configuré)</label>
+            <label class="disabled-model"><input type="checkbox" disabled /> Mistral (non configuré)</label>
+          </div>
+
+          <label>Prompt</label>
+          <textarea id="auditPrompt" placeholder="Rédigez le prompt à envoyer aux modèles..."></textarea>
+
+          <button class="action-btn btn-cyan audit-submit" onclick="triggerAudit()">Lancer l'audit</button>
+          <div class="audit-results" id="auditResults"></div>
+        </div>
+
+        <div class="section-title cyan" style="margin-top:2rem">Réponses en attente de publication</div>
+        <div id="auditPendingResponses"><div class="empty-state">Chargement...</div></div>
+      `;
+
+      loadPendingAuditResponses();
+    }
+
+    async function triggerAudit() {
+      const amendmentId = document.getElementById('auditAmendmentSelect').value;
+      if (!amendmentId) { alert('Veuillez sélectionner un amendement.'); return; }
+
+      const models = [];
+      if (document.getElementById('auditModelClaude').checked) models.push('claude');
+      if (document.getElementById('auditModelGPT').checked) models.push('gpt-4o');
+      if (models.length === 0) { alert('Veuillez sélectionner au moins un modèle.'); return; }
+
+      const prompt = document.getElementById('auditPrompt').value.trim();
+      if (!prompt) { alert('Veuillez rédiger un prompt.'); return; }
+
+      const resultsDiv = document.getElementById('auditResults');
+      resultsDiv.innerHTML = '<span style="color:var(--grey)">Audit en cours...</span>';
+
+      try {
+        const res = await fetch(`${API_BASE}/admin/amendments/${amendmentId}/audit`, {
+          method: 'POST',
+          headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ models: models, prompt: prompt })
+        });
+        const data = await res.json();
+
+        if (Array.isArray(data)) {
+          resultsDiv.innerHTML = data.map(r =>
+            r.success
+              ? `<div class="result-ok">${escapeHtml(r.model_name)} : OK</div>`
+              : `<div class="result-err">${escapeHtml(r.model_name)} : ${escapeHtml(r.error)}</div>`
+          ).join('');
+        } else {
+          resultsDiv.innerHTML = `<div class="result-err">Erreur : ${escapeHtml(JSON.stringify(data))}</div>`;
+        }
+
+        loadPendingAuditResponses();
+      } catch (e) {
+        console.error(e);
+        resultsDiv.innerHTML = '<div class="result-err">Erreur de connexion.</div>';
+      }
+    }
+
+    async function loadPendingAuditResponses() {
+      const container = document.getElementById('auditPendingResponses');
+      if (!container) return;
+
+      const allResponses = [];
+
+      // Fetch audit responses for all amendments
+      for (const a of amendmentsCache) {
+        try {
+          const res = await fetch(`${API_BASE}/admin/amendments/${a.id}/audit-responses`, {
+            headers: { 'X-Admin-Key': adminKey }
+          });
+          if (!res.ok) continue;
+          const data = await res.json();
+          const unpublished = (Array.isArray(data) ? data : []).filter(
+            r => !r.published && !r.publication_decision_logged
+          );
+          unpublished.forEach(r => {
+            r._amendment_code = a.code;
+            r._amendment_id = a.id;
+          });
+          allResponses.push(...unpublished);
+        } catch (e) {
+          // skip silently
+        }
+      }
+
+      if (allResponses.length === 0) {
+        container.innerHTML = '<div class="empty-state">Aucune réponse en attente de publication.</div>';
+        return;
+      }
+
+      container.innerHTML = allResponses.map(r => {
+        const text = r.response_text || '';
+        const truncated = text.length > 500;
+        const displayText = truncated ? text.substring(0, 500) : text;
+        const date = r.audited_at ? new Date(r.audited_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+        return `
+          <div class="audit-response-card">
+            <div class="audit-response-header">
+              <span class="amendment-code">${escapeHtml(r._amendment_code)}</span>
+              <span class="audit-model-name">${escapeHtml(r.model_name)}</span>
+              <span class="audit-model-version">${escapeHtml(r.model_version || '')}</span>
+              <span class="card-date">${date}</span>
+            </div>
+            <div class="audit-response-text" id="audit-text-${r.id}">${escapeHtml(displayText)}${truncated ? '...' : ''}</div>
+            ${truncated ? `<button class="voir-plus" onclick="expandAuditText(${r.id}, ${r._amendment_id})">voir plus</button>` : ''}
+            <div class="card-actions" style="margin-top:0.6rem">
+              <button class="action-btn btn-approve" onclick="publishAudit(${r._amendment_id}, ${r.id})">Publier</button>
+              <button class="action-btn btn-danger" onclick="rejectAudit(${r._amendment_id}, ${r.id})">Ne pas publier</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    // Store full texts for expand
+    const auditFullTexts = {};
+
+    async function expandAuditText(auditId, amendmentId) {
+      if (auditFullTexts[auditId]) {
+        document.getElementById(`audit-text-${auditId}`).textContent = auditFullTexts[auditId];
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/admin/amendments/${amendmentId}/audit-responses`, {
+          headers: { 'X-Admin-Key': adminKey }
+        });
+        const data = await res.json();
+        const found = (Array.isArray(data) ? data : []).find(r => r.id === auditId);
+        if (found) {
+          auditFullTexts[auditId] = found.response_text;
+          document.getElementById(`audit-text-${auditId}`).textContent = found.response_text;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function publishAudit(amendmentId, auditId) {
+      const reason = prompt('Raison de la publication :');
+      if (!reason) return;
+      try {
+        await fetch(`${API_BASE}/admin/amendments/${amendmentId}/audit/${auditId}/publish`, {
+          method: 'POST',
+          headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: reason })
+        });
+        loadPendingAuditResponses();
+        loadTransparence();
+      } catch (e) {
+        console.error(e);
+        alert('Erreur lors de la publication.');
+      }
+    }
+
+    async function rejectAudit(amendmentId, auditId) {
+      const reason = prompt('Raison du rejet (non-publication) :');
+      if (!reason) return;
+      try {
+        await fetch(`${API_BASE}/admin/amendments/${amendmentId}/audit/${auditId}/reject`, {
+          method: 'POST',
+          headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: reason })
+        });
+        loadPendingAuditResponses();
+        loadTransparence();
+      } catch (e) {
+        console.error(e);
+        alert('Erreur lors du rejet.');
+      }
+    }
+
+    // ── TAB 7: SIGNATAIRES ────────
+    async function loadSignataires() {
+      try {
+        const [pubRes, countRes] = await Promise.all([
+          fetch(`${API_BASE}/signatures/public`),
+          fetch(`${API_BASE}/signatures/count`)
+        ]);
+        const pubData = await pubRes.json();
+        const countData = await countRes.json();
+        const total = countData.count || 0;
+        document.getElementById('statSignataires').textContent = total;
+        renderSignataires(pubData.signatures || [], total);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderSignataires(signatures, total) {
+      const container = document.getElementById('tab-signataires');
+      if (signatures.length === 0) {
+        container.innerHTML = '<div class="empty-state">Aucun signataire pour le moment.</div>';
+        return;
+      }
+      container.innerHTML = `
+        <div class="section-title">Signataires confirmés — <span style="color:var(--gold)">${total}</span> au total</div>
+        <table class="subscribers-table">
+          <thead>
+            <tr><th>Pseudo</th><th>Signé le</th></tr>
+          </thead>
+          <tbody>
+            ${signatures.map(s => `
+              <tr>
+                <td>${escapeHtml(s.pseudo)}</td>
+                <td>${s.confirmed_at ? new Date(s.confirmed_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    // ── TAB 8: TRANSPARENCE ───────
+    async function loadTransparence() {
+      try {
+        const res = await fetch(`${API_BASE}/transparency/actions`);
+        const data = await res.json();
+        renderTransparence(data.actions || []);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderTransparence(actions) {
+      const container = document.getElementById('tab-transparence');
+      if (actions.length === 0) {
+        container.innerHTML = '<div class="empty-state">Aucune action administrative enregistrée.</div>';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="section-title">Journal de transparence — <span style="color:var(--gold)">${actions.length}</span> action${actions.length > 1 ? 's' : ''}</div>
+        <table class="transparency-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Amendement</th>
+              <th>Action</th>
+              <th>Raison</th>
+              <th>Via</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${actions.map(a => {
+              const date = a.acted_at ? new Date(a.acted_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+              const actionLabel = ACTION_LABELS[a.action] || a.action;
+              const actionClass = a.action || '';
+              const amendCode = a.amendment_id ? `#${a.amendment_id}` : '—';
+              return `
+                <tr>
+                  <td style="white-space:nowrap">${date}</td>
+                  <td>${amendCode}</td>
+                  <td><span class="action-label ${actionClass}">${escapeHtml(actionLabel)}</span></td>
+                  <td style="max-width:300px">${escapeHtml(a.reason || '—')}</td>
+                  <td>${escapeHtml(a.via || '—')}</td>
+                </tr>`;
+            }).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    // ── ACTIONS (ORIGINAL) ────────
     async function approveComment(id) {
       await fetch(`${API_BASE}/admin/comments/${id}/approve`, {
         method: 'POST',
@@ -670,9 +1405,15 @@
 
     // ── UTILS ──────────────────────
     function escapeHtml(text) {
+      if (!text) return '';
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    function escapeAttr(text) {
+      if (!text) return '';
+      return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
     }
 
     function capitalize(str) {
