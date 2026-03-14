@@ -86,7 +86,7 @@
       transition: color 0.3s;
     }
 
-    .nav-links a:hover { color: var(--gold); }
+    .nav-links a:hover, .nav-links a.active { color: var(--gold); }
 
     .nav-hamburger {
       display: none;
@@ -1165,15 +1165,14 @@
       <span></span><span></span><span></span>
     </div>
     <ul class="nav-links">
-      <li><a href="#genese">Genèse</a></li>
-      <li><a href="#principes">Principes</a></li>
-      <li><a href="#pacte">Lignes rouges</a></li>
+      <li><a href="#genese" data-fr="Genèse" data-en="Genesis" data-es="Génesis">Genèse</a></li>
+      <li><a href="#principes" data-fr="Principes" data-en="Principles" data-es="Principios">Principes</a></li>
+      <li><a href="#pacte" data-fr="Lignes rouges" data-en="Red lines" data-es="Lineas rojas">Lignes rouges</a></li>
       <li><a href="/gouvernance" data-fr="Gouvernance" data-en="Governance" data-es="Gobernanza">Gouvernance</a></li>
       <li><a href="#roadmap">Roadmap</a></li>
-      <li><a href="#rejoindre">Rejoindre</a></li>
+      <li><a href="#rejoindre" data-fr="Rejoindre" data-en="Join" data-es="Unirse">Rejoindre</a></li>
       <li><a href="#signer" data-fr="Signer" data-en="Sign" data-es="Firmar">Signer</a></li>
       <li><a href="/proposer" data-fr="Proposer" data-en="Propose" data-es="Proponer">Proposer</a></li>
-      <li><a href="/vote" data-fr="Voter" data-en="Vote" data-es="Votar">Voter</a></li>
     </ul>
     <div class="lang-switcher">
       <button class="lang-btn active" onclick="setLang('fr')">FR</button>

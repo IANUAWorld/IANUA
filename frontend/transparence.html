@@ -33,19 +33,62 @@
         }
 
         /* -- Nav -- */
-        .nav { display: flex; justify-content: space-between; align-items: center; padding: 1rem 2rem; background: var(--dark2); border-bottom: 1px solid rgba(201,168,76,0.2); }
-        .nav-logo { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.4rem; text-decoration: none; }
-        .nav-right { display: flex; align-items: center; gap: 1rem; font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem; }
-        .nav-right a { color: var(--grey); text-decoration: none; }
-        .nav-right a:hover { color: var(--gold); }
-        .breadcrumb { padding: 0.8rem 2rem; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; color: var(--grey); }
-        .breadcrumb a { color: var(--gold); text-decoration: none; }
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 4rem;
+            background: rgba(13,13,26,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(201,168,76,0.15);
+        }
+        .nav-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: 0.25em;
+            color: var(--gold);
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--grey);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+        .nav-hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            z-index: 101;
+        }
+        .nav-hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--gold);
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .nav-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .nav-hamburger.active span:nth-child(2) { opacity: 0; }
+        .nav-hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
         .user-name { color: var(--gold); }
         .btn-logout { background: none; border: 1px solid var(--grey); color: var(--grey); padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; }
         .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
 
         /* -- Page -- */
-        .page-header { text-align: center; padding: 2rem 2rem 1rem; }
+        .page-header { text-align: center; padding: 6rem 2rem 1rem; }
         .page-header h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2rem; font-weight: 600; }
         .page-header p { color: var(--grey); font-size: 1.1rem; margin-top: 0.5rem; }
 
@@ -81,7 +124,21 @@
         .footer a:hover { color: var(--gold); }
 
         @media (max-width: 768px) {
-            .nav { padding: 0.8rem 1rem; }
+            nav { padding: 1rem 1.5rem; }
+            .nav-hamburger { display: flex; }
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(13,13,26,0.98);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2rem;
+                z-index: 99;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a { font-size: 1.1rem; letter-spacing: 0.2em; }
             .page-header h1 { font-size: 1.5rem; }
             .timeline-entry { flex-direction: column; gap: 0.3rem; }
             .timeline-date { min-width: auto; }
@@ -89,17 +146,23 @@
     </style>
 </head>
 <body>
-    <nav class="nav">
+    <nav>
         <a href="/" class="nav-logo">IANUA</a>
-        <div class="nav-right">
-            <a href="gouvernance.html">&larr; Gouvernance</a>
+        <div class="nav-hamburger" onclick="toggleMobileNav()">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/#principes" data-fr="Principes" data-en="Principles" data-es="Principios">Principes</a></li>
+            <li><a href="/#pacte" data-fr="Lignes rouges" data-en="Red lines" data-es="Lineas rojas">Lignes rouges</a></li>
+            <li><a href="/gouvernance" data-fr="Gouvernance" data-en="Governance" data-es="Gobernanza">Gouvernance</a></li>
+            <li><a href="/#roadmap">Roadmap</a></li>
+            <li><a href="/#rejoindre" data-fr="Rejoindre" data-en="Join" data-es="Unirse">Rejoindre</a></li>
+            <li><a href="/proposer" data-fr="Proposer" data-en="Propose" data-es="Proponer">Proposer</a></li>
+        </ul>
+        <div style="display:flex;align-items:center;gap:1rem;">
             <span id="auth-status"></span>
         </div>
     </nav>
-
-    <div class="breadcrumb">
-        <a href="gouvernance.html">Gouvernance</a> &rsaquo; Transparence
-    </div>
 
     <div class="page-header">
         <h1 data-fr="Transparence" data-en="Transparency" data-es="Transparencia">Transparence</h1>
@@ -214,6 +277,18 @@
         div.textContent = str;
         return div.innerHTML;
     }
+
+    // -- Mobile Nav --
+    function toggleMobileNav() {
+        document.querySelector('.nav-hamburger').classList.toggle('active');
+        document.querySelector('.nav-links').classList.toggle('open');
+    }
+    document.querySelectorAll('.nav-links a').forEach(a => {
+        a.addEventListener('click', () => {
+            document.querySelector('.nav-hamburger').classList.remove('active');
+            document.querySelector('.nav-links').classList.remove('open');
+        });
+    });
 
     // -- Init --
     checkAuth();
