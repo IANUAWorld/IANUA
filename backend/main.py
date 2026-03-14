@@ -148,6 +148,10 @@ async def startup():
         import subprocess
         subprocess.run(["alembic", "upgrade", "head"], check=True)
 
+    # Start automatic cron scheduler
+    from scheduler import start_scheduler
+    start_scheduler()
+
 
 # ── PUBLIC ENDPOINTS ─────────────────────────────
 
