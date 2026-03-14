@@ -22,7 +22,7 @@ class Comment(Base):
     __tablename__ = "comments"
 
     id = Column(Integer, primary_key=True, index=True)
-    principle_id = Column(String(5), nullable=False, index=True)
+    principle_id = Column(String(20), nullable=False, index=True)
     author_name = Column(String(100), nullable=False)
     author_country = Column(String(100), nullable=True)
     content = Column(Text, nullable=False)

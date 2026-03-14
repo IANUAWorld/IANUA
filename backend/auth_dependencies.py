@@ -3,7 +3,11 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from fastapi import Request, HTTPException
 
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-change-in-production")
+SECRET_KEY = os.getenv("SECRET_KEY", "")
+if not SECRET_KEY:
+    import warnings
+    warnings.warn("SECRET_KEY not set — JWT authentication will not work. Set SECRET_KEY in environment.")
+    SECRET_KEY = "INSECURE-DEV-ONLY-CHANGE-ME"
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRATION_HOURS = 24
 COOKIE_NAME = "ianua_session"

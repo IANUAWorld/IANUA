@@ -151,7 +151,8 @@ async def trigger_audit(
         try:
             response_text, model_version = await provider(body.prompt)
         except Exception as exc:
-            results.append({"model_name": model_name, "success": False, "error": str(exc)})
+            print(f"[AUDIT ERROR] {model_name}: {exc}")
+            results.append({"model_name": model_name, "success": False, "error": "AI provider call failed"})
             continue
 
         audit = AuditResponse(

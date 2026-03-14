@@ -1,8 +1,13 @@
+import re
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import select, func, case
+
+
+def strip_html(text: str) -> str:
+    return re.sub(r'<[^>]+>', '', text)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
@@ -242,8 +247,8 @@ async def submit_vote(
     if vote_value not in VALID_VOTES:
         raise HTTPException(status_code=422, detail=f"Invalid vote. Must be one of: {', '.join(VALID_VOTES)}")
 
-    # Validate comment length
-    comment = body.comment.strip() if body.comment else None
+    # Validate and sanitize comment
+    comment = strip_html(body.comment.strip()) if body.comment else None
     if comment and len(comment) > 500:
         raise HTTPException(status_code=422, detail="Comment too long (max 500 characters)")
 

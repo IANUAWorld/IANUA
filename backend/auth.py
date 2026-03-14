@@ -8,12 +8,16 @@ from pydantic import BaseModel, EmailStr
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
 from database import get_db
 from models import Signature, MagicToken
 from auth_dependencies import create_jwt, get_current_signer, COOKIE_NAME
 from email_service import send_magic_link_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+limiter = Limiter(key_func=get_remote_address)
 
 BASE_URL = os.getenv("BASE_URL", "https://ianua.world")
 MAGIC_LINK_EXPIRY_MINUTES = 15
@@ -68,7 +72,8 @@ async def send_magic_link(body: MagicLinkRequest, request: Request, db: AsyncSes
 
 
 @router.get("/verify/{token}")
-async def verify_magic_link(token: str, db: AsyncSession = Depends(get_db)):
+@limiter.limit("10/minute")
+async def verify_magic_link(token: str, request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(MagicToken).where(MagicToken.token == token)
     )

@@ -183,6 +183,10 @@ async def create_draft(
 
     if len(title) > 120:
         raise HTTPException(status_code=400, detail="Title too long (max 120)")
+    if len(text_after) > 5000:
+        raise HTTPException(status_code=400, detail="Text too long (max 5000)")
+    if len(motivation) > 2000:
+        raise HTTPException(status_code=400, detail="Motivation too long (max 2000)")
 
     # Check max 5 active drafts
     count_result = await db.execute(
@@ -582,6 +586,8 @@ async def support_proposal(
         raise HTTPException(status_code=409, detail="Already supported")
 
     comment = strip_html(body.comment.strip()) if body.comment else None
+    if comment and len(comment) > 500:
+        raise HTTPException(status_code=400, detail="Comment too long (max 500)")
 
     support = AmendmentSupport(
         amendment_id=amendment_id,
