@@ -130,3 +130,24 @@ class AmendmentVote(Base):
     __table_args__ = (
         UniqueConstraint("amendment_id", "voter_identity", name="uq_amendment_vote_per_voter"),
     )
+
+
+class MagicToken(Base):
+    __tablename__ = "magic_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), nullable=False, index=True)
+    token = Column(String(64), unique=True, nullable=False, index=True)
+    used = Column(Boolean, default=False)
+    expires_at = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+
+
+class VoteHistory(Base):
+    __tablename__ = "vote_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+    vote_id = Column(Integer, ForeignKey("amendment_votes.id", ondelete="CASCADE"), nullable=False, index=True)
+    previous_vote = Column(String(10), nullable=False)  # FOR / AGAINST / ABSTAIN
+    previous_comment = Column(Text, nullable=True)
+    changed_at = Column(DateTime, server_default=func.now())
