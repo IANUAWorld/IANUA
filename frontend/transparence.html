@@ -83,8 +83,26 @@
         .nav-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .nav-hamburger.active span:nth-child(2) { opacity: 0; }
         .nav-hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-        .user-name { color: var(--gold); }
-        .btn-logout { background: none; border: 1px solid var(--grey); color: var(--grey); padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; }
+        .lang-switcher { display: flex; gap: 0.5rem; }
+        .lang-btn {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            padding: 0.3rem 0.7rem;
+            border: 1px solid rgba(201,168,76,0.3);
+            background: transparent;
+            color: var(--grey);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .lang-btn.active, .lang-btn:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: var(--gold-dim);
+        }
+        .user-name { color: var(--gold); font-family: 'Source Sans 3', sans-serif; font-size: 0.8rem; }
+        .btn-logout { background: none; border: 1px solid var(--grey); color: var(--grey); padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-size: 0.8rem; }
         .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
 
         /* -- Page -- */
@@ -119,9 +137,43 @@
         .loading { text-align: center; padding: 3rem; color: var(--grey); font-family: 'Source Sans 3', sans-serif; }
 
         /* -- Footer -- */
-        .footer { text-align: center; padding: 2rem; margin-top: 3rem; border-top: 1px solid rgba(201,168,76,0.1); }
-        .footer a { color: var(--grey); text-decoration: none; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; margin: 0 0.5rem; }
-        .footer a:hover { color: var(--gold); }
+        footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 3rem 4rem;
+            border-top: 1px solid rgba(201,168,76,0.1);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.8rem;
+            color: var(--grey);
+        }
+        .footer-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.2em;
+            color: var(--gold);
+            margin-bottom: 0.3rem;
+        }
+        .footer-tagline { font-size: 0.9rem; color: var(--grey); font-style: italic; margin-top: 0.5rem; }
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+        .footer-links a {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold);
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+        .footer-links a:hover { opacity: 0.7; }
+        .footer-right { text-align: right; }
+        .footer-right p { margin: 0.3rem 0; font-size: 0.8rem; color: var(--grey); }
+        .footer-right a { color: var(--gold); text-decoration: none; }
 
         @media (max-width: 768px) {
             nav { padding: 1rem 1.5rem; }
@@ -139,6 +191,9 @@
             }
             .nav-links.open { display: flex; }
             .nav-links a { font-size: 1.1rem; letter-spacing: 0.2em; }
+            .lang-switcher { z-index: 101; }
+            footer { flex-direction: column; align-items: flex-start; }
+            .footer-right { text-align: left; }
             .page-header h1 { font-size: 1.5rem; }
             .timeline-entry { flex-direction: column; gap: 0.3rem; }
             .timeline-date { min-width: auto; }
@@ -155,12 +210,16 @@
             <li><a href="/#principes" data-fr="Principes" data-en="Principles" data-es="Principios">Principes</a></li>
             <li><a href="/#pacte" data-fr="Lignes rouges" data-en="Red lines" data-es="Lineas rojas">Lignes rouges</a></li>
             <li><a href="/gouvernance" data-fr="Gouvernance" data-en="Governance" data-es="Gobernanza">Gouvernance</a></li>
-            <li><a href="/#roadmap">Roadmap</a></li>
-            <li><a href="/#rejoindre" data-fr="Rejoindre" data-en="Join" data-es="Unirse">Rejoindre</a></li>
             <li><a href="/proposer" data-fr="Proposer" data-en="Propose" data-es="Proponer">Proposer</a></li>
+            <li><a href="/status" data-fr="Status" data-en="Status" data-es="Estado">Status</a></li>
         </ul>
         <div style="display:flex;align-items:center;gap:1rem;">
             <span id="auth-status"></span>
+            <div class="lang-switcher">
+                <button class="lang-btn active" onclick="setLang('fr')">FR</button>
+                <button class="lang-btn" onclick="setLang('en')">EN</button>
+                <button class="lang-btn" onclick="setLang('es')">ES</button>
+            </div>
         </div>
     </nav>
 
@@ -185,11 +244,25 @@
         <h2>Aucune action administrative enregistr&eacute;e.</h2>
     </div>
 
-    <footer class="footer">
-        <a href="gouvernance.html">Gouvernance</a>
-        <a href="https://github.com/IANUAWorld" target="_blank">GitHub</a>
-        <a href="https://x.com/ianua_world" target="_blank">X</a>
-        <a href="mailto:ianua@outlook.fr">Contact</a>
+    <footer>
+        <div class="footer-left">
+            <div class="footer-logo">IANUA</div>
+            <div class="footer-tagline" data-fr="La porte. Le seuil franchi ensemble." data-en="The door. The threshold crossed together." data-es="La puerta. El umbral cruzado juntos.">La porte. Le seuil franchi ensemble.</div>
+            <div class="footer-links">
+                <a href="/" data-fr="Accueil" data-en="Home" data-es="Inicio">Accueil</a>
+                <a href="/gouvernance" data-fr="Gouvernance" data-en="Governance" data-es="Gobernanza">Gouvernance</a>
+                <a href="/proposer" data-fr="Proposer" data-en="Propose" data-es="Proponer">Proposer</a>
+                <a href="/transparence" data-fr="Transparence" data-en="Transparency" data-es="Transparencia">Transparence</a>
+                <a href="/status" data-fr="Status" data-en="Status" data-es="Estado">Status</a>
+                <a href="https://github.com/IANUAWorld/IANUA" target="_blank" rel="noopener">GitHub</a>
+                <a href="https://x.com/ianua_world" target="_blank" rel="noopener">@ianua_world</a>
+                <a href="mailto:ianua@outlook.fr">ianua@outlook.fr</a>
+            </div>
+        </div>
+        <div class="footer-right">
+            <p data-fr="Charte v2.2 · 8 Principes · 2026" data-en="Charter v2.2 · 8 Principles · 2026" data-es="Carta v2.2 · 8 Principios · 2026">Charte v2.2 · 8 Principes · 2026</p>
+            <p data-fr="Nee d'un dialogue entre Max et Claude." data-en="Born from a dialogue between Max and Claude." data-es="Nacida de un dialogo entre Max y Claude.">Nee d'un dialogue entre Max et Claude.</p>
+        </div>
     </footer>
 
     <script>
@@ -276,6 +349,18 @@
         const div = document.createElement('div');
         div.textContent = str;
         return div.innerHTML;
+    }
+
+    // -- Lang --
+    let currentLang = 'fr';
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.lang-btn:nth-child(${lang === 'fr' ? 1 : lang === 'en' ? 2 : 3})`).classList.add('active');
+        document.querySelectorAll('[data-' + lang + ']').forEach(el => {
+            const val = el.getAttribute('data-' + lang);
+            if (val) el.textContent = val;
+        });
     }
 
     // -- Mobile Nav --
