@@ -723,3 +723,30 @@ async def admin_subscribers(
             for s in subscribers
         ]
     }
+
+
+@app.post("/admin/open-votes")
+async def admin_open_votes(
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Open voting on all deliberation amendments that don't have vote_opened_at set."""
+    result = await db.execute(
+        select(Amendment).where(
+            Amendment.status == "deliberation",
+            Amendment.vote_opened_at.is_(None),
+        )
+    )
+    amendments = result.scalars().all()
+
+    now = datetime.utcnow()
+    count = 0
+    for a in amendments:
+        a.vote_opened_at = now
+        a.vote_closed_at = now + timedelta(days=30)
+        if not a.vote_threshold:
+            a.vote_threshold = 50
+        count += 1
+
+    await db.commit()
+    return {"message": f"Opened voting on {count} amendments", "count": count}
