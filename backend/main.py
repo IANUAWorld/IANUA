@@ -23,6 +23,7 @@ from database import get_db, engine, Base, IS_SQLITE, create_tables_sync
 from models import Subscriber, Comment, Reaction, Amendment, AmendmentVote, Signature
 from email_service import send_confirmation_email, send_signature_confirmation
 from auth import router as auth_router
+from voting import router as voting_router
 
 # ── App ──────────────────────────────────────────
 app = FastAPI(title="Ianua API", version="1.0.0")
@@ -68,6 +69,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 app.add_middleware(SecurityHeadersMiddleware)
 
 app.include_router(auth_router)
+app.include_router(voting_router)
 
 # ── Config ───────────────────────────────────────
 ADMIN_KEY = os.getenv("ADMIN_KEY", "")
