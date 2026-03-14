@@ -585,6 +585,7 @@
       <li><a href="/gouvernance" class="active" data-fr="Gouvernance" data-en="Governance" data-es="Gobernanza">Gouvernance</a></li>
       <li><a href="/#roadmap">Roadmap</a></li>
       <li><a href="/#rejoindre" data-fr="Rejoindre" data-en="Join" data-es="Unirse">Rejoindre</a></li>
+      <li><a href="/vote" data-fr="Voter" data-en="Vote" data-es="Votar">Voter</a></li>
     </ul>
     <div class="lang-switcher">
       <button class="lang-btn active" onclick="setLang('fr')">FR</button>
@@ -870,6 +871,16 @@
               ${a.charte_version_after ? `<span>${charteLabel[currentLang]} ${a.charte_version_after}</span>` : ''}
               ${a.principle_id ? `<a href="/#principes" class="amendment-link">${seeCharte[currentLang]} &rarr;</a>` : ''}
             </div>
+            ${a.status === 'deliberation' ? `
+            <div style="margin-top:0.8rem; padding-top:0.8rem; border-top:1px solid rgba(46,156,202,0.15);">
+              <a href="vote.html#${a.code}"
+                 style="display:inline-block;background:var(--gold);color:var(--dark);padding:0.4rem 1.2rem;border-radius:4px;text-decoration:none;font-family:'Source Sans 3',sans-serif;font-weight:600;font-size:0.85rem;">
+                ${{fr:'Voter →', en:'Vote →', es:'Votar →'}[currentLang]}
+              </a>
+              <span style="font-family:'Source Sans 3',sans-serif;font-size:0.8rem;color:var(--grey);margin-left:0.5rem;">
+                ${{fr:'Participez a la deliberation', en:'Join the deliberation', es:'Participe en la deliberacion'}[currentLang]}
+              </span>
+            </div>` : ''}
           </div>
         `;
       }).join('');
