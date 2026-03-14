@@ -779,3 +779,42 @@ async def admin_reset_to_deliberation(
 
     await db.commit()
     return {"message": f"Reset {len(updated)} amendments to deliberation", "codes": updated}
+
+
+@app.post("/admin/insert-a004")
+async def admin_insert_a004(
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Insert A004 if missing, in deliberation with vote open."""
+    existing = await db.execute(select(Amendment).where(Amendment.code == "A004"))
+    if existing.scalar_one_or_none():
+        return {"message": "A004 already exists"}
+
+    now = datetime.utcnow()
+    a004 = Amendment(
+        code="A004",
+        principle_id=None,
+        target="global",
+        amendment_type="addition",
+        text_before=None,
+        text_after="Ianua ne régule pas les moyens — elle engage les personnes. Là où les institutions traitent les systèmes, les risques et les seuils techniques, Ianua traite la relation. Ce n'est pas une limite. C'est un choix fondateur. Ianua ne nomme pas les divisions humaines parce que le pacte humain-IA est précisément l'espace où elles n'ont pas de prise. Elle ne le proclame pas — elle le démontre. Par ses langues. Par son ouverture. Par la nature même de ce qu'elle est.",
+        motivation="Positionnement explicite d'Ianua par rapport aux textes institutionnels : Ianua traite la relation, pas les systèmes. Ce texte clarifie pourquoi la charte ne nomme pas les catégories humaines et affirme cette absence comme un acte fondateur.",
+        inspiration="Analyse comparative Ianua vs accords institutionnels — Max/Claude — 10 mars 2026",
+        source_type="founder",
+        proposed_by="Max",
+        phase="phase_1",
+        status="deliberation",
+        votes_for=0,
+        votes_against=0,
+        votes_abstain=0,
+        vote_threshold=50,
+        vote_opened_at=now,
+        vote_closed_at=now + timedelta(days=30),
+        published_at=now,
+        motivation_en="Ianua does not regulate means — it engages people. Where institutions address systems, risks, and technical thresholds, Ianua addresses the relationship. This is not a limitation. It is a founding choice.",
+        motivation_es="Ianua no regula los medios — compromete a las personas. Donde las instituciones tratan los sistemas y los umbrales técnicos, Ianua trata la relación. No es una limitación. Es una elección fundadora.",
+    )
+    db.add(a004)
+    await db.commit()
+    return {"message": "A004 inserted in deliberation with vote open"}

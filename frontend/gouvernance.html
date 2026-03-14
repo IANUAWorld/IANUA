@@ -874,7 +874,12 @@
               ${a.principle_id ? `<a href="/#principes" class="amendment-link">${seeCharte[currentLang]} &rarr;</a>` : ''}
             </div>
             ${a.status === 'deliberation' ? `
-            <div style="margin-top:0.8rem; padding-top:0.8rem; border-top:1px solid rgba(46,156,202,0.15);">
+            <div id="vote-stats-${a.code}" style="margin-top:0.8rem; padding-top:0.8rem; border-top:1px solid rgba(46,156,202,0.15);">
+              <div style="display:flex;gap:1.5rem;align-items:center;margin-bottom:0.6rem;font-family:'Source Sans 3',sans-serif;font-size:0.85rem;">
+                <span style="color:#2ECA8C;">&#9650; <span class="vs-for-${a.code}">—</span> ${{fr:'pour',en:'for',es:'a favor'}[currentLang]}</span>
+                <span style="color:#CA2E2E;">&#9660; <span class="vs-against-${a.code}">—</span> ${{fr:'contre',en:'against',es:'en contra'}[currentLang]}</span>
+                <span style="color:#8A8A9A;">&#9679; <span class="vs-abstain-${a.code}">—</span> ${{fr:'abstention',en:'abstain',es:'abstencion'}[currentLang]}</span>
+              </div>
               <a href="vote.html#${a.code}"
                  style="display:inline-block;background:var(--gold);color:var(--dark);padding:0.4rem 1.2rem;border-radius:4px;text-decoration:none;font-family:'Source Sans 3',sans-serif;font-weight:600;font-size:0.85rem;">
                 ${{fr:'Voter →', en:'Vote →', es:'Votar →'}[currentLang]}
@@ -1046,10 +1051,30 @@
     }
 
     /* ── Init ─────────────────────────────── */
+    /* ── Fetch live vote stats from API ──── */
+    const GOV_API = window.location.hostname === 'localhost'
+        ? 'http://localhost:8000' : 'https://api.ianua.world';
+
+    async function loadVoteStats() {
+      try {
+        const resp = await fetch(`${GOV_API}/amendments/voting`);
+        const data = await resp.json();
+        (data.amendments || []).forEach(a => {
+          document.querySelectorAll(`.vs-for-${a.code}`).forEach(el => el.textContent = a.votes_for || 0);
+          document.querySelectorAll(`.vs-against-${a.code}`).forEach(el => el.textContent = a.votes_against || 0);
+          document.querySelectorAll(`.vs-abstain-${a.code}`).forEach(el => el.textContent = a.votes_abstain || 0);
+        });
+      } catch (err) {
+        console.error('Failed to load vote stats:', err);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const lang = detectLang();
       setLang(lang);
       loadRegistry();
+      // Load live vote stats after registry renders
+      setTimeout(loadVoteStats, 500);
 
       // Close mobile nav on link click
       document.querySelectorAll('.nav-links a').forEach(a => {
