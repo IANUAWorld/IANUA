@@ -322,7 +322,7 @@ async def submit_draft(
     draft.tier = _force_tier_for_type(draft.amendment_type, draft.tier)
 
     tier_cfg = TIER_CONFIG[draft.tier]
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
 
     draft.status = "proposed"
     draft.proposed_at = now
@@ -609,7 +609,7 @@ async def support_proposal(
 
     if support_count >= threshold:
         # Auto-transition to deliberation
-        now = datetime.now(timezone.utc)
+        now = datetime.utcnow()
         amendment.status = "deliberation"
         amendment.vote_opened_at = now
         amendment.vote_closed_at = now + timedelta(days=amendment.deliberation_duration_days or tier_cfg["delib_days"])
@@ -637,7 +637,7 @@ async def withdraw_proposal(
         raise HTTPException(status_code=409, detail="Can only withdraw proposed amendments")
 
     amendment.status = "withdrawn"
-    amendment.withdrawn_at = datetime.now(timezone.utc)
+    amendment.withdrawn_at = datetime.utcnow()
     await db.commit()
 
     return {"message": "withdrawn"}

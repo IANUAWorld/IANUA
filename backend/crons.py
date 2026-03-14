@@ -31,7 +31,7 @@ async def expire_proposals(
     db: AsyncSession = Depends(get_db),
     _admin: None = Depends(verify_admin),
 ):
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     result = await db.execute(
         select(Amendment).where(
             Amendment.status == "proposed",
@@ -50,7 +50,7 @@ async def close_votes(
     db: AsyncSession = Depends(get_db),
     _admin: None = Depends(verify_admin),
 ):
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     result = await db.execute(
         select(Amendment).where(
             Amendment.status == "deliberation",
@@ -109,7 +109,7 @@ async def cleanup_tokens(
     db: AsyncSession = Depends(get_db),
     _admin: None = Depends(verify_admin),
 ):
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     result = await db.execute(
         delete(MagicToken).where(
             (MagicToken.used == True) | (MagicToken.expires_at < now)

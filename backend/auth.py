@@ -39,7 +39,7 @@ async def send_magic_link(body: MagicLinkRequest, request: Request, db: AsyncSes
         return {"message": "Si cette adresse est associee a un signataire verifie, un lien vous sera envoye."}
 
     # Rate limit: 3 magic links per email per hour
-    since = datetime.now(timezone.utc) - timedelta(hours=1)
+    since = datetime.utcnow() - timedelta(hours=1)
     count_result = await db.execute(
         select(func.count(MagicToken.id)).where(
             MagicToken.email == email,
@@ -54,7 +54,7 @@ async def send_magic_link(body: MagicLinkRequest, request: Request, db: AsyncSes
     magic_token = MagicToken(
         email=email,
         token=token,
-        expires_at=datetime.now(timezone.utc) + timedelta(minutes=MAGIC_LINK_EXPIRY_MINUTES),
+        expires_at=datetime.utcnow() + timedelta(minutes=MAGIC_LINK_EXPIRY_MINUTES),
     )
     db.add(magic_token)
     await db.commit()
@@ -80,10 +80,10 @@ async def verify_magic_link(token: str, db: AsyncSession = Depends(get_db)):
     if magic_token.used:
         return RedirectResponse(url=f"{BASE_URL}/vote.html?error=used")
 
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     expires = magic_token.expires_at
-    if expires.tzinfo is None:
-        expires = expires.replace(tzinfo=timezone.utc)
+    if expires.tzinfo is not None:
+        expires = expires.replace(tzinfo=None)
     if now > expires:
         return RedirectResponse(url=f"{BASE_URL}/vote.html?error=expired")
 

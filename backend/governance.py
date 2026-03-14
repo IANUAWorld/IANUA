@@ -118,7 +118,7 @@ async def challenge_tier(
             amendment.tier = new_tier
             amendment.tier_requalified = True
             amendment.tier_requalified_by = "auto"
-            amendment.tier_requalified_at = datetime.now(timezone.utc)
+            amendment.tier_requalified_at = datetime.utcnow()
 
             action = AdminAction(
                 amendment_id=id,
@@ -280,7 +280,7 @@ async def admin_requalify_tier(
     amendment.tier = body.new_tier
     amendment.tier_requalified = True
     amendment.tier_requalified_by = "admin"
-    amendment.tier_requalified_at = datetime.now(timezone.utc)
+    amendment.tier_requalified_at = datetime.utcnow()
 
     action = AdminAction(
         amendment_id=id,

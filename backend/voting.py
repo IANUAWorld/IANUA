@@ -256,11 +256,11 @@ async def submit_vote(
         raise HTTPException(status_code=409, detail="Amendment is not in deliberation")
 
     # Check vote period
-    now = datetime.now(timezone.utc)
+    now = datetime.utcnow()
     if amendment.vote_closed_at:
         closed = amendment.vote_closed_at
-        if closed.tzinfo is None:
-            closed = closed.replace(tzinfo=timezone.utc)
+        if closed.tzinfo is not None:
+            closed = closed.replace(tzinfo=None)
         if now >= closed:
             raise HTTPException(status_code=403, detail="Vote period closed")
 
@@ -277,7 +277,7 @@ async def submit_vote(
 
     if existing_vote:
         # Rate limit: max 10 modifications per amendment per user per hour
-        since = datetime.now(timezone.utc) - timedelta(hours=1)
+        since = datetime.utcnow() - timedelta(hours=1)
         mod_count = await db.execute(
             select(func.count(VoteHistory.id)).where(
                 VoteHistory.vote_id == existing_vote.id,
