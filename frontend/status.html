@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ianua — Etat du projet</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <meta name="description" content="Ianua — Etat du projet : ce qui est actif, ce qui reste a construire.">
+    <meta property="og:title" content="Ianua — Etat du projet">
+    <meta property="og:description" content="Ce qui est actif, ce qui reste a construire. Transparence totale.">
+    <meta name="twitter:card" content="summary">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #C9A84C;
+            --gold-light: #E8C97A;
+            --gold-dim: rgba(201,168,76,0.15);
+            --cyan: #2E9CCA;
+            --green: #2ECA8C;
+            --red: #CA2E2E;
+            --dark: #0D0D1A;
+            --dark2: #13131F;
+            --dark3: #1A1A2E;
+            --grey: #8A8A9A;
+            --light: #E8E8F0;
+            --white: #F5F5FA;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--dark);
+            color: var(--light);
+            font-family: 'Cormorant Garamond', serif;
+            min-height: 100vh;
+        }
+
+        /* -- Nav -- */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 4rem;
+            background: rgba(13,13,26,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(201,168,76,0.15);
+        }
+        .nav-logo {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: 0.25em;
+            color: var(--gold);
+            text-decoration: none;
+        }
+        .nav-links { display: flex; gap: 2.5rem; list-style: none; }
+        .nav-links a {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--grey);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+        .nav-hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 4px;
+            z-index: 101;
+        }
+        .nav-hamburger span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: var(--gold);
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .nav-hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .nav-hamburger.active span:nth-child(2) { opacity: 0; }
+        .nav-hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+        .user-name { color: var(--gold); }
+        .btn-logout { background: none; border: 1px solid var(--grey); color: var(--grey); padding: 0.3rem 0.8rem; border-radius: 4px; cursor: pointer; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; }
+        .btn-logout:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* -- Page -- */
+        .page-header { text-align: center; padding: 6rem 2rem 1rem; }
+        .page-header h1 { font-family: 'Cinzel', serif; color: var(--gold); font-size: 2rem; font-weight: 600; }
+        .page-header p { color: var(--grey); font-size: 1.1rem; margin-top: 0.5rem; font-family: 'Source Sans 3', sans-serif; }
+
+        /* -- Sections -- */
+        .status-container { max-width: 900px; margin: 0 auto; padding: 0 2rem; }
+
+        .phase-section {
+            margin-bottom: 3rem;
+            background: var(--dark2);
+            border: 1px solid rgba(201,168,76,0.1);
+            border-radius: 12px;
+            padding: 2rem 2.5rem;
+        }
+
+        .phase-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(201,168,76,0.1);
+        }
+
+        .phase-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        .phase-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .phase-date {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.85rem;
+            color: var(--grey);
+        }
+
+        .badge {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.25rem 0.8rem;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .badge-complete { background: rgba(46,202,140,0.2); color: var(--green); }
+        .badge-planned { background: rgba(201,168,76,0.2); color: var(--gold); }
+
+        /* -- Checklist -- */
+        .checklist { list-style: none; }
+        .checklist li {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.95rem;
+            color: var(--light);
+            padding: 0.45rem 0;
+            padding-left: 2rem;
+            position: relative;
+            line-height: 1.5;
+            border-bottom: 1px solid rgba(201,168,76,0.04);
+        }
+        .checklist li:last-child { border-bottom: none; }
+
+        .checklist li::before {
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            font-size: 1rem;
+        }
+        .checklist li.done::before {
+            content: "\2713";
+            color: var(--green);
+            font-weight: 700;
+        }
+        .checklist li.planned::before {
+            content: "\25CB";
+            color: var(--gold);
+            font-weight: 400;
+        }
+
+        /* -- Stats cards -- */
+        .stats-section {
+            margin-bottom: 3rem;
+        }
+        .stats-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: var(--gold);
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.2rem;
+        }
+        .stat-card {
+            background: var(--dark2);
+            border: 1px solid rgba(201,168,76,0.25);
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: border-color 0.3s;
+        }
+        .stat-card:hover { border-color: var(--gold); }
+        .stat-number {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--gold);
+            line-height: 1;
+        }
+        .stat-label {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.85rem;
+            color: var(--grey);
+            margin-top: 0.5rem;
+        }
+
+        /* -- Footer -- */
+        .footer { text-align: center; padding: 2rem; margin-top: 3rem; border-top: 1px solid rgba(201,168,76,0.1); }
+        .footer a { color: var(--grey); text-decoration: none; font-family: 'Source Sans 3', sans-serif; font-size: 0.85rem; margin: 0 0.5rem; }
+        .footer a:hover { color: var(--gold); }
+        .footer .update-date { display: block; margin-top: 0.8rem; font-family: 'Source Sans 3', sans-serif; font-size: 0.75rem; color: var(--grey); opacity: 0.6; }
+
+        @media (max-width: 768px) {
+            nav { padding: 1rem 1.5rem; }
+            .nav-hamburger { display: flex; }
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(13,13,26,0.98);
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 2rem;
+                z-index: 99;
+            }
+            .nav-links.open { display: flex; }
+            .nav-links a { font-size: 1.1rem; letter-spacing: 0.2em; }
+            .page-header h1 { font-size: 1.5rem; }
+            .phase-section { padding: 1.5rem; }
+            .phase-header { flex-direction: column; align-items: flex-start; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-logo">IANUA</a>
+        <div class="nav-hamburger" onclick="toggleMobileNav()">
+            <span></span><span></span><span></span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="/#principes">Principes</a></li>
+            <li><a href="/#pacte">Lignes rouges</a></li>
+            <li><a href="/gouvernance">Gouvernance</a></li>
+            <li><a href="/#roadmap">Roadmap</a></li>
+            <li><a href="/#rejoindre">Rejoindre</a></li>
+            <li><a href="/proposer">Proposer</a></li>
+        </ul>
+        <div style="display:flex;align-items:center;gap:1rem;">
+            <span id="auth-status"></span>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>Ianua &mdash; Etat du projet</h1>
+        <p>Ce qui est actif, ce qui reste a construire. Transparence totale.</p>
+    </div>
+
+    <div class="status-container">
+
+        <!-- Phase 1 -->
+        <div class="phase-section">
+            <div class="phase-header">
+                <div class="phase-title">Phase 1 &mdash; Ancrage</div>
+                <div class="phase-meta">
+                    <span class="phase-date">Mars 2026</span>
+                    <span class="badge badge-complete">Complete</span>
+                </div>
+            </div>
+            <ul class="checklist">
+                <li class="done">Charte 8 principes, 3 paliers visuels</li>
+                <li class="done">Voix humaine + voix IA pour chaque principe</li>
+                <li class="done">Lignes rouges (Pacte) &mdash; 8 lignes non negociables</li>
+                <li class="done">Forum commentaires par principe + reactions</li>
+                <li class="done">Newsletter double opt-in (Brevo)</li>
+                <li class="done">Signatures de soutien global (double opt-in)</li>
+                <li class="done">SEO (Open Graph, Twitter Cards, sitemap, robots.txt)</li>
+                <li class="done">Trilingue FR/EN/ES</li>
+                <li class="done">Gouvernance : registre des amendements, filtres, forum de deliberation</li>
+                <li class="done">Amendements A001, A001-R (ratifies), A002 (ratifie)</li>
+                <li class="done">Dashboard admin : moderation commentaires</li>
+                <li class="done">Infrastructure : Vercel (frontend) + Railway (backend + PostgreSQL)</li>
+                <li class="done">SSL, CORS, rate limiting, security headers</li>
+            </ul>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-section">
+            <div class="phase-header">
+                <div class="phase-title">Phase 2 &mdash; Deliberation communautaire</div>
+                <div class="phase-meta">
+                    <span class="phase-date">14 mars 2026</span>
+                    <span class="badge badge-complete">Complete</span>
+                </div>
+            </div>
+            <ul class="checklist">
+                <li class="done">Authentification magic link (email, JWT httpOnly, one-time token)</li>
+                <li class="done">Vote communautaire Pour/Contre/Abstention sur amendements en deliberation</li>
+                <li class="done">Modification de vote avec historique public visible</li>
+                <li class="done">Resultats en temps reel (polling 30s)</li>
+                <li class="done">Motivations signees publiques</li>
+                <li class="done">Reactions sur motivations (Pertinent/Enrichissant/Hors sujet)</li>
+                <li class="done">Flux de proposition d'amendement (brouillons, soumission, gel du texte)</li>
+                <li class="done">3 types d'amendement : Modification, Ajout, Suppression</li>
+                <li class="done">Soutiens communautaires (seuil adaptatif par palier)</li>
+                <li class="done">Transition automatique proposition &rarr; deliberation &rarr; ratification/rejet</li>
+                <li class="done">Contestation de palier (convergence auto ou arbitrage admin)</li>
+                <li class="done">Signalement communautaire (spam/hors-charte/contenu inapproprie)</li>
+                <li class="done">Suppression pour abus (loggee publiquement)</li>
+                <li class="done">Audit IA multi-modeles (Claude, GPT-4o, extensible)</li>
+                <li class="done">Publication/rejet d'audits avec tracabilite complete</li>
+                <li class="done">Page transparence (log public des actions admin)</li>
+                <li class="done">Crons automatiques (APScheduler) : expiration, cloture votes, nettoyage tokens</li>
+                <li class="done">Dashboard admin enrichi (8 onglets)</li>
+                <li class="done">Navigation unifiee (entonnoir d'engagement)</li>
+                <li class="done">Securite : audit complet, sanitization XSS, rate limiting, anti-enumeration</li>
+                <li class="done">58 tests automatises, 61 routes API</li>
+                <li class="done">Definition fondatrice d'ianuite (texte trilateral)</li>
+            </ul>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="phase-section">
+            <div class="phase-header">
+                <div class="phase-title">Phase 3 &mdash; Ratification formelle</div>
+                <div class="phase-meta">
+                    <span class="badge badge-planned">Planifiee</span>
+                </div>
+            </div>
+            <ul class="checklist">
+                <li class="planned">OAuth (Google/GitHub/X) en complement du magic link</li>
+                <li class="planned">Notifications push (nouveaux amendements, resultats de vote)</li>
+                <li class="planned">Traduction communautaire des propositions</li>
+                <li class="planned">Systeme de delegation de vote</li>
+                <li class="planned">Publication academique de la charte</li>
+                <li class="planned">Integration providers IA supplementaires (Gemini, Mistral, Grok, Llama)</li>
+                <li class="planned">Ratification formelle des amendements Phase 2</li>
+            </ul>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-section">
+            <div class="stats-title">Chiffres cles</div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">principes fondateurs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">8</div>
+                    <div class="stat-label">lignes rouges</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">61</div>
+                    <div class="stat-label">routes API</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">58</div>
+                    <div class="stat-label">tests automatises</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">15</div>
+                    <div class="stat-label">tables PostgreSQL</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">3</div>
+                    <div class="stat-label">langues (FR/EN/ES)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">6</div>
+                    <div class="stat-label">modeles IA prevus</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="footer">
+        <a href="https://ianua.world">ianua.world</a>
+        <a href="https://github.com/IANUAWorld/IANUA" target="_blank">GitHub</a>
+        <a href="/transparence">Transparence</a>
+        <a href="/gouvernance">Gouvernance</a>
+        <span class="update-date">Derniere mise a jour : 14 mars 2026</span>
+    </footer>
+
+    <script>
+    const API = window.location.hostname === 'localhost'
+        ? 'http://localhost:8000'
+        : 'https://api.ianua.world';
+
+    // -- Auth state --
+    async function checkAuth() {
+        try {
+            const resp = await fetch(`${API}/auth/me`, { credentials: 'include' });
+            if (resp.ok) {
+                const user = await resp.json();
+                const el = document.getElementById('auth-status');
+                el.innerHTML = `<span class="user-name">${escapeHtml(user.name)}</span> <button class="btn-logout" onclick="logout()">D\u00e9connexion</button>`;
+            }
+        } catch {}
+    }
+
+    async function logout() {
+        await fetch(`${API}/auth/logout`, { method: 'POST', credentials: 'include' });
+        location.reload();
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // -- Mobile Nav --
+    function toggleMobileNav() {
+        document.querySelector('.nav-hamburger').classList.toggle('active');
+        document.querySelector('.nav-links').classList.toggle('open');
+    }
+    document.querySelectorAll('.nav-links a').forEach(a => {
+        a.addEventListener('click', () => {
+            document.querySelector('.nav-hamburger').classList.remove('active');
+            document.querySelector('.nav-links').classList.remove('open');
+        });
+    });
+
+    checkAuth();
+    </script>
+</body>
+</html>

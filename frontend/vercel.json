@@ -3,7 +3,8 @@
     { "source": "/gouvernance", "destination": "/gouvernance.html" },
     { "source": "/vote", "destination": "/vote.html" },
     { "source": "/proposer", "destination": "/proposer.html" },
-    { "source": "/transparence", "destination": "/transparence.html" }
+    { "source": "/transparence", "destination": "/transparence.html" },
+    { "source": "/status", "destination": "/status.html" }
   ],
   "redirects": [
     { "source": "/wp-admin/:path*", "destination": "/", "statusCode": 301 },
