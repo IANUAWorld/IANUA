@@ -142,41 +142,6 @@ async def health():
     return {"status": "ok"}
 
 
-@app.get("/debug/send-test")
-async def debug_send_test():
-    """Temporary: send a real test email and return the full Brevo response."""
-    import httpx as _httpx
-    from email_service import BREVO_API_KEY, FROM_EMAIL, FROM_NAME, BREVO_SEND_URL
-
-    if not BREVO_API_KEY:
-        return {"error": "BREVO_API_KEY not set", "key_prefix": "N/A"}
-
-    payload = {
-        "sender": {"name": FROM_NAME, "email": FROM_EMAIL},
-        "to": [{"email": "mquittet@outlook.fr"}],
-        "subject": "Ianua — Test email diagnostic",
-        "textContent": "Ceci est un email de test. Si vous le recevez, Brevo fonctionne !",
-    }
-
-    try:
-        async with _httpx.AsyncClient(timeout=15.0) as client:
-            resp = await client.post(
-                BREVO_SEND_URL,
-                json=payload,
-                headers={
-                    "api-key": BREVO_API_KEY,
-                    "Content-Type": "application/json",
-                },
-            )
-            return {
-                "status_code": resp.status_code,
-                "response": resp.text,
-                "sender_used": FROM_EMAIL,
-                "api_key_prefix": BREVO_API_KEY[:12] + "...",
-            }
-    except Exception as e:
-        return {"error": str(e)}
-
 
 @app.get("/stats")
 async def stats(db: AsyncSession = Depends(get_db)):
@@ -209,7 +174,9 @@ async def subscribe(body: SubscribeRequest, request: Request, db: AsyncSession =
         existing.token = token
         existing.lang = lang
         await db.commit()
-        await send_confirmation_email(body.email, token, lang)
+        sent = await send_confirmation_email(body.email, token, lang)
+        if not sent:
+            raise HTTPException(status_code=502, detail="Email delivery failed")
         return {"message": "ok"}
 
     # New subscriber
@@ -217,7 +184,9 @@ async def subscribe(body: SubscribeRequest, request: Request, db: AsyncSession =
     subscriber = Subscriber(email=body.email, lang=lang, token=token)
     db.add(subscriber)
     await db.commit()
-    await send_confirmation_email(body.email, token, lang)
+    sent = await send_confirmation_email(body.email, token, lang)
+    if not sent:
+        raise HTTPException(status_code=502, detail="Email delivery failed")
     return {"message": "ok"}
 
 
@@ -588,7 +557,9 @@ async def post_signature(
         existing.pseudo = pseudo
         existing.lang = lang
         await db.commit()
-        await send_signature_confirmation(body.email, pseudo, token, lang)
+        sent = await send_signature_confirmation(body.email, pseudo, token, lang)
+        if not sent:
+            raise HTTPException(status_code=502, detail="Email delivery failed")
         return {"message": "ok"}
 
     # New signature
@@ -601,7 +572,9 @@ async def post_signature(
     )
     db.add(sig)
     await db.commit()
-    await send_signature_confirmation(body.email, pseudo, token, lang)
+    sent = await send_signature_confirmation(body.email, pseudo, token, lang)
+    if not sent:
+        raise HTTPException(status_code=502, detail="Email delivery failed")
     return {"message": "ok"}
 
 
