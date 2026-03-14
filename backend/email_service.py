@@ -139,6 +139,49 @@ Este enlace es válido durante 72 horas.
 }
 
 
+# ── Magic link authentication ────────────────────
+MAGIC_LINK_TEMPLATES = {
+    "fr": {
+        "subject": "Ianua — Votre lien de connexion",
+        "body": """Pour vous connecter et voter sur les amendements, cliquez ici :
+{magic_url}
+
+Ce lien est valable 15 minutes et utilisable une seule fois.
+
+— Ianua · ianua.world""",
+    },
+    "en": {
+        "subject": "Ianua — Your login link",
+        "body": """To log in and vote on amendments, click here:
+{magic_url}
+
+This link is valid for 15 minutes and can only be used once.
+
+— Ianua · ianua.world""",
+    },
+    "es": {
+        "subject": "Ianua — Su enlace de conexion",
+        "body": """Para conectarse y votar sobre las enmiendas, haga clic aqui:
+{magic_url}
+
+Este enlace es valido durante 15 minutos y solo se puede usar una vez.
+
+— Ianua · ianua.world""",
+    },
+}
+
+
+async def send_magic_link_email(email: str, token: str, lang: str = "fr") -> bool:
+    if lang not in MAGIC_LINK_TEMPLATES:
+        lang = "en"
+
+    magic_url = f"{API_URL}/auth/verify/{token}"
+    template = MAGIC_LINK_TEMPLATES[lang]
+    body = template["body"].format(magic_url=magic_url)
+
+    return await _send_via_brevo(email, template["subject"], body)
+
+
 async def send_signature_confirmation(email: str, pseudo: str, token: str, lang: str = "fr") -> bool:
     if lang not in SIGNATURE_TEMPLATES:
         lang = "en"
