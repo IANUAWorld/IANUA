@@ -91,16 +91,21 @@
     const params = new URLSearchParams(window.location.search);
     const lang = ['fr', 'en', 'es'].includes(params.get('lang')) ? params.get('lang') : 'en';
     const error = params.get('error');
+    const type = params.get('type'); // "signature" or null (= subscription)
 
     const texts = {
       fr: {
-        success: {
+        subscribe: {
           title: 'Inscription confirmée',
           message: 'Vous recevrez les mises à jour d\'Ianua.',
         },
+        signature: {
+          title: 'Signature confirmée',
+          message: 'Votre soutien à la démarche Ianua est enregistré. Merci.',
+        },
         expired: {
           title: 'Lien expiré',
-          message: 'Ce lien de confirmation a expiré. Veuillez vous réinscrire.',
+          message: 'Ce lien de confirmation a expiré. Veuillez renouveler votre demande.',
         },
         invalid: {
           title: 'Lien invalide',
@@ -109,13 +114,17 @@
         back: '← Retour à ianua.world'
       },
       en: {
-        success: {
+        subscribe: {
           title: 'Subscription confirmed',
           message: 'You will receive Ianua updates.',
         },
+        signature: {
+          title: 'Signature confirmed',
+          message: 'Your support for the Ianua initiative is registered. Thank you.',
+        },
         expired: {
           title: 'Link expired',
-          message: 'This confirmation link has expired. Please subscribe again.',
+          message: 'This confirmation link has expired. Please renew your request.',
         },
         invalid: {
           title: 'Invalid link',
@@ -124,13 +133,17 @@
         back: '← Back to ianua.world'
       },
       es: {
-        success: {
+        subscribe: {
           title: 'Suscripción confirmada',
           message: 'Recibirá las actualizaciones de Ianua.',
         },
+        signature: {
+          title: 'Firma confirmada',
+          message: 'Su apoyo a la iniciativa Ianua ha sido registrado. Gracias.',
+        },
         expired: {
           title: 'Enlace expirado',
-          message: 'Este enlace de confirmación ha expirado. Por favor, suscríbase de nuevo.',
+          message: 'Este enlace de confirmación ha expirado. Por favor, renueve su solicitud.',
         },
         invalid: {
           title: 'Enlace inválido',
@@ -142,6 +155,7 @@
 
     const t = texts[lang];
     const iconEl = document.getElementById('icon');
+    const successKey = type === 'signature' ? 'signature' : 'subscribe';
 
     if (error === 'expired') {
       iconEl.textContent = '✕';
@@ -155,8 +169,8 @@
       document.getElementById('message').textContent = t.invalid.message;
     } else {
       iconEl.className = 'icon icon-success';
-      document.getElementById('title').textContent = t.success.title;
-      document.getElementById('message').textContent = t.success.message;
+      document.getElementById('title').textContent = t[successKey].title;
+      document.getElementById('message').textContent = t[successKey].message;
     }
 
     document.getElementById('backLink').textContent = t.back;
