@@ -1,8 +1,20 @@
 {
   "rewrites": [
     { "source": "/gouvernance", "destination": "/gouvernance.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/vote", "destination": "/vote.html" },
+    { "source": "/proposer", "destination": "/proposer.html" },
+    { "source": "/transparence", "destination": "/transparence.html" }
   ],
+  "redirects": [
+    { "source": "/wp-admin/:path*", "destination": "/", "statusCode": 301 },
+    { "source": "/wp-login.php", "destination": "/", "statusCode": 301 },
+    { "source": "/wp-content/:path*", "destination": "/", "statusCode": 301 },
+    { "source": "/wp-includes/:path*", "destination": "/", "statusCode": 301 },
+    { "source": "/xmlrpc.php", "destination": "/", "statusCode": 301 },
+    { "source": "/administrator/:path*", "destination": "/", "statusCode": 301 },
+    { "source": "/phpmyadmin/:path*", "destination": "/", "statusCode": 301 }
+  ],
+  "cleanUrls": true,
   "headers": [
     {
       "source": "/(.*)",
