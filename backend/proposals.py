@@ -28,6 +28,23 @@ VALID_PRINCIPLES = {
     "refus", "proactive", "agentique", "deliberation",
 }
 
+async def get_deadline_multiplier(db) -> float:
+    """Calculate deadline multiplier based on confirmed signatories count."""
+    from models import Signature
+    result = await db.execute(
+        select(func.count()).select_from(Signature).where(Signature.confirmed == True)
+    )
+    count = result.scalar() or 0
+    if count < 50:
+        return 3.0
+    elif count < 200:
+        return 2.0
+    elif count < 500:
+        return 1.5
+    else:
+        return 1.0
+
+
 CHARTER_PRINCIPLES = [
     {"id": "bienveillance", "label": "Bienveillance"},
     {"id": "transparence", "label": "Transparence"},
@@ -57,6 +74,7 @@ class DraftCreateRequest(BaseModel):
     submission_language: str = "fr"
     suggested_position: int | None = None
     deletion_justification: str | None = None
+    human_voice: str | None = None
 
 
 class DraftUpdateRequest(BaseModel):
@@ -67,6 +85,7 @@ class DraftUpdateRequest(BaseModel):
     tier: str | None = None
     submission_language: str | None = None
     suggested_position: int | None = None
+    human_voice: str | None = None
     deletion_justification: str | None = None
 
 
@@ -105,6 +124,39 @@ def _force_tier_for_type(amendment_type: str, tier: str) -> str:
     return tier
 
 
+# ── Deadline multiplier (public) ──────────────────
+
+@router.get("/deadline-info")
+async def deadline_info(db: AsyncSession = Depends(get_db)):
+    """Public endpoint: current deadline multiplier and community size."""
+    multiplier = await get_deadline_multiplier(db)
+    from models import Signature
+    result = await db.execute(
+        select(func.count()).select_from(Signature).where(Signature.confirmed == True)
+    )
+    count = result.scalar() or 0
+
+    if count < 50:
+        next_threshold = 50
+        next_multiplier = 2.0
+    elif count < 200:
+        next_threshold = 200
+        next_multiplier = 1.5
+    elif count < 500:
+        next_threshold = 500
+        next_multiplier = 1.0
+    else:
+        next_threshold = None
+        next_multiplier = None
+
+    return {
+        "signatories": count,
+        "multiplier": multiplier,
+        "next_threshold": next_threshold,
+        "next_multiplier": next_multiplier,
+    }
+
+
 # ── Charter principles (public) ───────────────────
 
 @router.get("/charter/principles", tags=["proposals"])
@@ -138,6 +190,7 @@ async def list_drafts(
                 "principle_id": d.principle_id,
                 "text_after": d.text_after,
                 "motivation": d.motivation,
+                "human_voice": d.human_voice,
                 "tier": d.tier,
                 "status": d.status,
                 "submission_language": d.submission_language,
@@ -226,6 +279,7 @@ async def create_draft(
         submission_language=body.submission_language or "fr",
         suggested_position=body.suggested_position,
         deletion_justification=strip_html(body.deletion_justification.strip()) if body.deletion_justification else None,
+        human_voice=strip_html(body.human_voice.strip()) if body.human_voice else None,
     )
     db.add(draft)
     await db.commit()
@@ -278,6 +332,8 @@ async def update_draft(
         draft.suggested_position = body.suggested_position
     if body.deletion_justification is not None:
         draft.deletion_justification = strip_html(body.deletion_justification.strip())
+    if body.human_voice is not None:
+        draft.human_voice = strip_html(body.human_voice.strip())
 
     await db.commit()
     return {"message": "updated"}
@@ -328,10 +384,14 @@ async def submit_draft(
     tier_cfg = TIER_CONFIG[draft.tier]
     now = datetime.utcnow()
 
+    # Adaptive deadline based on community size
+    multiplier = await get_deadline_multiplier(db)
+
     draft.status = "proposed"
     draft.proposed_at = now
-    draft.expires_at = now + timedelta(days=tier_cfg["expiry_days"])
-    draft.deliberation_duration_days = tier_cfg["delib_days"]
+    draft.expires_at = now + timedelta(days=int(tier_cfg["expiry_days"] * multiplier))
+    draft.deliberation_duration_days = int(tier_cfg["delib_days"] * multiplier)
+    draft.deadline_multiplier = multiplier
 
     await db.commit()
 
@@ -340,6 +400,7 @@ async def submit_draft(
         "status": draft.status,
         "expires_at": draft.expires_at.isoformat(),
         "deliberation_duration_days": draft.deliberation_duration_days,
+        "deadline_multiplier": multiplier,
     }
 
 
@@ -410,6 +471,7 @@ async def read_shared_draft(
             "principle_id": draft.principle_id,
             "text_after": draft.text_after,
             "motivation": draft.motivation,
+            "human_voice": draft.human_voice,
             "tier": draft.tier,
             "submission_language": draft.submission_language,
         },
@@ -501,6 +563,7 @@ async def list_public_amendments(
                 "text_before": a.text_before,
                 "text_after": a.text_after,
                 "motivation": a.motivation,
+                "human_voice": a.human_voice,
                 "tier": a.tier,
                 "status": a.status,
                 "author_id": a.author_id,
@@ -614,11 +677,14 @@ async def support_proposal(
     threshold = max(tier_cfg["support_floor"], math.ceil(tier_cfg["support_pct"] * total_confirmed))
 
     if support_count >= threshold:
-        # Auto-transition to deliberation
+        # Auto-transition to deliberation with adaptive deadline
         now = datetime.utcnow()
+        multiplier = await get_deadline_multiplier(db)
+        delib_days = int((amendment.deliberation_duration_days or tier_cfg["delib_days"]) * multiplier)
         amendment.status = "deliberation"
         amendment.vote_opened_at = now
-        amendment.vote_closed_at = now + timedelta(days=amendment.deliberation_duration_days or tier_cfg["delib_days"])
+        amendment.vote_closed_at = now + timedelta(days=delib_days)
+        amendment.deadline_multiplier = multiplier
         await db.commit()
         return {"message": "supported", "threshold_reached": True, "new_status": "deliberation"}
 

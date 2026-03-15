@@ -487,6 +487,14 @@
                     </div>
                 </div>
 
+                <div id="human-voice-group" class="form-group" style="display:none;">
+                    <label for="draft-human-voice">Voix humaine — Ce que je m'engage a faire ou reconnaitre</label>
+                    <textarea id="draft-human-voice" placeholder="En tant que signataire, je m'engage a..." maxlength="1000"></textarea>
+                    <p style="font-family:'Source Sans 3',sans-serif;font-size:0.75rem;color:var(--cyan);font-style:italic;margin-top:0.3rem;">
+                        La voix IA sera generee par audit apres ratification — elle ne peut pas etre ecrite par un humain.
+                    </p>
+                </div>
+
                 <div class="form-actions">
                     <button type="button" class="btn-cancel" onclick="closeForm()">Annuler</button>
                     <button type="submit" class="btn-primary">Enregistrer le brouillon</button>
@@ -687,6 +695,7 @@
         document.getElementById('fields-modification').style.display = type === 'modification' ? 'block' : 'none';
         document.getElementById('fields-ajout').style.display = type === 'ajout' ? 'block' : 'none';
         document.getElementById('fields-suppression').style.display = type === 'suppression' ? 'block' : 'none';
+        document.getElementById('human-voice-group').style.display = 'block';
 
         // Toggle required attributes
         toggleRequired('fields-modification', type === 'modification');
@@ -723,6 +732,7 @@
         document.getElementById('mod-text-before').value = '';
         document.getElementById('sup-text-before').value = '';
         document.getElementById('mod-tier-info').innerHTML = tierDescriptions.mineur;
+        document.getElementById('draft-human-voice').value = '';
     }
 
     // ── Edit draft ──────────────────────────────
@@ -758,6 +768,9 @@
             if (draft.langue) document.getElementById('sup-langue').value = draft.langue;
         }
 
+        // Restore human voice
+        document.getElementById('draft-human-voice').value = draft.human_voice || '';
+
         document.getElementById('proposal-form').classList.add('visible');
         document.getElementById('proposal-form').scrollIntoView({ behavior: 'smooth' });
     }
@@ -767,6 +780,7 @@
         e.preventDefault();
 
         let body = { type: currentType };
+        body.human_voice = document.getElementById('draft-human-voice')?.value?.trim() || null;
 
         if (currentType === 'modification') {
             body.principle_id = document.getElementById('mod-principle').value;

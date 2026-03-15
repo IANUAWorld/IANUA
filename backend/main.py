@@ -468,6 +468,7 @@ async def list_amendments(
                 "votes_for": a.votes_for,
                 "votes_against": a.votes_against,
                 "votes_abstain": a.votes_abstain,
+                "human_voice": a.human_voice,
             }
             for a in amendments
         ]
@@ -510,6 +511,7 @@ async def get_amendment(code: str, db: AsyncSession = Depends(get_db)):
         "votes_for": a.votes_for,
         "votes_against": a.votes_against,
         "votes_abstain": a.votes_abstain,
+        "human_voice": a.human_voice,
     }
 
 

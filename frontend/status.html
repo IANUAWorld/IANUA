@@ -458,6 +458,10 @@
                     <div class="stat-number">6</div>
                     <div class="stat-label">modeles IA prevus</div>
                 </div>
+                <div class="stat-card" id="deadline-card">
+                    <div class="stat-number" id="stat-multiplier">—</div>
+                    <div class="stat-label">Multiplicateur délais</div>
+                </div>
             </div>
         </div>
 
@@ -546,6 +550,24 @@
             hamburger.classList.remove('active');
         }
     });
+
+    // Load deadline multiplier
+    (async function() {
+        try {
+            const resp = await fetch(`${API}/proposals/deadline-info`);
+            const data = await resp.json();
+            document.getElementById('stat-multiplier').textContent = `×${data.multiplier}`;
+            const card = document.getElementById('deadline-card');
+            if (card) {
+                const label = card.querySelector('.stat-label');
+                if (data.next_threshold) {
+                    label.innerHTML = `Multiplicateur délais<br><span style="font-size:0.7rem;color:var(--grey);">→ ×${data.next_multiplier} à ${data.next_threshold} signataires</span>`;
+                } else {
+                    label.textContent = 'Multiplicateur délais (standard)';
+                }
+            }
+        } catch (e) {}
+    })();
 
     checkAuth();
     </script>

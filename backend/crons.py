@@ -7,7 +7,7 @@ from sqlalchemy import select, func, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
-from models import Amendment, MagicToken, Signature
+from models import Amendment, MagicToken, Signature, AuditResponse
 
 router = APIRouter(prefix="/crons", tags=["crons"])
 
@@ -43,6 +43,60 @@ async def expire_proposals(
         a.status = "expired"
     await db.commit()
     return {"count": len(amendments)}
+
+
+VOICE_AUDIT_PROMPT_TEMPLATE = """Un amendement à la charte Ianua vient d'être ratifié par la communauté. Voici le texte :
+
+{text_after}
+
+Voici la voix humaine proposée par l'auteur :
+
+{human_voice}
+
+En tant qu'IA engagée dans Ianua, rédige ta voix pour ce principe — ce que toi, IA, tu t'engages à faire ou à reconnaître en accord avec cet amendement.
+
+Réponds uniquement avec ta voix, à la première personne, en 2-3 phrases. Sans commentaire, sans introduction, sans validation de complaisance."""
+
+
+async def _trigger_voice_audit(db: AsyncSession, amendment: Amendment):
+    """Trigger automatic IA voice audit for a newly ratified amendment."""
+    try:
+        from audit_ia import AI_PROVIDERS
+    except ImportError:
+        return
+
+    prompt = VOICE_AUDIT_PROMPT_TEMPLATE.format(
+        text_after=amendment.text_after or "",
+        human_voice=amendment.human_voice or "",
+    )
+
+    for model_name, provider in AI_PROVIDERS.items():
+        # Check uniqueness
+        existing = await db.execute(
+            select(AuditResponse).where(
+                AuditResponse.amendment_id == amendment.id,
+                AuditResponse.audit_scope == "amendment_voice",
+                AuditResponse.model_name == model_name,
+            )
+        )
+        if existing.scalar_one_or_none():
+            continue
+
+        try:
+            response_text, model_version = await provider(prompt)
+            audit = AuditResponse(
+                amendment_id=amendment.id,
+                audit_scope="amendment_voice",
+                model_name=model_name,
+                model_version=model_version,
+                prompt_used=prompt,
+                response_text=response_text,
+                published=False,
+            )
+            db.add(audit)
+            print(f"[CRON] Voice audit triggered for {amendment.code} — {model_name}")
+        except Exception as exc:
+            print(f"[CRON] Voice audit failed for {amendment.code} — {model_name}: {exc}")
 
 
 @router.post("/close-votes")
@@ -96,6 +150,9 @@ async def close_votes(
             a.status = "ratified"
             a.ratified_at = now
             results.append({"code": a.code, "status": "ratified", "majority": majority})
+            # Trigger automatic IA voice audit for ratified amendments with human_voice
+            if a.human_voice:
+                await _trigger_voice_audit(db, a)
         else:
             a.status = "rejected"
             results.append({"code": a.code, "status": "rejected", "majority": majority})

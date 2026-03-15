@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, String, Text, Boolean, DateTime, ForeignKey, UniqueConstraint,
+    Column, Integer, String, Text, Boolean, DateTime, Float, ForeignKey, UniqueConstraint,
     ARRAY
 )
 from sqlalchemy.sql import func
@@ -113,6 +113,8 @@ class Amendment(Base):
     tier_requalified_by = Column(String(20), nullable=True)
     tier_requalified_at = Column(DateTime, nullable=True)
     tier_original = Column(String(20), nullable=True)
+    human_voice = Column(Text, nullable=True)
+    deadline_multiplier = Column(Float, default=1.0)
 
 
 # ── Signatures — Soutien global à la démarche ────────────────────────

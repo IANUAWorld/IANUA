@@ -5,6 +5,27 @@ La transparence s'etend aux actes.
 
 ---
 
+## [2026-03-15] — Delais adaptatifs selon taille communaute
+- Multiplicateur automatique : x3 (<50 signataires), x2 (50-200), x1.5 (200-500), x1 (500+)
+- Applique a chaque soumission de proposition et ouverture de vote
+- Endpoint public GET /proposals/deadline-info
+- Affichage transparent sur status.html
+- Migration 009 : colonne deadline_multiplier sur amendments
+
+## [2026-03-15] — Saisie manuelle des voix IA post-ratification
+- Dashboard admin : section dediee avec prompt auto-genere et bouton copier
+- Endpoint POST /admin/audit/manual/voice
+- Selecteur d'amendements ratifies avec voix IA manquante
+- audit_scope="amendment_voice" pour les voix specifiques
+
+## [2026-03-15] — Double voix humain-IA pour les amendements
+- Nouveau champ "Voix humaine" dans le formulaire de proposition
+- Audit IA automatique declenche a la ratification (prompt sans framing)
+- Nouveau scope audit_scope="amendment_voice" pour les voix IA generees
+- Affichage 3 blocs sur gouvernance.html : texte + voix humaine + voix IA
+- Migration 009 : colonne human_voice sur amendments
+- La voix IA ne peut pas etre ecrite par un humain — elle emerge de l'audit
+
 ## [2026-03-15] — Historique du site public + CHANGELOG.md
 - Section "Historique du site" ajoutee sur transparence.html
 - CHANGELOG.md a la racine du repo comme source de verite

@@ -140,7 +140,7 @@ async def test_submit_draft(setup):
     data = resp.json()
     assert data["status"] == "proposed"
     assert "expires_at" in data
-    assert data["deliberation_duration_days"] == 14  # mineur
+    assert data["deliberation_duration_days"] == 42  # mineur × 3 (< 50 signataires)
 
     # Verify in DB
     async with sf() as session:
@@ -170,7 +170,7 @@ async def test_addition_forces_fondateur(setup):
     draft_id = data["id"]
     resp = await alice.post(f"/proposals/drafts/{draft_id}/submit")
     assert resp.status_code == 200
-    assert resp.json()["deliberation_duration_days"] == 30  # fondateur
+    assert resp.json()["deliberation_duration_days"] == 90  # fondateur × 3 (< 50 signataires)
 
 
 @pytest.mark.asyncio

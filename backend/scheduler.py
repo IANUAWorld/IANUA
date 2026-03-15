@@ -10,7 +10,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 from sqlalchemy import select, func, delete
 
 from database import async_session, IS_SQLITE
-from models import Amendment, MagicToken, Signature
+from models import Amendment, MagicToken, Signature, AuditResponse
 
 scheduler = AsyncIOScheduler()
 
@@ -88,11 +88,23 @@ async def close_votes_job():
                 a.status = "ratified"
                 a.ratified_at = now
                 print(f"[CRON] {a.code} ratified — {majority:.0%}")
+                # Trigger automatic IA voice audit
+                if a.human_voice:
+                    await _trigger_voice_audit_scheduler(db, a)
             else:
                 a.status = "rejected"
                 print(f"[CRON] {a.code} rejected — {majority:.0%} < {threshold:.0%}")
 
         await db.commit()
+
+
+async def _trigger_voice_audit_scheduler(db, amendment):
+    """Trigger voice audit from scheduler context."""
+    try:
+        from crons import _trigger_voice_audit
+        await _trigger_voice_audit(db, amendment)
+    except Exception as exc:
+        print(f"[SCHEDULER] Voice audit failed for {amendment.code}: {exc}")
 
 
 async def cleanup_tokens_job():

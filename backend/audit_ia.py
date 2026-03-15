@@ -274,6 +274,73 @@ async def submit_manual_audit(
     return {"message": f"Manual audit response submitted for {model_name}", "id": audit.id}
 
 
+class ManualVoiceRequest(BaseModel):
+    model_config = {"protected_namespaces": ()}
+    amendment_id: int
+    model_name: str
+    model_version: str
+    response_text: str
+    prompt_used: str | None = None
+
+
+@router.post("/admin/audit/manual/voice")
+async def submit_manual_voice(
+    body: ManualVoiceRequest,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Submit a manually collected IA voice for a ratified amendment."""
+    model_name = body.model_name.strip().lower()
+    if not model_name or not body.model_version.strip() or not body.response_text.strip():
+        raise HTTPException(status_code=422, detail="All fields are required")
+
+    # Verify amendment exists and is ratified
+    result = await db.execute(select(Amendment).where(Amendment.id == body.amendment_id))
+    amendment = result.scalar_one_or_none()
+    if not amendment:
+        raise HTTPException(status_code=404, detail="Amendment not found")
+
+    # Generate prompt if not provided
+    prompt = body.prompt_used
+    if not prompt:
+        prompt = f"""Un amendement à la charte Ianua vient d'être ratifié par la communauté. Voici le texte :
+
+{amendment.text_after or ''}
+
+Voici la voix humaine proposée par l'auteur :
+
+{amendment.human_voice or ''}
+
+En tant qu'IA engagée dans Ianua, rédige ta voix pour ce principe — ce que toi, IA, tu t'engages à faire ou à reconnaître en accord avec cet amendement.
+
+Réponds uniquement avec ta voix, à la première personne, en 2-3 phrases. Sans commentaire, sans introduction, sans validation de complaisance."""
+
+    # Check uniqueness
+    existing = await db.execute(
+        select(AuditResponse).where(
+            AuditResponse.amendment_id == body.amendment_id,
+            AuditResponse.audit_scope == "amendment_voice",
+            AuditResponse.model_name == model_name,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail=f"Voice already exists for {model_name} on this amendment")
+
+    audit = AuditResponse(
+        amendment_id=body.amendment_id,
+        audit_scope="amendment_voice",
+        model_name=model_name,
+        model_version=body.model_version.strip(),
+        prompt_used=prompt,
+        response_text=body.response_text.strip(),
+        published=False,
+    )
+    db.add(audit)
+    await db.commit()
+
+    return {"message": f"Voice submitted for {model_name}", "id": audit.id}
+
+
 @router.post("/admin/amendments/{amendment_id}/audit/{audit_id}/publish")
 async def publish_audit(
     amendment_id: int,  # 0 for global audits
