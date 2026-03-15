@@ -5,37 +5,45 @@ La transparence s'etend aux actes.
 
 ---
 
-## [2026-03-15] — Audit complet du site (backend + frontend + admin)
-- 3 audits paralleles : backend, frontend, admin/integration
-- Corrige : timedelta manquant dans scheduler.py (crash toutes les 6h)
-- Corrige : contrainte unique audit_responses inclut audit_scope (migration 010)
-- Corrige : compteurs de vote atomiques (SQL-level, anti race condition)
-- Corrige : PRINCIPLES undefined dans index.html (crash JS)
-- Corrige : parsing reponses globales dans admin dashboard
-- Corrige : escapeHtml sur donnees registry
-- Active : notifications email sur suppression et requalification
-- Documente : cles API IA dans .env.example
+## [2026-03-15] — Audit complet + corrections (20 points)
+- 3 audits paralleles lances : backend, frontend, admin
+- Corrige CRITICAL : crash scheduler (timedelta manquant)
+- Corrige CRITICAL : contrainte unique audit_responses (migration 010)
+- Corrige HIGH : compteurs de vote atomiques SQL (anti race condition)
+- Corrige HIGH : crash JS index.html (PRINCIPLES undefined)
+- Corrige HIGH : notifications email sur suppression et requalification
+- Corrige : verify_admin et strip_html centralises dans utils.py (DRY)
+- Corrige : parsing reponses audit global dashboard admin
+- Corrige : escapeHtml sur donnees registry (XSS)
+- Corrige : amendements supprimes exclus du listing public
+- Corrige : generation codes proposition avec retry anti-collision
+- Corrige : validation vote/amendement dans endpoints
+- Corrige : imports inutilises, code mort, date statique
+- Sauvegarde complete dans _SAVE/ disponible
 
 ## [2026-03-15] — Delais adaptatifs selon taille communaute
 - Multiplicateur automatique : x3 (<50 signataires), x2 (50-200), x1.5 (200-500), x1 (500+)
-- Applique a chaque soumission de proposition et ouverture de vote
-- Endpoint public GET /proposals/deadline-info
-- Affichage transparent sur status.html
-- Migration 009 : colonne deadline_multiplier sur amendments
+- Applique a chaque soumission et ouverture de vote
+- Affiche publiquement sur proposer.html et status.html
 
-## [2026-03-15] — Saisie manuelle des voix IA post-ratification
-- Dashboard admin : section dediee avec prompt auto-genere et bouton copier
-- Endpoint POST /admin/audit/manual/voice
-- Selecteur d'amendements ratifies avec voix IA manquante
-- audit_scope="amendment_voice" pour les voix specifiques
-
-## [2026-03-15] — Double voix humain-IA pour les amendements
-- Nouveau champ "Voix humaine" dans le formulaire de proposition
-- Audit IA automatique declenche a la ratification (prompt sans framing)
-- Nouveau scope audit_scope="amendment_voice" pour les voix IA generees
+## [2026-03-15] — Double voix humaine/IA sur amendements
+- Nouveau champ human_voice sur la table amendments
+- Flux Option B : voix IA generee par audit apres ratification communautaire
+- La voix IA ne peut pas etre ecrite par un humain
+- Saisie manuelle des voix IA via dashboard admin
 - Affichage 3 blocs sur gouvernance.html : texte + voix humaine + voix IA
-- Migration 009 : colonne human_voice sur amendments
-- La voix IA ne peut pas etre ecrite par un humain — elle emerge de l'audit
+
+## [2026-03-15] — Deux nouveaux amendements en brouillon
+- A01 : Responsabilite environnementale de l'usage IA (Modification Principe I — Substantiel)
+- Principe IX : La Dignite creatrice (Nouveau principe — Fondateur)
+- Co-reflechis avec Claude Sonnet 4.6 le 15 mars 2026
+
+## [2026-03-15] — Audit IA global operationnel
+- Option "Audit global — Charte complete" dans dashboard
+- Prompt prerempli avec genese + 8 principes + lignes rouges + prompt Ianua v1.3
+- Saisie manuelle des reponses IA (sans cle API)
+- Section "Voix IA sur la charte" sur gouvernance.html
+- Migration 008 : audit_scope (amendment/global)
 
 ## [2026-03-15] — Historique du site public + CHANGELOG.md
 - Section "Historique du site" ajoutee sur transparence.html
