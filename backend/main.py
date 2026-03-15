@@ -883,3 +883,38 @@ async def admin_create_draft(
     await db.refresh(draft)
 
     return {"message": f"Draft {code} created", "id": draft.id, "code": code}
+
+
+@app.post("/admin/recalc-vote-counters")
+async def admin_recalc_vote_counters(
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Recalculate all denormalized vote counters from actual votes."""
+    result = await db.execute(select(Amendment))
+    amendments = result.scalars().all()
+
+    fixed = []
+    for a in amendments:
+        votes_result = await db.execute(
+            select(
+                func.count(case((AmendmentVote.vote == "FOR", 1))).label("f"),
+                func.count(case((AmendmentVote.vote == "AGAINST", 1))).label("a"),
+                func.count(case((AmendmentVote.vote == "ABSTAIN", 1))).label("ab"),
+            ).where(AmendmentVote.amendment_id == a.id)
+        )
+        row = votes_result.one()
+        real_for, real_against, real_abstain = row.f, row.a, row.ab
+
+        if a.votes_for != real_for or a.votes_against != real_against or a.votes_abstain != real_abstain:
+            fixed.append({
+                "code": a.code,
+                "before": {"for": a.votes_for, "against": a.votes_against, "abstain": a.votes_abstain},
+                "after": {"for": real_for, "against": real_against, "abstain": real_abstain},
+            })
+            a.votes_for = real_for
+            a.votes_against = real_against
+            a.votes_abstain = real_abstain
+
+    await db.commit()
+    return {"fixed": fixed, "count": len(fixed)}

@@ -289,6 +289,12 @@ async def submit_vote(
     existing_vote = existing_result.scalar_one_or_none()
 
     if existing_vote:
+        old_vote = existing_vote.vote.upper()
+
+        # If same vote value and same comment, do nothing
+        if old_vote == vote_value and existing_vote.comment == comment:
+            return {"message": "vote_unchanged"}
+
         # Rate limit: max 10 modifications per amendment per user per hour
         since = datetime.utcnow() - timedelta(hours=1)
         mod_count = await db.execute(
@@ -300,7 +306,7 @@ async def submit_vote(
         if mod_count.scalar() >= 10:
             raise HTTPException(status_code=429, detail="Too many vote modifications. Try again later.")
 
-        # Modification — create history entry
+        # Create history entry
         history = VoteHistory(
             vote_id=existing_vote.id,
             previous_vote=existing_vote.vote,
@@ -308,10 +314,10 @@ async def submit_vote(
         )
         db.add(history)
 
-        # Update counters (decrement old, increment new)
-        old_vote = existing_vote.vote.upper()
-        _update_counter(amendment, old_vote, -1)
-        _update_counter(amendment, vote_value, 1)
+        # Update counters ONLY if vote value changed
+        if old_vote != vote_value:
+            _update_counter(amendment, old_vote, -1)
+            _update_counter(amendment, vote_value, 1)
 
         # Update vote
         existing_vote.vote = vote_value
