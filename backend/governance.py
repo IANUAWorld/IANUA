@@ -323,11 +323,23 @@ async def transparency_actions(
 async def transparency_changelog():
     """Serve the CHANGELOG.md content parsed into entries."""
     import os
-    changelog_path = os.path.join(os.path.dirname(__file__), "..", "CHANGELOG.md")
-    try:
-        with open(changelog_path, "r", encoding="utf-8") as f:
-            content = f.read()
-    except FileNotFoundError:
+    # Search in multiple locations (handles both local dev and Railway deployment)
+    candidates = [
+        os.path.join(os.path.dirname(__file__), "..", "CHANGELOG.md"),  # local: backend/../CHANGELOG.md
+        os.path.join(os.path.dirname(__file__), "CHANGELOG.md"),        # if copied to backend/
+        "/app/CHANGELOG.md",                                            # Railway root
+        os.path.join(os.getcwd(), "CHANGELOG.md"),                      # cwd
+        os.path.join(os.getcwd(), "..", "CHANGELOG.md"),                # cwd parent
+    ]
+    content = None
+    for path in candidates:
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                content = f.read()
+            break
+        except FileNotFoundError:
+            continue
+    if not content:
         return {"entries": []}
 
     entries = []
