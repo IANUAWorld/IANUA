@@ -1,22 +1,14 @@
-import os
-import hmac
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models import Amendment, MagicToken, Signature, AuditResponse
+from utils import verify_admin
 
 router = APIRouter(prefix="/crons", tags=["crons"])
-
-ADMIN_KEY = os.getenv("ADMIN_KEY", "")
-
-
-def verify_admin(x_admin_key: str = Header(None)):
-    if not x_admin_key or not ADMIN_KEY or not hmac.compare_digest(x_admin_key, ADMIN_KEY):
-        raise HTTPException(status_code=403, detail="Forbidden")
 
 
 TIER_THRESHOLDS = {

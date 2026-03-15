@@ -1,8 +1,6 @@
-import os
-import hmac
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,16 +10,9 @@ from email_service import send_tier_requalified_email, send_abuse_deletion_email
 from models import Amendment, TierChallenge, ContentReport, AdminAction, Signature
 from auth_dependencies import get_current_signer
 
+from utils import verify_admin
+
 router = APIRouter(tags=["governance"])
-
-# ── Admin auth ────────────────────────────────────
-ADMIN_KEY = os.getenv("ADMIN_KEY", "")
-
-
-def verify_admin(x_admin_key: str = Header(None)):
-    if not x_admin_key or not ADMIN_KEY or not hmac.compare_digest(x_admin_key, ADMIN_KEY):
-        raise HTTPException(status_code=403, detail="Forbidden")
-
 
 # ── Tier ordering ─────────────────────────────────
 TIER_ORDER = {"mineur": 0, "substantiel": 1, "fondateur": 2}

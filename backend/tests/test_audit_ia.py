@@ -21,10 +21,6 @@ ADMIN_HEADERS = {"X-Admin-Key": ADMIN_KEY}
 async def setup(monkeypatch):
     monkeypatch.setenv("ADMIN_KEY", ADMIN_KEY)
 
-    # Re-set ADMIN_KEY in the audit_ia module so verify_admin picks it up
-    import audit_ia
-    monkeypatch.setattr(audit_ia, "ADMIN_KEY", ADMIN_KEY)
-
     engine = create_async_engine("sqlite+aiosqlite:///:memory:")
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

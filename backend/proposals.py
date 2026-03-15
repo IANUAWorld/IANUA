@@ -1,7 +1,6 @@
-import re
 import uuid
 import math
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -65,9 +64,7 @@ CHARTER_PRINCIPLES = [
 ]
 
 
-def strip_html(text: str) -> str:
-    """Remove HTML tags from user input (defense-in-depth)."""
-    return re.sub(r'<[^>]+>', '', text)
+from utils import strip_html
 
 
 # ── Pydantic models ──────────────────────────────
@@ -109,19 +106,22 @@ class SupportRequest(BaseModel):
 # ── Helpers ───────────────────────────────────────
 
 async def _generate_code(db: AsyncSession) -> str:
-    """Generate next proposal code like P001, P002, etc."""
+    """Generate next proposal code like P001, P002, etc. Uses COUNT for safety."""
     result = await db.execute(
-        select(func.max(Amendment.code))
+        select(func.count(Amendment.id))
         .where(Amendment.code.like("P%"))
     )
-    max_code = result.scalar_one_or_none()
-    if max_code:
-        try:
-            num = int(max_code[1:]) + 1
-        except (ValueError, IndexError):
-            num = 1
-    else:
-        num = 1
+    count = result.scalar() or 0
+    # Use count + 1 as base, then check for conflicts
+    num = count + 1
+    for _ in range(10):  # retry up to 10 times
+        code = f"P{num:03d}"
+        existing = await db.execute(
+            select(Amendment.id).where(Amendment.code == code)
+        )
+        if not existing.scalar_one_or_none():
+            return code
+        num += 1
     return f"P{num:03d}"
 
 
@@ -541,7 +541,10 @@ async def list_public_amendments(
     """List all non-draft amendments."""
     NON_DRAFT_STATUSES = {"proposed", "deliberation", "accepted", "ratified", "rejected", "withdrawn"}
 
-    stmt = select(Amendment).where(Amendment.status != "draft")
+    stmt = select(Amendment).where(
+        Amendment.status != "draft",
+        Amendment.status != "deleted",
+    )
 
     if status:
         if status not in NON_DRAFT_STATUSES:

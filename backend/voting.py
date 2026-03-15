@@ -1,18 +1,16 @@
-import re
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from sqlalchemy import select, func, case
 
 
-def strip_html(text: str) -> str:
-    return re.sub(r'<[^>]+>', '', text)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
 from models import Amendment, AmendmentVote, VoteHistory, Signature, Reaction
 from auth_dependencies import get_current_signer, get_optional_signer
+from utils import strip_html
 
 router = APIRouter(tags=["voting"])
 
@@ -57,10 +55,10 @@ async def list_voting_amendments(db: AsyncSession = Depends(get_db)):
                 "text_before": a.text_before,
                 "text_after": a.text_after,
                 "motivation": a.motivation,
-                "motivation_en": getattr(a, "motivation_en", None),
-                "motivation_es": getattr(a, "motivation_es", None),
-                "text_after_en": getattr(a, "text_after_en", None),
-                "text_after_es": getattr(a, "text_after_es", None),
+                "motivation_en": a.motivation_en,
+                "motivation_es": a.motivation_es,
+                "text_after_en": a.text_after_en,
+                "text_after_es": a.text_after_es,
                 "status": a.status,
                 "vote_threshold": a.vote_threshold,
                 "votes_for": a.votes_for,
@@ -145,6 +143,16 @@ async def get_vote_history(
     amendment_id: int, vote_id: int, db: AsyncSession = Depends(get_db)
 ):
     """Public: modification history of a specific vote."""
+    # Validate vote belongs to amendment
+    vote_check = await db.execute(
+        select(AmendmentVote.id).where(
+            AmendmentVote.id == vote_id,
+            AmendmentVote.amendment_id == amendment_id,
+        )
+    )
+    if not vote_check.scalar_one_or_none():
+        raise HTTPException(status_code=404, detail="Vote not found for this amendment")
+
     result = await db.execute(
         select(VoteHistory)
         .where(VoteHistory.vote_id == vote_id)
