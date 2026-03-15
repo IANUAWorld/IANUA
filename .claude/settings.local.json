@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(git:*)",
+      "Bash(git clone:*)",
+      "Bash(shopt:*)",
+      "Bash(cd:*)",
+      "Bash(pip install:*)",
+      "Bash(export:*)",
+      "Bash(python3:*)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Read(//home/t_490s/_PROJETS/_IANUA/frontend/**)",
+      "Bash(done)"
+    ]
+  }
+}

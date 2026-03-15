@@ -5,6 +5,12 @@ La transparence s'etend aux actes.
 
 ---
 
+## [2026-03-15] — Historique du site public + CHANGELOG.md
+- Section "Historique du site" ajoutee sur transparence.html
+- CHANGELOG.md a la racine du repo comme source de verite
+- Endpoint GET /transparency/changelog (parse automatique du markdown)
+- CLAUDE.md mis a jour : regle obligatoire de mise a jour du changelog a chaque commit significatif
+
 ## [2026-03-15] — Soumission manuelle d'audits IA
 - Ajout de la possibilite de soumettre manuellement des reponses IA collectees hors API
 - Dashboard admin : formulaire avec selecteur de modele, version, reponse
