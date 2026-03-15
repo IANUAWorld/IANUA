@@ -329,10 +329,10 @@ async def submit_vote(
 
 
 def _update_counter(amendment: Amendment, vote_value: str, delta: int):
-    """Increment or decrement denormalized vote counters."""
+    """Atomic increment/decrement of denormalized vote counters (SQL-level)."""
     if vote_value == "FOR":
-        amendment.votes_for = (amendment.votes_for or 0) + delta
+        amendment.votes_for = Amendment.votes_for + delta
     elif vote_value == "AGAINST":
-        amendment.votes_against = (amendment.votes_against or 0) + delta
+        amendment.votes_against = Amendment.votes_against + delta
     elif vote_value == "ABSTAIN":
-        amendment.votes_abstain = (amendment.votes_abstain or 0) + delta
+        amendment.votes_abstain = Amendment.votes_abstain + delta

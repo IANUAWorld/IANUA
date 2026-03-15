@@ -258,5 +258,5 @@ class AuditResponse(Base):
     audited_at = Column(DateTime, server_default=func.now())
 
     __table_args__ = (
-        UniqueConstraint("amendment_id", "model_name", name="uq_audit_per_model"),
+        UniqueConstraint("amendment_id", "model_name", "audit_scope", name="uq_audit_per_model_scope"),
     )

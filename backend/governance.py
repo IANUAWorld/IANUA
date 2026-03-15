@@ -8,6 +8,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import get_db
+from email_service import send_tier_requalified_email, send_abuse_deletion_email
 from models import Amendment, TierChallenge, ContentReport, AdminAction, Signature
 from auth_dependencies import get_current_signer
 
@@ -232,6 +233,17 @@ async def admin_delete_amendment(
     )
     db.add(action)
     await db.commit()
+
+    # Notify author by email
+    if amendment.author_id:
+        from models import Signature
+        author = await db.execute(select(Signature).where(Signature.id == amendment.author_id))
+        author = author.scalar_one_or_none()
+        if author:
+            await send_abuse_deletion_email(
+                author.email, amendment.code, amendment.title or "",
+                body.reason, body.via, author.lang or "fr"
+            )
 
     return {"message": "Amendment deleted"}
 

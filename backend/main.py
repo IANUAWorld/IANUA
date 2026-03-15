@@ -537,7 +537,7 @@ async def governance_stats(db: AsyncSession = Depends(get_db)):
         "charte_version": version,
         "amendments_ratified": ratified.scalar() or 0,
         "amendments_deliberation": deliberation.scalar() or 0,
-        "last_updated": "2026-03-10",
+        "last_updated": datetime.utcnow().strftime("%Y-%m-%d"),
     }
 
 

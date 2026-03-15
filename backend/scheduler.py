@@ -3,7 +3,7 @@ Automatic cron jobs using APScheduler.
 Runs inside the FastAPI process — no external cron needed.
 """
 import asyncio
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger

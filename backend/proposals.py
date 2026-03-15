@@ -263,13 +263,7 @@ async def create_draft(
     # Generate code
     code = await _generate_code(db)
 
-    # Determine target
-    if body.amendment_type == "addition":
-        target = "principle_body"
-    elif body.amendment_type == "suppression":
-        target = "principle_body"
-    else:
-        target = "principle_body"
+    target = "principle_body"
 
     draft = Amendment(
         code=code,
