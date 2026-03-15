@@ -115,7 +115,7 @@ async def verify_magic_link(token: str, request: Request, db: AsyncSession = Dep
         httponly=True,
         secure=True,
         samesite="lax",
-        max_age=24 * 3600,
+        max_age=5 * 24 * 3600,  # 5 days
     )
     return response
 

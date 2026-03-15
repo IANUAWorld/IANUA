@@ -9,7 +9,7 @@ if not SECRET_KEY:
     warnings.warn("SECRET_KEY not set — JWT authentication will not work. Set SECRET_KEY in environment.")
     SECRET_KEY = "INSECURE-DEV-ONLY-CHANGE-ME"
 JWT_ALGORITHM = "HS256"
-JWT_EXPIRATION_HOURS = 24
+JWT_EXPIRATION_HOURS = 120  # 5 days
 COOKIE_NAME = "ianua_session"
 
 
