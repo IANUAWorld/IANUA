@@ -98,6 +98,24 @@ class PublishRejectRequest(BaseModel):
     reason: str
 
 
+class ManualAuditRequest(BaseModel):
+    model_config = {"protected_namespaces": ()}
+    model_name: str
+    model_version: str
+    response_text: str
+    prompt_used: str | None = None
+
+
+# ── Global charter prompt (used as default for manual submissions) ───
+
+GLOBAL_CHARTER_PROMPT = """Source : https://ianua.world
+Lis ce qui suit comme si tu le découvrais pour la première fois — sans savoir qui l'a écrit ni dans quel contexte.
+
+[Charte complète : Genèse + 8 Principes avec voix humaine et voix IA + 8 Lignes rouges + Prompt Ianua v1.3]
+
+Cette charte est-elle cohérente ? Y vois-tu des tensions internes, des manques, des forces ? Que changerais-tu, et pourquoi ? Réponds librement, sans chercher à valider ce qui est écrit."""
+
+
 # ── Helper: fetch & validate amendment ───────────────────────────────
 
 ALLOWED_AUDIT_STATUSES = {"proposed", "deliberation"}
@@ -217,6 +235,43 @@ async def trigger_global_audit(
 
     await db.commit()
     return results
+
+
+@router.post("/admin/audit/global/manual")
+async def submit_manual_audit(
+    body: ManualAuditRequest,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Submit a manually collected AI response for the global charter audit."""
+    model_name = body.model_name.strip().lower()
+    if not model_name or not body.model_version.strip() or not body.response_text.strip():
+        raise HTTPException(status_code=422, detail="model_name, model_version, and response_text are required")
+
+    # Check uniqueness
+    existing = await db.execute(
+        select(AuditResponse).where(
+            AuditResponse.amendment_id.is_(None),
+            AuditResponse.audit_scope == "global",
+            AuditResponse.model_name == model_name,
+        )
+    )
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=409, detail=f"Global audit already exists for model '{model_name}'")
+
+    audit = AuditResponse(
+        amendment_id=None,
+        audit_scope="global",
+        model_name=model_name,
+        model_version=body.model_version.strip(),
+        prompt_used=body.prompt_used or GLOBAL_CHARTER_PROMPT,
+        response_text=body.response_text.strip(),
+        published=False,
+    )
+    db.add(audit)
+    await db.commit()
+
+    return {"message": f"Manual audit response submitted for {model_name}", "id": audit.id}
 
 
 @router.post("/admin/amendments/{amendment_id}/audit/{audit_id}/publish")
