@@ -828,3 +828,59 @@ async def admin_insert_a004(
     db.add(a004)
     await db.commit()
     return {"message": "A004 inserted in deliberation with vote open"}
+
+
+@app.post("/admin/create-draft")
+async def admin_create_draft(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+    _: None = Depends(verify_admin),
+):
+    """Admin: create a draft amendment on behalf of a signer."""
+    body = await request.json()
+
+    # Find signer
+    signer_email = body.get("signer_email")
+    if signer_email:
+        result = await db.execute(
+            select(Signature).where(Signature.email == signer_email, Signature.confirmed == True)
+        )
+        signer = result.scalar_one_or_none()
+        if not signer:
+            raise HTTPException(status_code=404, detail="Signer not found")
+        author_id = signer.id
+    else:
+        author_id = body.get("author_id", 1)
+
+    # Generate code
+    max_code = await db.execute(
+        select(func.max(Amendment.code)).where(Amendment.code.like("P%"))
+    )
+    max_val = max_code.scalar()
+    if max_val:
+        num = int(max_val[1:]) + 1
+    else:
+        num = 1
+    code = f"P{num:03d}"
+
+    draft = Amendment(
+        code=code,
+        title=body.get("title", ""),
+        principle_id=body.get("principle_id"),
+        target="principle_body",
+        amendment_type=body.get("amendment_type", "modification"),
+        text_after=body.get("text_after", ""),
+        motivation=body.get("motivation", ""),
+        human_voice=body.get("human_voice"),
+        tier=body.get("tier", "substantiel"),
+        status="draft",
+        source_type="community",
+        phase="phase_2",
+        author_id=author_id,
+        submission_language=body.get("submission_language", "fr"),
+    )
+    db.add(draft)
+    await db.commit()
+    await db.refresh(draft)
+
+    return {"message": f"Draft {code} created", "id": draft.id, "code": code}
