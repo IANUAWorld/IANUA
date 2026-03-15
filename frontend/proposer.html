@@ -737,14 +737,16 @@
 
     // ── Edit draft ──────────────────────────────
     function editDraft(draftId) {
-        const draft = drafts.find(d => d.id === draftId);
+        const draft = drafts.find(d => d.id == draftId);
         if (!draft) return;
 
         editingDraftId = draftId;
         document.getElementById('draft-id').value = draftId;
         document.getElementById('form-title').textContent = 'Modifier le brouillon';
 
-        const type = draft.type || 'modification';
+        // Map backend type to frontend selector value
+        const rawType = draft.amendment_type || draft.type || 'modification';
+        const type = rawType === 'addition' ? 'ajout' : rawType;
         selectType(type);
 
         if (type === 'modification') {
@@ -779,7 +781,9 @@
     async function saveDraft(e) {
         e.preventDefault();
 
-        let body = { type: currentType };
+        // Map frontend type names to backend values
+        const typeMap = { ajout: 'addition', modification: 'modification', suppression: 'suppression' };
+        let body = { amendment_type: typeMap[currentType] || currentType };
         body.human_voice = document.getElementById('draft-human-voice')?.value?.trim() || null;
 
         if (currentType === 'modification') {
@@ -880,10 +884,12 @@
         }
 
         container.innerHTML = drafts.map(d => {
-            const typeLabel = { modification: 'Modification', ajout: 'Ajout', suppression: 'Suppression' }[d.type] || d.type;
-            const tierLabel = { mineur: 'Mineur', substantiel: 'Substantiel', fondateur: 'Fondateur' }[d.tier] || d.tier;
-            const created = d.created_at ? new Date(d.created_at).toLocaleDateString('fr-FR') : '';
-            const title = d.title || d.motivation?.substring(0, 60) || 'Sans titre';
+            const aType = d.amendment_type || d.type || '';
+            const typeLabel = { modification: 'Modification', addition: 'Ajout', ajout: 'Ajout', suppression: 'Suppression' }[aType] || aType;
+            const tierLabel = { mineur: 'Mineur', substantiel: 'Substantiel', fondateur: 'Fondateur' }[d.tier] || d.tier || '';
+            const created = (d.proposed_at || d.created_at) ? new Date(d.proposed_at || d.created_at).toLocaleDateString('fr-FR') : '';
+            const title = d.title || (d.motivation ? d.motivation.substring(0, 60) : 'Sans titre');
+            const preview = d.text_after ? d.text_after.substring(0, 150) + (d.text_after.length > 150 ? '...' : '') : '';
 
             return `
             <div class="draft-card">
@@ -893,15 +899,17 @@
                 <div class="draft-meta">
                     <span>Type : ${escapeHtml(typeLabel)}</span>
                     ${d.principle_id ? `<span>Principe : ${escapeHtml(String(d.principle_id))}</span>` : ''}
-                    <span>Tier : ${escapeHtml(tierLabel)}</span>
-                    ${created ? `<span>Cree le ${created}</span>` : ''}
+                    <span>Palier : ${escapeHtml(tierLabel)}</span>
+                    ${created ? `<span>${created}</span>` : ''}
                 </div>
+                ${preview ? `<p style="font-family:'Cormorant Garamond',serif;font-size:0.9rem;color:var(--grey);line-height:1.5;margin:0.5rem 0;font-style:italic;">${escapeHtml(preview)}</p>` : ''}
+                ${d.human_voice ? `<p style="font-family:'Source Sans 3',sans-serif;font-size:0.8rem;color:var(--gold);margin:0.3rem 0;">Voix humaine : ${escapeHtml(d.human_voice.substring(0, 80))}...</p>` : ''}
                 <div class="draft-actions">
-                    <button class="btn-action edit" onclick="editDraft('${d.id}')">Modifier</button>
-                    <button class="btn-action preview" onclick="previewDiff('${d.id}')">Apercu diff</button>
-                    <button class="btn-action share" onclick="shareDraft('${d.id}', this)">Partager</button>
-                    <button class="btn-action submit" onclick="submitDraft('${d.id}')">Soumettre</button>
-                    <button class="btn-action delete" onclick="deleteDraft('${d.id}')">Supprimer</button>
+                    <button class="btn-action edit" onclick="editDraft(${d.id})">Modifier</button>
+                    <button class="btn-action preview" onclick="previewDiff(${d.id})">Aperçu diff</button>
+                    <button class="btn-action share" onclick="shareDraft(${d.id}, this)">Partager</button>
+                    <button class="btn-action submit" onclick="submitDraft(${d.id})">Soumettre</button>
+                    <button class="btn-action delete" onclick="deleteDraft(${d.id})">Supprimer</button>
                 </div>
                 <div class="share-link" id="share-link-${d.id}"></div>
             </div>`;
@@ -910,16 +918,17 @@
 
     // ── Draft actions ───────────────────────────
     function previewDiff(draftId) {
-        const draft = drafts.find(d => d.id === draftId);
+        const draft = drafts.find(d => d.id == draftId);
         if (!draft) return;
 
         const content = document.getElementById('diff-content');
         let html = '';
 
-        if (draft.type === 'suppression') {
+        const dType = draft.amendment_type || draft.type || '';
+        if (dType === 'suppression') {
             html = `<div class="diff-before">${escapeHtml(draft.text_before || '')}</div>
-                    <div style="color:var(--grey);margin-top:0.5rem;font-style:italic;">Principe supprime</div>`;
-        } else if (draft.type === 'ajout') {
+                    <div style="color:var(--grey);margin-top:0.5rem;font-style:italic;">Principe supprimé</div>`;
+        } else if (dType === 'ajout' || dType === 'addition') {
             html = `<div style="color:var(--grey);margin-bottom:0.5rem;font-style:italic;">Nouveau principe</div>
                     <div class="diff-after">${escapeHtml(draft.text_after || '')}</div>`;
         } else {
