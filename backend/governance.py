@@ -317,3 +317,33 @@ async def transparency_actions(
             for a in actions
         ]
     }
+
+
+@router.get("/transparency/changelog")
+async def transparency_changelog():
+    """Serve the CHANGELOG.md content parsed into entries."""
+    import os
+    changelog_path = os.path.join(os.path.dirname(__file__), "..", "CHANGELOG.md")
+    try:
+        with open(changelog_path, "r", encoding="utf-8") as f:
+            content = f.read()
+    except FileNotFoundError:
+        return {"entries": []}
+
+    entries = []
+    current = None
+    for line in content.split("\n"):
+        if line.startswith("## ["):
+            if current:
+                entries.append(current)
+            bracket_end = line.index("]")
+            date = line[4:bracket_end]
+            title = line[bracket_end + 1:].strip().lstrip("—").lstrip("-").strip()
+            current = {"date": date, "title": title, "items": []}
+        elif line.startswith("- ") and current:
+            current["items"].append(line[2:].strip())
+
+    if current:
+        entries.append(current)
+
+    return {"entries": entries}

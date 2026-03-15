@@ -252,6 +252,15 @@
         <h2>Aucune action administrative enregistr&eacute;e.</h2>
     </div>
 
+    <!-- HISTORIQUE DU SITE -->
+    <div style="max-width:900px;margin:3rem auto 0;padding:0 2rem;">
+        <div style="border-top:1px solid rgba(201,168,76,0.15);padding-top:2rem;">
+            <h2 style="font-family:'Cinzel',serif;font-size:1.3rem;font-weight:600;color:var(--gold);margin-bottom:0.3rem;" data-fr="Historique du site" data-en="Site history" data-es="Historial del sitio">Historique du site</h2>
+            <p style="font-family:'Source Sans 3',sans-serif;font-size:0.85rem;color:var(--grey);margin-bottom:2rem;font-style:italic;" data-fr="Chaque modification apportée à Ianua est documentée ici. La transparence s'étend aux actes." data-en="Every modification to Ianua is documented here. Transparency extends to acts." data-es="Cada modificación en Ianua se documenta aquí. La transparencia se extiende a los actos.">Chaque modification apportée à Ianua est documentée ici. La transparence s'étend aux actes.</p>
+            <div id="changelog-content"><em style="color:var(--grey);">Chargement...</em></div>
+        </div>
+    </div>
+
     <footer>
         <div class="footer-left">
             <div class="footer-logo">IANUA</div>
@@ -394,8 +403,35 @@
     });
 
     // -- Init --
+    async function loadChangelog() {
+        const container = document.getElementById('changelog-content');
+        try {
+            const resp = await fetch(`${API}/transparency/changelog`);
+            const data = await resp.json();
+            if (!data.entries || data.entries.length === 0) {
+                container.innerHTML = '<p style="color:var(--grey);font-style:italic;">Aucune entrée.</p>';
+                return;
+            }
+            container.innerHTML = data.entries.map(e => `
+                <div style="margin-bottom:1.5rem;padding-left:1rem;border-left:3px solid var(--gold);">
+                    <div style="display:flex;align-items:center;gap:0.8rem;margin-bottom:0.4rem;">
+                        <span style="font-family:'Source Sans 3',sans-serif;font-size:0.7rem;padding:0.15rem 0.5rem;border:1px solid rgba(201,168,76,0.3);color:var(--gold);letter-spacing:0.1em;text-transform:uppercase;">Site</span>
+                        <span style="font-family:'Source Sans 3',sans-serif;font-size:0.8rem;color:var(--grey);">${escapeHtml(e.date)}</span>
+                    </div>
+                    <div style="font-family:'Cinzel',serif;font-size:0.95rem;font-weight:600;color:var(--light);margin-bottom:0.4rem;">${escapeHtml(e.title)}</div>
+                    <ul style="list-style:none;padding:0;margin:0;">
+                        ${e.items.map(item => `<li style="font-family:'Source Sans 3',sans-serif;font-size:0.8rem;color:var(--grey);padding:0.15rem 0;padding-left:0.8rem;position:relative;"><span style="position:absolute;left:0;color:var(--gold);">·</span>${escapeHtml(item)}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        } catch (err) {
+            container.innerHTML = '<p style="color:var(--grey);font-style:italic;">Erreur de chargement.</p>';
+        }
+    }
+
     checkAuth();
     loadActions();
+    loadChangelog();
     </script>
 </body>
 </html>
