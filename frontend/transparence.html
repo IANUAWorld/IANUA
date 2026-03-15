@@ -186,18 +186,22 @@
             nav { padding: 1rem 1.5rem; }
             .nav-hamburger { display: flex; }
             .nav-links {
-                display: none;
+                display: none !important;
+            }
+            .nav-links.open {
+                display: flex !important;
                 position: fixed;
                 top: 0; left: 0; right: 0; bottom: 0;
-                background: rgba(13,13,26,0.98);
+                width: 100vw;
+                height: 100vh;
+                background: #0a0a14;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 gap: 2rem;
-                backdrop-filter: blur(16px);
                 z-index: 9999;
+                padding: 2rem;
             }
-            .nav-links.open { display: flex; }
             .nav-links a { font-size: 1.1rem; letter-spacing: 0.2em; }
             .lang-switcher { z-index: 10000; }
             footer { flex-direction: column; align-items: flex-start; }
