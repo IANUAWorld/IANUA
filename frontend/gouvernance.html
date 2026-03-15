@@ -860,14 +860,7 @@
     <div id="gov-login-msg" class="login-msg"></div>
   </div>
 
-  <!-- SECTION 4 — AMENDEMENTS EN DELIBERATION + FORUM -->
-  <section class="gov-section" id="deliberation">
-    <h2 data-fr="Amendements en délibération" data-en="Amendments in deliberation" data-es="Enmiendas en deliberación">Amendements en délibération</h2>
-    <p data-fr="Ces amendements sont ouverts à la discussion. Partagez votre point de vue." data-en="These amendments are open for discussion. Share your perspective." data-es="Estas enmiendas están abiertas a discusión. Comparta su perspectiva.">Ces amendements sont ouverts à la discussion. Partagez votre point de vue.</p>
-    <div id="deliberation-content"></div>
-  </section>
-
-  <!-- SECTION 5 — STATISTIQUES -->
+  <!-- SECTION 4 — STATISTIQUES -->
   <section class="gov-section" id="stats">
     <h2 data-fr="Statistiques" data-en="Statistics" data-es="Estadísticas">Statistiques</h2>
     <div class="stats-grid">
@@ -958,7 +951,6 @@
         renderChannels();
         renderPhases();
         renderAmendments();
-        renderDeliberation();
       }
     }
 
@@ -978,7 +970,6 @@
         liveAmendments = apiData.amendments || [];
 
         renderAmendments();
-        renderDeliberation();
         renderStats();
       } catch (e) {
         console.error('Failed to load:', e);
@@ -1154,6 +1145,20 @@
                 </div>
                 <div id="ia-content-${a.code}" style="display:none;margin-top:0.8rem;"></div>
               </div>
+              <div style="margin-top:1rem;border-top:1px solid rgba(201,168,76,0.1);padding-top:0.8rem;">
+                <div onclick="toggleForum('${a.code}')" style="cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:0.85rem;color:var(--gold);display:flex;align-items:center;gap:0.5rem;">
+                    <span id="forum-toggle-${a.code}">\u25B6</span> \uD83D\uDCAC Discussion <span id="forum-count-${a.code}" style="color:var(--grey);font-size:0.8rem;"></span>
+                </div>
+                <div id="forum-content-${a.code}" style="display:none;margin-top:0.8rem;">
+                    <div id="forum-comments-${a.code}"><em style="color:var(--grey);font-size:0.85rem;">Chargement...</em></div>
+                    <div style="margin-top:1rem;padding-top:0.8rem;border-top:1px solid rgba(255,255,255,0.05);">
+                        <input type="text" id="forum-name-${a.code}" placeholder="Votre nom" maxlength="100" style="width:100%;padding:0.5rem;background:var(--dark3);border:1px solid var(--grey);border-radius:4px;color:var(--light);font-family:'Source Sans 3',sans-serif;font-size:0.85rem;margin-bottom:0.5rem;" />
+                        <textarea id="forum-text-${a.code}" placeholder="Votre commentaire..." maxlength="2000" style="width:100%;padding:0.5rem;background:var(--dark3);border:1px solid var(--grey);border-radius:4px;color:var(--light);font-family:'Source Sans 3',sans-serif;font-size:0.85rem;min-height:60px;margin-bottom:0.5rem;resize:vertical;"></textarea>
+                        <button onclick="postForumComment('${a.code}')" style="background:var(--gold);color:var(--dark);border:none;padding:0.4rem 1rem;border-radius:4px;font-family:'Source Sans 3',sans-serif;font-size:0.8rem;font-weight:600;cursor:pointer;">Commenter</button>
+                        <span id="forum-msg-${a.code}" style="margin-left:0.5rem;font-size:0.8rem;"></span>
+                    </div>
+                </div>
+              </div>
             </div>` : ''}
           </div>
         `;
@@ -1237,7 +1242,12 @@
           </div>`;
         }
         html += `<div class="preview-after">
-          <div class="preview-after-label">Texte proposé (ajout au principe)</div>
+          <div class="preview-after-label">Texte proposé</div>
+          <p>${escapeHtml(a.text_after || '')}</p>
+        </div>`;
+      } else if (aType === 'addition' && a.principle_id) {
+        html += `<div class="preview-after">
+          <div class="preview-after-label">Texte proposé — sera ajouté au principe existant</div>
           <p>${escapeHtml(a.text_after || '')}</p>
         </div>`;
       } else if (aType === 'addition') {
@@ -1298,124 +1308,67 @@
     /* ── Deliberation Forum ────────────────── */
     const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.ianua.world';
 
-    function renderDeliberation() {
-      const container = document.getElementById('deliberation-content');
-      const delibAmendments = liveAmendments.filter(a => a.status === 'deliberation');
-
-      if (delibAmendments.length === 0) {
-        container.innerHTML = '<div class="deliberation-empty">Aucun amendement en deliberation.</div>';
-        return;
-      }
-
-      const commentLabel = { fr: 'Discussion', en: 'Discussion', es: 'Discusion' };
-      const nameLabel = { fr: 'Votre nom', en: 'Your name', es: 'Su nombre' };
-      const msgLabel = { fr: 'Votre commentaire', en: 'Your comment', es: 'Su comentario' };
-      const sendLabel = { fr: 'Envoyer', en: 'Submit', es: 'Enviar' };
-
-      container.innerHTML = delibAmendments.map(a => {
-        const motivation = a.motivation ? (currentLang === 'en' && a.motivation_en ? a.motivation_en : currentLang === 'es' && a.motivation_es ? a.motivation_es : a.motivation) : '';
-        const textAdded = a.text_after ? (currentLang === 'en' && a.text_after_en ? a.text_after_en : currentLang === 'es' && a.text_after_es ? a.text_after_es : a.text_after) : '';
-        const principle = a.principle_id ? `Principe ${PRINCIPLE_NUM[a.principle_id] || ''} · ${PRINCIPLES[a.principle_id] || a.principle_id}` : 'Global';
-        const dateStr = a.proposed_at ? a.proposed_at.split('T')[0] : null;
-
-        return `
-          <div class="amendment-card" style="margin-bottom:2rem;">
-            <div class="amendment-header">
-              <div>
-                <span class="amendment-code">[${a.code}]</span>
-                <span class="amendment-date"> — ${formatDate(dateStr)}</span>
-              </div>
-              <span class="status-badge deliberation">${{ fr: 'En deliberation', en: 'In deliberation', es: 'En deliberacion' }[currentLang]}</span>
-            </div>
-            <div class="amendment-meta"><span>${principle}</span></div>
-            <div class="amendment-body">
-              ${motivation ? `<div class="label">Motivation</div><div class="content-text">${escapeHtml(motivation)}</div>` : ''}
-              ${textAdded ? `<div class="label">${{ fr: 'Texte propose', en: 'Proposed text', es: 'Texto propuesto' }[currentLang]}</div><div class="content-text">${escapeHtml(textAdded)}</div>` : ''}
-            </div>
-            ${a.human_voice ? `
-            <div style="margin-top:0.8rem;padding:0.6rem 0.8rem;border-left:3px solid var(--gold);background:rgba(201,168,76,0.03);">
-                <div style="font-family:'Source Sans 3',sans-serif;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:0.3rem;">Voix Humaine</div>
-                <div style="font-family:'Cormorant Garamond',serif;font-size:0.9rem;font-style:italic;color:var(--light);line-height:1.5;">${escapeHtml(a.human_voice)}</div>
-                <div style="font-family:'Source Sans 3',sans-serif;font-size:0.75rem;color:var(--cyan);font-style:italic;margin-top:0.4rem;">Voix IA : sera generee apres ratification par audit multi-modeles</div>
-            </div>
-            ` : ''}
-            <div class="amendment-forum">
-              <h4>${commentLabel[currentLang]}</h4>
-              <div id="comments-${a.code}"></div>
-              <div class="forum-form">
-                <input type="text" id="name-${a.code}" maxlength="100" placeholder="${nameLabel[currentLang]}" />
-                <textarea id="text-${a.code}" maxlength="2000" placeholder="${msgLabel[currentLang]}"></textarea>
-                <button onclick="submitAmendmentComment('${a.code}')">${sendLabel[currentLang]}</button>
-                <div class="forum-msg" id="msg-${a.code}"></div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-
-      delibAmendments.forEach(a => loadAmendmentComments(a.code));
+    /* ── Forum functions (inline in deliberation cards) ── */
+    function toggleForum(code) {
+        const content = document.getElementById(`forum-content-${code}`);
+        const toggle = document.getElementById(`forum-toggle-${code}`);
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            toggle.textContent = '\u25BC';
+            loadForumComments(code);
+        } else {
+            content.style.display = 'none';
+            toggle.textContent = '\u25B6';
+        }
     }
 
-    async function loadAmendmentComments(code) {
-      try {
-        const res = await fetch(`${API_BASE}/comments/${code}`);
-        if (!res.ok) return;
-        const data = await res.json();
-        const container = document.getElementById(`comments-${code}`);
-        if (!data.comments || data.comments.length === 0) {
-          const emptyMsg = { fr: 'Aucun commentaire pour le moment.', en: 'No comments yet.', es: 'Sin comentarios por el momento.' };
-          container.innerHTML = `<p style="color:var(--grey);font-size:0.85rem;font-style:italic;">${emptyMsg[currentLang]}</p>`;
-          return;
+    async function loadForumComments(code) {
+        const container = document.getElementById(`forum-comments-${code}`);
+        try {
+            const resp = await fetch(`${API_BASE}/comments/${code}`);
+            const data = await resp.json();
+            const comments = data.comments || [];
+            document.getElementById(`forum-count-${code}`).textContent = `(${comments.length})`;
+            if (comments.length === 0) {
+                container.innerHTML = '<p style="color:var(--grey);font-style:italic;font-size:0.85rem;">Aucun commentaire pour le moment. Soyez le premier.</p>';
+                return;
+            }
+            container.innerHTML = comments.map(c => `
+                <div style="padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.04);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-family:'Source Sans 3',sans-serif;font-weight:600;font-size:0.85rem;color:var(--light);">${escapeHtml(c.author_name)}</span>
+                        <span style="font-family:'Source Sans 3',sans-serif;font-size:0.7rem;color:var(--grey);">${c.created_at ? new Date(c.created_at).toLocaleDateString('fr-FR') : ''}</span>
+                    </div>
+                    <p style="font-family:'Cormorant Garamond',serif;font-size:0.9rem;color:var(--light);line-height:1.5;margin-top:0.3rem;">${escapeHtml(c.content)}</p>
+                </div>
+            `).join('');
+        } catch (err) {
+            container.innerHTML = '<p style="color:var(--grey);">Erreur de chargement.</p>';
         }
-        container.innerHTML = data.comments.map(c => `
-          <div class="forum-comment-card">
-            <div class="forum-comment-author">${escapeHtml(c.author_name)} · ${c.author_country || ''}</div>
-            <div class="forum-comment-text">${escapeHtml(c.content)}</div>
-          </div>
-        `).join('');
-      } catch (e) { console.error(e); }
     }
 
-    async function submitAmendmentComment(code) {
-      const nameEl = document.getElementById(`name-${code}`);
-      const textEl = document.getElementById(`text-${code}`);
-      const msgEl = document.getElementById(`msg-${code}`);
-      const name = nameEl.value.trim();
-      const text = textEl.value.trim();
-
-      if (!name || !text) {
-        msgEl.textContent = { fr: 'Nom et commentaire requis.', en: 'Name and comment required.', es: 'Nombre y comentario requeridos.' }[currentLang];
-        msgEl.style.color = '#CA2E2E';
-        return;
-      }
-
-      try {
-        const res = await fetch(`${API_BASE}/comments`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ principle_id: code, author_name: name, content: text, lang: currentLang })
-        });
-
-        if (res.status === 429) {
-          msgEl.textContent = { fr: 'Trop de commentaires. Reessayez plus tard.', en: 'Too many comments. Try again later.', es: 'Demasiados comentarios. Intentelo mas tarde.' }[currentLang];
-          msgEl.style.color = '#CA2E2E';
-          return;
+    async function postForumComment(code) {
+        const name = document.getElementById(`forum-name-${code}`).value.trim();
+        const content = document.getElementById(`forum-text-${code}`).value.trim();
+        const msgEl = document.getElementById(`forum-msg-${code}`);
+        if (!name || !content) { msgEl.textContent = 'Nom et commentaire requis.'; msgEl.style.color = 'var(--red)'; return; }
+        try {
+            const resp = await fetch(`${API_BASE}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ principle_id: code, author_name: name, content: content }),
+            });
+            if (resp.status === 429) { msgEl.textContent = 'Limite atteinte. Réessayez plus tard.'; msgEl.style.color = 'var(--red)'; return; }
+            if (resp.ok) {
+                msgEl.textContent = 'Commentaire soumis (en attente de modération).'; msgEl.style.color = 'var(--green)';
+                document.getElementById(`forum-text-${code}`).value = '';
+            } else {
+                const err = await resp.json();
+                msgEl.textContent = err.detail || 'Erreur.'; msgEl.style.color = 'var(--red)';
+            }
+        } catch (err) {
+            msgEl.textContent = 'Erreur de connexion.'; msgEl.style.color = 'var(--red)';
         }
-
-        if (!res.ok) {
-          msgEl.textContent = { fr: 'Erreur. Reessayez.', en: 'Error. Try again.', es: 'Error. Intentelo de nuevo.' }[currentLang];
-          msgEl.style.color = '#CA2E2E';
-          return;
-        }
-
-        msgEl.textContent = { fr: 'Merci ! Votre commentaire sera publie apres moderation.', en: 'Thank you! Your comment will appear after moderation.', es: 'Gracias! Su comentario aparecera tras moderacion.' }[currentLang];
-        msgEl.style.color = 'var(--gold)';
-        nameEl.value = '';
-        textEl.value = '';
-      } catch (e) {
-        msgEl.textContent = { fr: 'Erreur de connexion.', en: 'Connection error.', es: 'Error de conexion.' }[currentLang];
-        msgEl.style.color = '#CA2E2E';
-      }
     }
 
     /* ── Init / API ──────────────────────── */
@@ -1460,7 +1413,6 @@
       // Re-render vote buttons in deliberation cards
       if (registryData) {
         renderAmendments();
-        renderDeliberation();
         // Re-enrich after re-render
         setTimeout(enrichDeliberationCards, 300);
       }
@@ -1641,6 +1593,16 @@
       } catch (err) {
         console.error('Failed to enrich deliberation cards:', err);
       }
+
+      // Preload comment counts for deliberation amendments
+      liveAmendments.filter(a => a.status === 'deliberation').forEach(async (a) => {
+          try {
+              const resp = await fetch(`${API_BASE}/comments/${a.code}`);
+              const data = await resp.json();
+              const countEl = document.getElementById(`forum-count-${a.code}`);
+              if (countEl) countEl.textContent = `(${(data.comments || []).length})`;
+          } catch (e) {}
+      });
 
       // Load IA voice for ratified amendments with human_voice
       liveAmendments.filter(a => a.status === 'ratified' && a.human_voice).forEach(async (a) => {
