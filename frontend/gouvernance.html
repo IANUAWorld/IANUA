@@ -451,7 +451,7 @@
       gap: 5px;
       cursor: pointer;
       padding: 4px;
-      z-index: 101;
+      z-index: 10000;
     }
     .nav-hamburger span {
       display: block;
@@ -615,11 +615,11 @@
         align-items: center;
         justify-content: center;
         gap: 2rem;
-        z-index: 99;
+        z-index: 9999;
       }
       .nav-links.open { display: flex; }
       .nav-links a { font-size: 1.1rem; letter-spacing: 0.2em; }
-      .lang-switcher { z-index: 101; }
+      .lang-switcher { z-index: 10000; }
       .page-header { padding: 7rem 1.5rem 3rem; }
       .page-header h1 { font-size: 1.8rem; }
       .gov-section { padding: 0 1.5rem; }
@@ -1556,6 +1556,16 @@
           document.querySelector('.nav-hamburger').classList.remove('active');
           document.querySelector('.nav-links').classList.remove('open');
         });
+      });
+
+      // Close mobile nav when clicking outside (on the overlay background)
+      document.addEventListener('click', function(e) {
+          const nav = document.querySelector('.nav-links');
+          const hamburger = document.querySelector('.nav-hamburger');
+          if (nav && nav.classList.contains('open') && !nav.contains(e.target) && !hamburger.contains(e.target)) {
+              nav.classList.remove('open');
+              hamburger.classList.remove('active');
+          }
       });
     });
   </script>
