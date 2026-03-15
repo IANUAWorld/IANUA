@@ -1424,7 +1424,29 @@
       govShowAuthState(false);
     }
 
+    let userVotes = {}; // code → { vote, comment }
+
     function renderGovVoteButtons(code) {
+      const existing = userVotes[code];
+      if (existing) {
+        const voteLabel = { FOR: 'Pour', AGAINST: 'Contre', ABSTAIN: 'Abstention' }[existing.vote] || existing.vote;
+        const voteClass = existing.vote === 'FOR' ? 'for' : existing.vote === 'AGAINST' ? 'against' : 'abstain';
+        return `
+          <div style="font-family:'Source Sans 3',sans-serif;font-size:0.9rem;margin-bottom:0.5rem;">
+            <span style="color:var(--gold);">Votre vote :</span>
+            <span class="btn-vote ${voteClass} active" style="cursor:default;margin-left:0.5rem;">${voteLabel}</span>
+            ${existing.comment ? `<p style="font-size:0.8rem;color:var(--grey);margin-top:0.3rem;font-style:italic;">"${escapeHtml(existing.comment)}"</p>` : ''}
+          </div>
+          <button onclick="showModifyVote('${code}')" style="background:none;border:1px solid var(--gold);color:var(--gold);padding:0.3rem 0.8rem;border-radius:4px;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:0.8rem;">Modifier mon vote</button>
+          <div id="modify-vote-${code}" style="display:none;margin-top:0.8rem;">
+            <div class="vote-buttons">
+              <button class="btn-vote for" onclick="govVote('${code}', 'FOR')">Pour</button>
+              <button class="btn-vote against" onclick="govVote('${code}', 'AGAINST')">Contre</button>
+              <button class="btn-vote abstain" onclick="govVote('${code}', 'ABSTAIN')">Abstention</button>
+            </div>
+            <textarea class="vote-comment" id="comment-${code}" placeholder="Motivation (optionnelle, max 500 car.)" maxlength="500"></textarea>
+          </div>`;
+      }
       return `
         <div class="vote-buttons">
           <button class="btn-vote for" onclick="govVote('${code}', 'FOR')">Pour</button>
@@ -1433,6 +1455,11 @@
         </div>
         <textarea class="vote-comment" id="comment-${code}" placeholder="Motivation (optionnelle, max 500 car.)" maxlength="500"></textarea>
         <div class="char-count"><span id="charcount-${code}">0</span>/500</div>`;
+    }
+
+    function showModifyVote(code) {
+      const el = document.getElementById(`modify-vote-${code}`);
+      if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 
     function renderGovBars(vFor, vAgainst, vAbstain, total) {
@@ -1486,6 +1513,11 @@
           alert(err.detail || 'Erreur');
           return;
         }
+
+        // Update user vote state and re-render
+        userVotes[code] = { vote: voteValue, comment: comment };
+        const section = document.getElementById(`vote-section-${code}`);
+        if (section) section.innerHTML = renderGovVoteButtons(code);
 
         await govUpdateCounters(code);
         await govLoadVotes(code);
@@ -1589,6 +1621,23 @@
 
           // Load motivations
           govLoadVotes(a.code);
+
+          // Check if current user already voted — update UI
+          if (govCurrentUser) {
+            (async () => {
+              try {
+                const vResp = await fetch(`${GOV_API}/amendments/${a.id}/votes?voter_id=${govCurrentUser.sub}`);
+                const vData = await vResp.json();
+                const myVote = (vData.votes || []).find(v => v.voter_identity === String(govCurrentUser.sub));
+                if (myVote) {
+                  userVotes[a.code] = { vote: myVote.vote, comment: myVote.comment };
+                  // Re-render vote section with "already voted" state
+                  const section = document.getElementById(`vote-section-${a.code}`);
+                  if (section) section.innerHTML = renderGovVoteButtons(a.code);
+                }
+              } catch (e) {}
+            })();
+          }
         });
       } catch (err) {
         console.error('Failed to enrich deliberation cards:', err);
