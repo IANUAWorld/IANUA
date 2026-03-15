@@ -994,9 +994,9 @@
       const tbody = document.getElementById('channels-body');
       tbody.innerHTML = registryData.proposal_channels.map(ch => `
         <tr>
-          <td>${ch.name[currentLang]}</td>
-          <td>${ch.condition[currentLang]}</td>
-          <td>${ch.threshold[currentLang]}</td>
+          <td>${escapeHtml(ch.name[currentLang])}</td>
+          <td>${escapeHtml(ch.condition[currentLang])}</td>
+          <td>${escapeHtml(ch.threshold[currentLang])}</td>
         </tr>
       `).join('');
     }
@@ -1011,10 +1011,10 @@
       };
       tbody.innerHTML = registryData.governance_phases.map(ph => `
         <tr>
-          <td>${ph.name[currentLang]}</td>
-          <td>${ph.ratification[currentLang]}</td>
-          <td>${ph.mechanism[currentLang]}</td>
-          <td><span class="phase-badge ${ph.status}">${statusLabels[ph.status][currentLang]}</span></td>
+          <td>${escapeHtml(ph.name[currentLang])}</td>
+          <td>${escapeHtml(ph.ratification[currentLang])}</td>
+          <td>${escapeHtml(ph.mechanism[currentLang])}</td>
+          <td><span class="phase-badge ${escapeHtml(ph.status)}">${escapeHtml(statusLabels[ph.status][currentLang])}</span></td>
         </tr>
       `).join('');
     }

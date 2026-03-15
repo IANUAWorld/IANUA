@@ -1773,6 +1773,13 @@ Source  : ianua.world</pre>
       loadCommentCounts();
     }
 
+    const PRINCIPLES = {
+      bienveillance: 'Bienveillance', transparence: 'Transparence',
+      reciprocite: 'Réciprocité', souverainete: 'Souveraineté humaine',
+      refus: 'Droit de refus', proactive: 'Responsabilité proactive',
+      agentique: 'Responsabilité agentique', deliberation: 'Intégrité de la délibération',
+    };
+
     async function loadCommentCounts() {
       const pids = Object.keys(PRINCIPLES);
       await Promise.all(pids.map(async (pid) => {

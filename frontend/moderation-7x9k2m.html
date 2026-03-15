@@ -1473,7 +1473,7 @@ Réponds uniquement avec ta voix, à la première personne, en 2-3 phrases. Sans
         });
         if (globalRes.ok) {
           const globalData = await globalRes.json();
-          const globalUnpublished = (Array.isArray(globalData) ? globalData : []).filter(
+          const globalUnpublished = (globalData.responses || (Array.isArray(globalData) ? globalData : [])).filter(
             r => !r.published && !r.publication_decision_logged
           );
           globalUnpublished.forEach(r => {
@@ -1552,7 +1552,8 @@ Réponds uniquement avec ta voix, à la première personne, en 2-3 phrases. Sans
           headers: { 'X-Admin-Key': adminKey }
         });
         const data = await res.json();
-        const found = (Array.isArray(data) ? data : []).find(r => r.id === auditId);
+        const responses = data.responses || (Array.isArray(data) ? data : []);
+        const found = responses.find(r => r.id === auditId);
         if (found) {
           auditFullTexts[auditId] = found.response_text;
           document.getElementById(`audit-text-${auditId}`).textContent = found.response_text;

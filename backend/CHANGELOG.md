@@ -5,6 +5,17 @@ La transparence s'etend aux actes.
 
 ---
 
+## [2026-03-15] — Audit complet du site (backend + frontend + admin)
+- 3 audits paralleles : backend, frontend, admin/integration
+- Corrige : timedelta manquant dans scheduler.py (crash toutes les 6h)
+- Corrige : contrainte unique audit_responses inclut audit_scope (migration 010)
+- Corrige : compteurs de vote atomiques (SQL-level, anti race condition)
+- Corrige : PRINCIPLES undefined dans index.html (crash JS)
+- Corrige : parsing reponses globales dans admin dashboard
+- Corrige : escapeHtml sur donnees registry
+- Active : notifications email sur suppression et requalification
+- Documente : cles API IA dans .env.example
+
 ## [2026-03-15] — Delais adaptatifs selon taille communaute
 - Multiplicateur automatique : x3 (<50 signataires), x2 (50-200), x1.5 (200-500), x1 (500+)
 - Applique a chaque soumission de proposition et ouverture de vote
