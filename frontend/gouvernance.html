@@ -1194,6 +1194,16 @@
       deliberation: 'VIII · L\'Intégrité de la délibération',
     };
 
+    let charterPrinciples = [];
+
+    async function loadCharterPrinciples() {
+      try {
+        const resp = await fetch(`${GOV_API}/proposals/charter/principles`);
+        const data = await resp.json();
+        charterPrinciples = data.principles || [];
+      } catch (e) {}
+    }
+
     function showAmendmentPreview(code) {
       const a = liveAmendments.find(am => am.code === code);
       if (!a) return;
@@ -1202,37 +1212,44 @@
       const aType = a.amendment_type || '';
       const content = document.getElementById('preview-content');
 
+      // Find current principle text from charter data
+      const currentPrinciple = charterPrinciples.find(p => p.id === a.principle_id);
+
       let html = `<h3>${escapeHtml(a.code)} — ${escapeHtml(a.title || a.motivation || '')}</h3>`;
 
       if (principle) {
         html += `<div class="preview-principle">${escapeHtml(principle)}</div>`;
       }
 
+      // Always show current text for the principle (if available)
+      if (currentPrinciple && currentPrinciple.body) {
+        html += `<div style="margin-bottom:1.5rem;padding:1rem;background:rgba(138,138,154,0.05);border-left:3px solid var(--grey);border-radius:0 4px 4px 0;">
+          <div style="font-family:'Source Sans 3',sans-serif;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--grey);margin-bottom:0.5rem;">Texte actuel dans la charte — ${escapeHtml(currentPrinciple.num || '')} ${escapeHtml(currentPrinciple.label || '')}</div>
+          <p style="font-family:'Cormorant Garamond',serif;font-size:0.95rem;color:var(--light);line-height:1.6;opacity:0.8;">${escapeHtml(currentPrinciple.body)}</p>
+        </div>`;
+      }
+
       if (aType === 'modification') {
         if (a.text_before) {
           html += `<div class="preview-before">
-            <div class="preview-before-label">Texte actuel (sera remplacé)</div>
+            <div class="preview-before-label">Texte à remplacer</div>
             <p>${escapeHtml(a.text_before)}</p>
           </div>`;
         }
-        if (a.text_after) {
-          html += `<div class="preview-after">
-            <div class="preview-after-label">Texte proposé</div>
-            <p>${escapeHtml(a.text_after)}</p>
-          </div>`;
-        }
+        html += `<div class="preview-after">
+          <div class="preview-after-label">Texte proposé (ajout au principe)</div>
+          <p>${escapeHtml(a.text_after || '')}</p>
+        </div>`;
       } else if (aType === 'addition') {
         html += `<div class="preview-new">
-          <div class="preview-new-label">Nouveau texte proposé</div>
+          <div class="preview-new-label">Nouveau principe proposé</div>
           <p>${escapeHtml(a.text_after || '')}</p>
         </div>`;
       } else if (aType === 'suppression') {
-        if (a.text_before) {
-          html += `<div class="preview-before">
-            <div class="preview-before-label">Texte à supprimer</div>
-            <p>${escapeHtml(a.text_before)}</p>
-          </div>`;
-        }
+        html += `<div class="preview-before">
+          <div class="preview-before-label">Texte à supprimer</div>
+          <p>${escapeHtml(a.text_before || (currentPrinciple ? currentPrinciple.body : ''))}</p>
+        </div>`;
       }
 
       if (a.human_voice) {
@@ -1762,6 +1779,7 @@
       const lang = detectLang();
       setLang(lang);
       loadRegistry();
+      loadCharterPrinciples();
       // Auth check and enrich deliberation cards with live vote data
       govCheckAuth();
       setTimeout(enrichDeliberationCards, 800);
