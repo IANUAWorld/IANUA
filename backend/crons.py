@@ -174,3 +174,42 @@ async def cleanup_tokens(
     )
     await db.commit()
     return {"count": result.rowcount}
+
+
+@router.post("/recalculate-deadlines")
+async def recalculate_deadlines(
+    db: AsyncSession = Depends(get_db),
+    _admin: None = Depends(verify_admin),
+):
+    """Force immediate recalculation of deadlines based on current community size."""
+    from proposals import get_deadline_multiplier, TIER_CONFIG
+
+    current_multiplier = await get_deadline_multiplier(db)
+
+    result = await db.execute(
+        select(Amendment).where(
+            Amendment.status.in_(["proposed", "deliberation"]),
+        )
+    )
+    amendments = result.scalars().all()
+
+    updated = []
+    for a in amendments:
+        stored = a.deadline_multiplier or 1.0
+        tier_cfg = TIER_CONFIG.get(a.tier or "mineur", TIER_CONFIG["mineur"])
+
+        if a.status == "proposed" and a.proposed_at:
+            new_expiry_days = int(tier_cfg["expiry_days"] * current_multiplier)
+            a.expires_at = a.proposed_at + timedelta(days=new_expiry_days)
+            a.deliberation_duration_days = int(tier_cfg["delib_days"] * current_multiplier)
+
+        elif a.status == "deliberation" and a.vote_opened_at:
+            new_delib_days = int(tier_cfg["delib_days"] * current_multiplier)
+            a.vote_closed_at = a.vote_opened_at + timedelta(days=new_delib_days)
+            a.deliberation_duration_days = new_delib_days
+
+        a.deadline_multiplier = current_multiplier
+        updated.append({"code": a.code, "status": a.status, "old_multiplier": stored, "new_multiplier": current_multiplier})
+
+    await db.commit()
+    return {"multiplier": current_multiplier, "updated": updated}

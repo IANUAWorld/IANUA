@@ -107,6 +107,49 @@ async def _trigger_voice_audit_scheduler(db, amendment):
         print(f"[SCHEDULER] Voice audit failed for {amendment.code}: {exc}")
 
 
+async def recalculate_deadlines_job():
+    """Retroactively adjust deadlines when community size crosses a threshold."""
+    async with async_session() as db:
+        from proposals import get_deadline_multiplier, TIER_CONFIG
+
+        current_multiplier = await get_deadline_multiplier(db)
+
+        # Find active amendments whose multiplier differs from current
+        result = await db.execute(
+            select(Amendment).where(
+                Amendment.status.in_(["proposed", "deliberation"]),
+            )
+        )
+        amendments = result.scalars().all()
+
+        updated = 0
+        for a in amendments:
+            stored = a.deadline_multiplier or 1.0
+            if abs(stored - current_multiplier) < 0.01:
+                continue  # No change needed
+
+            tier_cfg = TIER_CONFIG.get(a.tier or "mineur", TIER_CONFIG["mineur"])
+
+            if a.status == "proposed" and a.proposed_at:
+                # Recalculate expires_at from original proposed_at
+                new_expiry_days = int(tier_cfg["expiry_days"] * current_multiplier)
+                a.expires_at = a.proposed_at + timedelta(days=new_expiry_days)
+                a.deliberation_duration_days = int(tier_cfg["delib_days"] * current_multiplier)
+
+            elif a.status == "deliberation" and a.vote_opened_at:
+                # Recalculate vote_closed_at from original vote_opened_at
+                new_delib_days = int(tier_cfg["delib_days"] * current_multiplier)
+                a.vote_closed_at = a.vote_opened_at + timedelta(days=new_delib_days)
+                a.deliberation_duration_days = new_delib_days
+
+            a.deadline_multiplier = current_multiplier
+            updated += 1
+
+        if updated > 0:
+            await db.commit()
+            print(f"[CRON] Recalculated deadlines for {updated} amendments (multiplier: x{current_multiplier})")
+
+
 async def cleanup_tokens_job():
     """Delete used and expired magic tokens."""
     async with async_session() as db:
@@ -143,6 +186,14 @@ def start_scheduler():
         replace_existing=True,
     )
 
+    # Recalculate deadlines — every 6 hours
+    scheduler.add_job(
+        recalculate_deadlines_job,
+        trigger=IntervalTrigger(hours=6),
+        id="recalculate_deadlines",
+        replace_existing=True,
+    )
+
     # Cleanup tokens — every 24 hours
     scheduler.add_job(
         cleanup_tokens_job,
@@ -152,4 +203,4 @@ def start_scheduler():
     )
 
     scheduler.start()
-    print("[SCHEDULER] Started — expire_proposals (1h), close_votes (1h), cleanup_tokens (24h)")
+    print("[SCHEDULER] Started — expire_proposals (1h), close_votes (1h), recalculate_deadlines (6h), cleanup_tokens (24h)")
