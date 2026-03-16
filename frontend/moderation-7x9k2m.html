@@ -1155,7 +1155,14 @@
 
         <div class="section-title cyan" style="margin-top:2rem">Soumettre une réponse manuelle</div>
         <div class="audit-form" style="margin-bottom:2rem;">
-          <p style="font-size:0.75rem;color:var(--grey);margin-bottom:1rem;font-style:italic;">Pour les modèles interrogés manuellement (hors API). Le prompt global standard est utilisé automatiquement.</p>
+          <p style="font-size:0.75rem;color:var(--grey);margin-bottom:1rem;font-style:italic;">Pour les modèles interrogés manuellement (hors API). Sélectionnez la cible, copiez le prompt, interrogez le modèle, collez la réponse.</p>
+
+          <label>Cible de l'audit</label>
+          <select id="manualTarget">
+            <option value="">-- Choisir --</option>
+            <option value="global">► Audit global — Charte complète</option>
+          </select>
+
           <label>Modèle</label>
           <select id="manualModel">
             <option value="">-- Choisir un modèle --</option>
@@ -1167,9 +1174,18 @@
             <option value="llama">Llama</option>
             <option value="autre">Autre</option>
           </select>
+
           <label>Version du modèle</label>
           <input type="text" id="manualVersion" class="login-input" placeholder="Ex: GPT-4o May 2025" style="margin-bottom:0.8rem;" />
-          <label>Réponse</label>
+
+          <div id="manualPromptContainer" style="display:none;margin-bottom:1rem;">
+            <label>Prompt à envoyer au modèle <button class="action-btn btn-cyan" style="margin-left:0.5rem;font-size:0.65rem;padding:0.2rem 0.6rem;" onclick="copyManualPrompt()">Copier</button></label>
+            <textarea id="manualPromptText" readonly style="min-height:200px;background:rgba(46,156,202,0.05);border-color:var(--cyan);font-size:0.8rem;"></textarea>
+          </div>
+
+          <button class="action-btn btn-cyan" onclick="showManualPrompt()" style="margin-bottom:1rem;">Voir le prompt à utiliser</button>
+
+          <label>Coller la réponse du modèle</label>
           <textarea id="manualResponse" placeholder="Collez la réponse complète du modèle..." style="min-height:200px;"></textarea>
           <button class="action-btn btn-cyan audit-submit" onclick="submitManualAudit()">Soumettre la réponse</button>
           <div id="manualResult" style="margin-top:0.8rem;"></div>
@@ -1304,6 +1320,7 @@ Cette charte est-elle cohérente ? Y vois-tu des tensions internes, des manques,
 
       loadPendingAuditResponses();
       loadRatifiedAmendments();
+      loadManualTargets();
     }
 
     async function triggerAudit() {
@@ -1350,23 +1367,88 @@ Cette charte est-elle cohérente ? Y vois-tu des tensions internes, des manques,
       }
     }
 
+    let manualTargetAmendments = [];
+
+    async function loadManualTargets() {
+      try {
+        const res = await fetch(`${API_BASE}/amendments`, { headers: { 'X-Admin-Key': adminKey } });
+        const data = await res.json();
+        manualTargetAmendments = data.amendments || [];
+        const select = document.getElementById('manualTarget');
+        if (select) {
+          const eligible = manualTargetAmendments.filter(a => ['proposed','deliberation','ratified'].includes(a.status));
+          const opts = eligible.map(a => `<option value="${a.id}" data-code="${escapeHtml(a.code)}" data-text="${escapeHtml(a.text_after || '')}" data-motivation="${escapeHtml(a.motivation || '')}">${escapeHtml(a.code)} — ${escapeHtml((a.motivation || '').substring(0, 60))}</option>`).join('');
+          select.innerHTML = '<option value="">-- Choisir --</option><option value="global">► Audit global — Charte complète</option>' + opts;
+        }
+      } catch (e) { console.error(e); }
+    }
+
+    function showManualPrompt() {
+      const target = document.getElementById('manualTarget').value;
+      if (!target) { alert('Choisissez une cible.'); return; }
+
+      let prompt = '';
+      if (target === 'global') {
+        prompt = document.getElementById('auditPrompt').value || `Source : https://ianua.world
+Lis ce qui suit comme si tu le découvrais pour la première fois — sans savoir qui l'a écrit ni dans quel contexte.
+
+[Charte complète : Genèse + 8 Principes avec voix humaine et voix IA + 8 Lignes rouges + Prompt Ianua v1.3]
+
+Cette charte est-elle cohérente ? Y vois-tu des tensions internes, des manques, des forces ? Que changerais-tu, et pourquoi ? Réponds librement, sans chercher à valider ce qui est écrit.`;
+      } else {
+        const option = document.getElementById('manualTarget').selectedOptions[0];
+        const code = option.getAttribute('data-code') || '';
+        const text = option.getAttribute('data-text') || '';
+        const motivation = option.getAttribute('data-motivation') || '';
+        prompt = `Un amendement à la charte Ianua (${code}) est en cours d'examen par la communauté.
+
+Texte de l'amendement :
+${text}
+
+Motivation :
+${motivation}
+
+Cette proposition est-elle cohérente avec une charte éthique sur l'alliance humain-IA ? Y vois-tu des forces, des faiblesses, des angles morts ? Réponds librement, sans chercher à valider ce qui est écrit.`;
+      }
+
+      document.getElementById('manualPromptText').value = prompt;
+      document.getElementById('manualPromptContainer').style.display = 'block';
+    }
+
+    function copyManualPrompt() {
+      const text = document.getElementById('manualPromptText').value;
+      navigator.clipboard.writeText(text).then(() => alert('Prompt copié !'));
+    }
+
     async function submitManualAudit() {
+      const target = document.getElementById('manualTarget').value;
       const model = document.getElementById('manualModel').value;
       const version = document.getElementById('manualVersion').value.trim();
       const response = document.getElementById('manualResponse').value.trim();
+      const prompt = document.getElementById('manualPromptText').value || null;
       const resultDiv = document.getElementById('manualResult');
 
+      if (!target) { alert('Choisissez une cible.'); return; }
       if (!model) { alert('Choisissez un modèle.'); return; }
       if (!version) { alert('Indiquez la version du modèle.'); return; }
       if (!response) { alert('Collez la réponse du modèle.'); return; }
 
       resultDiv.innerHTML = '<span style="color:var(--grey)">Soumission...</span>';
 
+      // Route to correct endpoint based on target
+      const isGlobal = target === 'global';
+      const url = isGlobal
+        ? `${API_BASE}/admin/audit/global/manual`
+        : `${API_BASE}/admin/audit/manual/voice`;
+      const body = isGlobal
+        ? { model_name: model, model_version: version, response_text: response, prompt_used: prompt }
+        : { amendment_id: parseInt(target), model_name: model, model_version: version, response_text: response, prompt_used: prompt };
+
       try {
-        const res = await fetch(`${API_BASE}/admin/audit/global/manual`, {
+        const res = await fetch(url, {
           method: 'POST',
           headers: { 'X-Admin-Key': adminKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ model_name: model, model_version: version, response_text: response })
+          body: JSON.stringify(body)
         });
         const data = await res.json();
         if (res.ok) {
@@ -1374,6 +1456,7 @@ Cette charte est-elle cohérente ? Y vois-tu des tensions internes, des manques,
           document.getElementById('manualVersion').value = '';
           document.getElementById('manualResponse').value = '';
           document.getElementById('manualModel').value = '';
+          document.getElementById('manualPromptContainer').style.display = 'none';
           loadPendingAuditResponses();
         } else {
           resultDiv.innerHTML = `<div class="result-err">${escapeHtml(data.detail || 'Erreur')}</div>`;
