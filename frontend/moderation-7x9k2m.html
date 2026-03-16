@@ -372,6 +372,16 @@
       line-height: 1.6;
     }
 
+    /* ── Global select/option fix for dark theme ── */
+    select, select option {
+      background: var(--dark3, #1A1A2E);
+      color: var(--white, #F5F5FA);
+    }
+    input[type="text"], input.login-input {
+      background: var(--dark3, #1A1A2E);
+      color: var(--white, #F5F5FA);
+    }
+
     /* ── AMENDMENT ADMIN CARDS ──── */
     .amendment-admin-card {
       padding: 1.2rem 1.5rem;
@@ -487,13 +497,17 @@
     .audit-form textarea {
       width: 100%;
       padding: 0.6rem 0.8rem;
-      background: rgba(255,255,255,0.04);
+      background: var(--dark3);
       border: 1px solid rgba(255,255,255,0.1);
       color: var(--white);
       font-family: 'Source Sans 3', sans-serif;
       font-size: 0.85rem;
       outline: none;
       transition: border-color 0.3s;
+    }
+    .audit-form select option {
+      background: var(--dark3);
+      color: var(--white);
     }
     .audit-form select:focus,
     .audit-form textarea:focus { border-color: var(--cyan); }
@@ -632,7 +646,7 @@
     }
     .tier-select-group select {
       padding: 0.3rem 0.6rem;
-      background: rgba(255,255,255,0.04);
+      background: var(--dark3);
       border: 1px solid rgba(255,255,255,0.1);
       color: var(--white);
       font-family: 'Source Sans 3', sans-serif;
