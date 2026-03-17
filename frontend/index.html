@@ -2040,6 +2040,56 @@ Source  : ianua.world</pre>
     }
 
     // ── INIT ──────────────────────────────
+    async function loadPrincipleAmendments() {
+      try {
+        const resp = await fetch(`${API_BASE}/amendments`);
+        const data = await resp.json();
+        const amendments = data.amendments || [];
+
+        // Group active amendments by principle_id
+        const activeStatuses = ['proposed', 'deliberation'];
+        const byPrinciple = {};
+        amendments.forEach(a => {
+          if (a.principle_id && activeStatuses.includes(a.status)) {
+            if (!byPrinciple[a.principle_id]) byPrinciple[a.principle_id] = [];
+            byPrinciple[a.principle_id].push(a);
+          }
+        });
+
+        // Inject badges into principle cards
+        Object.entries(byPrinciple).forEach(([pid, amends]) => {
+          const card = document.querySelector(`.principle-item[data-principle-id="${pid}"]`);
+          if (!card) return;
+
+          const content = card.querySelector('.principle-content');
+          if (!content) return;
+
+          // Check if badge already exists
+          if (content.querySelector('.principle-amendments-badge')) return;
+
+          const count = amends.length;
+          const label = count === 1
+            ? { fr: '1 amendement en cours sur ce principe', en: '1 pending amendment on this principle', es: '1 enmienda en curso sobre este principio' }
+            : { fr: `${count} amendements en cours sur ce principe`, en: `${count} pending amendments on this principle`, es: `${count} enmiendas en curso sobre este principio` };
+          const linkLabel = { fr: 'voir', en: 'view', es: 'ver' };
+
+          const badge = document.createElement('div');
+          badge.className = 'principle-amendments-badge';
+          badge.style.cssText = 'margin-top:0.8rem;padding:0.5rem 0.8rem;background:rgba(46,156,202,0.06);border-left:3px solid var(--cyan);border-radius:0 4px 4px 0;font-family:"Source Sans 3",sans-serif;font-size:0.8rem;color:var(--cyan);';
+
+          const links = amends.map(a => {
+            const statusLabel = a.status === 'proposed' ? 'proposé' : 'en délibération';
+            return `<a href="/gouvernance#${a.code}" style="color:var(--gold);text-decoration:none;border-bottom:1px dotted var(--gold);">${a.code}</a> <span style="color:var(--grey);font-size:0.75rem;">(${statusLabel})</span>`;
+          }).join(', ');
+
+          badge.innerHTML = `<span data-fr="${label.fr}" data-en="${label.en}" data-es="${label.es}">${label[currentLang] || label.fr}</span> → ${links}`;
+          content.appendChild(badge);
+        });
+      } catch (err) {
+        // Silently fail — principles still display without badges
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       // Detect browser language
       const bl = navigator.language ? navigator.language.slice(0, 2).toLowerCase() : 'fr';
@@ -2053,6 +2103,9 @@ Source  : ianua.world</pre>
 
       // Load community counter
       loadCommunityCounter();
+
+      // Load active amendments per principle
+      loadPrincipleAmendments();
     });
 
     // Scroll animations
